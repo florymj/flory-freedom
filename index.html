@@ -225,6 +225,10 @@ const DEF = {
   condoRental: 18000,
   condoRentalOn: false,
   budgetDrives: true,
+  // Live income controls — these drive the main dashboard directly
+  wifeMode: "full",   // "full" | "ssdi_gone" | "all_gone" | "custom"
+  customWifeIncome: 53000,
+  sideIncomeOn: false,
 };
 
 // ─── SHARED COMPONENTS ────────────────────────────────────────────────────────
@@ -326,8 +330,16 @@ function FloryFreedomV7() {
   // budgetDrives=false → use the manual slider (also in retirement-year dollars)
   const effectiveSpend = s.budgetDrives ? budgetAtRetire : s.annualSpend;
 
-  // ── Core calcs ──
-  const wifeInc = s.wifeIncomeOn ? s.wifeIncome : 0;
+  // ── Core calcs — wife income driven by mode selector ──
+  const wifeInc = useMemo(() => {
+    if (s.wifeMode === "full")      return s.wifeIncome;
+    if (s.wifeMode === "ssdi_gone") return Math.round(s.wifeIncome * 0.45); // OPERS pension only ~$24k
+    if (s.wifeMode === "all_gone")  return 0;
+    if (s.wifeMode === "custom")    return s.customWifeIncome;
+    return s.wifeIncome;
+  }, [s.wifeMode, s.wifeIncome, s.customWifeIncome]);
+
+  const sideInc = s.sideIncomeOn ? s.sideIncome : 0;
   const divs    = s.dividendsOn ? s.dividends : 0;
 
   const condoCF = s.condoOn
@@ -347,7 +359,7 @@ function FloryFreedomV7() {
     trsAge: s.trsAge,
     ssAge: s.ssAge,
     condoCashFlow: condoCF,
-    sideIncome: s.sideIncome,
+    sideIncome: sideInc,
   }), [s, curScenario, wifeInc, divs, condoCF]);
 
   // ── All 5 scenarios for comparison ──
@@ -367,7 +379,7 @@ function FloryFreedomV7() {
         trsAge: s.trsAge,
         ssAge: s.ssAge,
         condoCashFlow: condoCF,
-        sideIncome: s.sideIncome,
+        sideIncome: sideInc,
       }),
     })), [s, wifeInc, divs, condoCF]);
 
@@ -443,9 +455,9 @@ function FloryFreedomV7() {
       <Card>
         <SectionLabel color={C.teal}>Income Waterfall (Pre-65)</SectionLabel>
         {[
-          { label: "Wife's Income", val: wifeInc, color: C.teal, on: s.wifeIncomeOn },
+          { label: "Wife's Income", val: wifeInc, color: C.teal, on: wifeInc > 0 },
           { label: "Portfolio Dividends", val: divs, color: C.purple, on: s.dividendsOn },
-          { label: "Side Income", val: s.sideIncome, color: C.gold, on: s.sideIncome > 0 },
+          { label: "Side Income", val: sideInc, color: C.gold, on: s.sideIncomeOn && sideInc > 0 },
           { label: "Ozarks Net CF", val: condoCF, color: C.lake, on: s.condoOn },
         ].filter(r => r.on && r.val !== 0).map(({ label, val, color }) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -510,26 +522,88 @@ function FloryFreedomV7() {
         </div>
       </Card>
 
-      {/* Scenario selector */}
-      <Card>
-        <SectionLabel>Retirement Date</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 5 }}>
-          {RETIRE_SCENARIOS.map(sc => (
-            <button key={sc.id} onClick={() => set("selectedScenario")(sc.id)} style={{
-              background: s.selectedScenario === sc.id ? `${sc.color}30` : "transparent",
-              border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
-              borderRadius: 8, padding: "8px 4px", cursor: "pointer", textAlign: "center",
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: s.selectedScenario === sc.id ? sc.color : C.muted }}>
-                {sc.label.replace("Jun ", "'")}
-              </div>
-              <div style={{ fontSize: 9, color: C.dim }}>{sc.trsYears}yr TRS</div>
-            </button>
-          ))}
+      {/* Live Controls Card */}
+      <Card style={{ background: `${C.cardHi}`, border: `1px solid ${C.gold}35` }}>
+        <SectionLabel color={C.gold}>Live Controls</SectionLabel>
+
+        {/* Retirement date */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: C.muted, marginBottom: 5 }}>Retirement Date</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 4 }}>
+            {RETIRE_SCENARIOS.map(sc => (
+              <button key={sc.id} onClick={() => set("selectedScenario")(sc.id)} style={{
+                background: s.selectedScenario === sc.id ? `${sc.color}30` : "transparent",
+                border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
+                borderRadius: 8, padding: "7px 3px", cursor: "pointer", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: s.selectedScenario === sc.id ? sc.color : C.muted }}>
+                  {sc.label.replace("Jun ", "'")}
+                </div>
+                <div style={{ fontSize: 8, color: C.dim }}>{sc.trsYears}yr</div>
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-          <span style={{ color: C.muted }}>Selected: <strong style={{ color: curScenario.color }}>{curScenario.label}</strong></span>
-          <span style={{ color: C.muted }}>TRS: <strong style={{ color: C.teal }}>{fmtC(derived.trs, true)}/yr</strong></span>
+
+        {/* Wife's income mode */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: C.muted, marginBottom: 5 }}>Wife's Income</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 }}>
+            {[
+              { id: "full",      label: "Full",       sub: fmtC(s.wifeIncome, true), color: C.greenBright },
+              { id: "ssdi_gone", label: "SSDI Gone",  sub: fmtC(Math.round(s.wifeIncome*0.45), true), color: C.orange },
+              { id: "all_gone",  label: "All Gone",   sub: "$0", color: C.red },
+              { id: "custom",    label: "Custom",     sub: fmtC(s.customWifeIncome, true), color: C.purple },
+            ].map(m => (
+              <button key={m.id} onClick={() => set("wifeMode")(m.id)} style={{
+                background: s.wifeMode === m.id ? `${m.color}25` : "transparent",
+                border: `1px solid ${s.wifeMode === m.id ? m.color : C.dim}`,
+                borderRadius: 8, padding: "7px 4px", cursor: "pointer", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: s.wifeMode === m.id ? m.color : C.muted }}>{m.label}</div>
+                <div style={{ fontSize: 9, color: C.dim, fontFamily: "monospace" }}>{m.sub}</div>
+              </button>
+            ))}
+          </div>
+          {s.wifeMode === "custom" && (
+            <div style={{ marginTop: 8 }}>
+              <Slider label="Custom wife income" value={s.customWifeIncome}
+                min={0} max={100000} step={1000} onChange={set("customWifeIncome")} color={C.purple} />
+            </div>
+          )}
+          <div style={{ marginTop: 6, fontSize: 10, color: C.muted }}>
+            Active: <strong style={{ color: wifeInc > 0 ? C.teal : C.red, fontFamily: "monospace" }}>
+              {fmtC(wifeInc, true)}/yr
+            </strong>
+            {s.wifeMode === "ssdi_gone" && <span style={{ color: C.dim }}> — OPERS pension only</span>}
+            {s.wifeMode === "all_gone" && <span style={{ color: C.dim }}> — portfolio covers everything</span>}
+          </div>
+        </div>
+
+        {/* Side income */}
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: C.muted }}>Side / Part-Time Income</div>
+            <div onClick={() => set("sideIncomeOn")(!s.sideIncomeOn)} style={{
+              width: 38, height: 20, borderRadius: 10, cursor: "pointer", position: "relative",
+              background: s.sideIncomeOn ? C.gold : C.dim, transition: "background 0.25s",
+            }}>
+              <div style={{
+                position: "absolute", top: 2, left: s.sideIncomeOn ? 19 : 2,
+                width: 16, height: 16, borderRadius: 8, background: "white",
+                transition: "left 0.25s", boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
+              }} />
+            </div>
+          </div>
+          {s.sideIncomeOn && (
+            <Slider label="" value={s.sideIncome} min={0} max={80000} step={1000}
+              onChange={set("sideIncome")} color={C.gold} />
+          )}
+          {s.sideIncomeOn && (
+            <div style={{ fontSize: 10, color: C.gold, marginTop: -6, fontFamily: "monospace" }}>
+              +{fmtC(sideInc, true)}/yr reduces portfolio gap
+            </div>
+          )}
         </div>
       </Card>
     </div>
@@ -605,7 +679,7 @@ function FloryFreedomV7() {
       <Card>
         <SectionLabel color={C.orange}>Backstop: Wife's Income Stress Test</SectionLabel>
         <div style={{ fontSize: 10, color: C.muted, marginBottom: 10 }}>
-          Using selected scenario ({curScenario.label}). Three income assumptions side by side.
+          All use {curScenario.label}. Active mode on Home tab: <strong style={{color: C.gold}}>{s.wifeMode === "full" ? "Full income" : s.wifeMode === "ssdi_gone" ? "SSDI gone" : s.wifeMode === "all_gone" ? "All gone" : "Custom"}</strong>.
         </div>
         {backstopScenarios.map((bs, i) => (
           <div key={i} style={{
@@ -960,8 +1034,10 @@ function FloryFreedomV7() {
 
       <Card>
         <SectionLabel>Wife's Income</SectionLabel>
-        <Toggle label="Wife's Income (SSDI + OPERS)" value={s.wifeIncomeOn} onChange={set("wifeIncomeOn")} color={C.teal} />
-        <Slider label="Annual Amount" value={s.wifeIncome} min={0} max={100000} step={1000} onChange={set("wifeIncome")} />
+        <div style={{ fontSize: 10, color: C.muted, marginBottom: 8 }}>
+          Use the Live Controls on the Home tab to toggle income scenarios. Set the base amount here.
+        </div>
+        <Slider label="Base Annual Amount (Full)" value={s.wifeIncome} min={0} max={100000} step={1000} onChange={set("wifeIncome")} />
       </Card>
 
       <Card>
