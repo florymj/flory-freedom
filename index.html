@@ -821,52 +821,18 @@ function FloryFreedomV7() {
           {/* Specific context notes */}
           <div style={{ marginTop: 12, fontSize: 10, color: C.muted, lineHeight: 1.8, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
             <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>What $80–95k covers in Edmond with no mortgage:</div>
-            {"✓ Full healthcare (ACA ~$900–1,800/mo depending on subsidy eligibility)
-✓ Groceries & dining well ($1,100–1,400/mo)
-✓ 2–3 domestic trips/year + 1 international
-✓ Two vehicles, maintained
-✓ Hobbies, entertainment, golf, fitness
-✓ Generous giving & Libby support
-✓ Full home maintenance buffer
-✓ Meaningful emergency reserves".split('
-').map((line, i) => (
-              <div key={i} style={{ color: line.startsWith('✓') ? C.greenBright : C.muted }}>{line}</div>
+            {[
+              "✓ Full healthcare (ACA ~$900–1,800/mo depending on subsidy eligibility)",
+              "✓ Groceries & dining well ($1,100–1,400/mo)",
+              "✓ 2–3 domestic trips/year + 1 international",
+              "✓ Two vehicles, fully maintained",
+              "✓ Hobbies, entertainment, golf, fitness",
+              "✓ Generous giving & Libby support",
+              "✓ Full home maintenance buffer",
+              "✓ Meaningful emergency reserves",
+            ].map((line, i) => (
+              <div key={i} style={{ color: C.greenBright, fontSize: 10, marginBottom: 2 }}>{line}</div>
             ))}
-          </div>
-
-          <div style={{ marginTop: 10, padding: "8px 10px", borderRadius: 8, background: `${C.teal}12`, border: `1px solid ${C.teal}30`, fontSize: 10, color: C.muted, lineHeight: 1.7 }}>
-            💡 Oklahoma advantages: no state tax on SS or pension income, property tax ~40% lower than Texas, gas ~13% below national avg, healthcare costs 11–14% below national avg.
-          </div>
-        </div>
-
-        {/* Sticky summary */}
-        <div style={{
-          background: C.cardHi, border: `1px solid ${C.border}`, borderRadius: 14,
-          padding: 14, marginBottom: 12, position: "sticky", top: 116, zIndex: 5,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <div style={{ fontSize: 10, color: C.muted }}>Monthly</div>
-              <div style={{ fontSize: 24, fontWeight: 900, fontFamily: "monospace", color: C.accent }}>
-                {fmtC(budgetMonthly)}/mo
-              </div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: C.muted }}>Annual · vs target</div>
-              <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "monospace", color: C.gold }}>
-                {fmtC(budgetAnnual, true)}/yr
-              </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: diffColor }}>
-                {budgetDiff <= 0 ? `✓ ${fmtC(Math.abs(budgetDiff), true)} under` : `${fmtC(budgetDiff, true)} over`}
-              </div>
-            </div>
-          </div>
-          {/* Color bar */}
-          <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", gap: 1, marginTop: 10 }}>
-            {BUDGET_CATS.map(cat => {
-              const p = budgetMonthly > 0 ? (catTotals[cat.id] / budgetMonthly) * 100 : 0;
-              return <div key={cat.id} style={{ width: `${p}%`, background: cat.color, transition: "width 0.4s" }} />;
-            })}
           </div>
           <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
             <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: "7px 10px" }}>
@@ -885,6 +851,36 @@ function FloryFreedomV7() {
               ✓ FIRE engine uses <strong>{fmtC(budgetAtRetire, true)}/yr</strong> — budget inflated to {curScenario.label}. Change the scenario and this updates instantly.
             </div>
           )}
+        </div>
+
+        {/* Sticky summary */}
+        <div style={{
+          background: C.cardHi, border: `1px solid ${C.border}`, borderRadius: 14,
+          padding: 14, marginBottom: 12,
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontSize: 10, color: C.muted }}>Monthly total</div>
+              <div style={{ fontSize: 24, fontWeight: 900, fontFamily: "monospace", color: C.accent }}>
+                {fmtC(budgetMonthly)}/mo
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: C.muted }}>Annual</div>
+              <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "monospace", color: C.gold }}>
+                {fmtC(budgetAnnual, true)}/yr
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: budgetDiff <= 0 ? C.green : C.red }}>
+                {budgetDiff <= 0 ? `✓ ${fmtC(Math.abs(budgetDiff), true)} under target` : `${fmtC(budgetDiff, true)} over target`}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", gap: 1, marginTop: 10 }}>
+            {BUDGET_CATS.map(cat => {
+              const p = budgetMonthly > 0 ? (catTotals[cat.id] / budgetMonthly) * 100 : 0;
+              return <div key={cat.id} style={{ width: `${p}%`, background: cat.color, transition: "width 0.4s" }} />;
+            })}
+          </div>
         </div>
 
         {/* Category cards */}
@@ -1270,7 +1266,7 @@ function FloryFreedomV7() {
   <script>
     if('serviceWorker' in navigator){
       window.addEventListener('load',()=>{
-        const sw=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>clients.claim());self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>new Response('Offline',{status:503})));}); `;
+        const sw=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>clients.claim());self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>new Response('',{status:503})));}); `;
         const url=URL.createObjectURL(new Blob([sw],{type:'application/javascript'}));
         navigator.serviceWorker.register(url).catch(()=>{});
       });
