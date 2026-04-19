@@ -28,17 +28,28 @@
   <div id="root"></div>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
+  <script>
+    // Pre-compiled — no Babel needed in browser
     const { useState, useMemo } = React;
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const C = {
-  bg: "#070f1c", card: "#0c1d2e", cardHi: "#102540",
-  border: "#1a3050", accent: "#4fc3f7", gold: "#ffd54f",
-  green: "#52c97a", greenBright: "#69f0ae", red: "#ef5350",
-  orange: "#ffa726", teal: "#26c6da", purple: "#ab47bc",
-  pink: "#e07bb5", lake: "#1565c0",
-  text: "#ddeeff", muted: "#6b93b8", dim: "#2e4a66",
+  bg: "#070f1c",
+  card: "#0c1d2e",
+  cardHi: "#102540",
+  border: "#1a3050",
+  accent: "#4fc3f7",
+  gold: "#ffd54f",
+  green: "#52c97a",
+  greenBright: "#69f0ae",
+  red: "#ef5350",
+  orange: "#ffa726",
+  teal: "#26c6da",
+  purple: "#ab47bc",
+  pink: "#e07bb5",
+  lake: "#1565c0",
+  text: "#ddeeff",
+  muted: "#6b93b8",
+  dim: "#2e4a66"
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -47,7 +58,11 @@ if (n === undefined || isNaN(n)) return “$0”;
 const abs = Math.abs(n);
 if (compact && abs >= 1_000_000) return `$${(n / 1e6).toFixed(2)}M`;
 if (compact && abs >= 1_000) return `$${(n / 1e3).toFixed(0)}k`;
-return n.toLocaleString(“en-US”, { style: “currency”, currency: “USD”, maximumFractionDigits: 0 });
+return n.toLocaleString(“en-US”, {
+style: “currency”,
+currency: “USD”,
+maximumFractionDigits: 0
+});
 };
 const fmtPct = (n, d = 1) => `${((n || 0) * 100).toFixed(d)}%`;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -57,29 +72,40 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // Pre-trsAge: high gap. At trsAge: TRS cuts withdrawal sharply.
 // At ssAge: SS adds on, gap often drops to near-zero. Portfolio then compounds.
 function monteCarloStepped({
-port, retireAge, trsAge, ssAge, years, sims = 1200,
-annualSpend, wifeIncome, dividends, sideIncome, condoCF, trs, ssIncome,
+port,
+retireAge,
+trsAge,
+ssAge,
+years,
+sims = 1200,
+annualSpend,
+wifeIncome,
+dividends,
+sideIncome,
+condoCF,
+trs,
+ssIncome
 }) {
 if (port <= 0) return 0;
-const mu = 0.069, sigma = 0.155;
+const mu = 0.069,
+sigma = 0.155;
 let ok = 0;
 for (let sim = 0; sim < sims; sim++) {
-let b = port, alive = true;
+let b = port,
+alive = true;
 for (let y = 0; y < years; y++) {
 const age = retireAge + y;
 const inf = Math.pow(1.03, y);
-const guaranteed =
-wifeIncome * inf +
-dividends  * inf +
-sideIncome * inf +
-condoCF    * inf +
-(age >= trsAge ? trs      * inf : 0) +
-(age >= ssAge  ? ssIncome * inf : 0);
+const guaranteed = wifeIncome * inf + dividends * inf + sideIncome * inf + condoCF * inf + (age >= trsAge ? trs * inf : 0) + (age >= ssAge ? ssIncome * inf : 0);
 const withdrawal = Math.max(0, annualSpend * inf - guaranteed);
-const u1 = Math.random(), u2 = Math.random();
+const u1 = Math.random(),
+u2 = Math.random();
 const z = Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2);
 b = b * (1 + mu + sigma * z) - withdrawal;
-if (b <= 0) { alive = false; break; }
+if (b <= 0) {
+alive = false;
+break;
+}
 }
 if (alive) ok++;
 }
@@ -102,11 +128,20 @@ return Math.round(bal);
 // ─── SCENARIO ENGINE ──────────────────────────────────────────────────────────
 function calcScenario(params) {
 const {
-currentPort, monthlyContrib, currentAge, retireAge,
-annualSpend, wifeIncome, dividends, trsYears, ssIncome,
-trsAge, ssAge, condoCashFlow, sideIncome,
+currentPort,
+monthlyContrib,
+currentAge,
+retireAge,
+annualSpend,
+wifeIncome,
+dividends,
+trsYears,
+ssIncome,
+trsAge,
+ssAge,
+condoCashFlow,
+sideIncome
 } = params;
-
 const months = Math.round((retireAge - currentAge) * 12);
 const projPort = growPortfolio(currentPort, monthlyContrib, months);
 const trs = calcTRS(trsYears);
@@ -122,84 +157,356 @@ const postGap = Math.max(0, annualSpend - guaranteed65);
 
 // Monte Carlo
 const mcArgs = {
-port: projPort, retireAge, trsAge, ssAge,
-annualSpend, wifeIncome, dividends, sideIncome,
-condoCF: condoCashFlow, trs, ssIncome,
+port: projPort,
+retireAge,
+trsAge,
+ssAge,
+annualSpend,
+wifeIncome,
+dividends,
+sideIncome,
+condoCF: condoCashFlow,
+trs,
+ssIncome
 };
-const mc20 = monteCarloStepped({ …mcArgs, years: 20 });
-const mc30 = monteCarloStepped({ …mcArgs, years: 30 });
-const mc40 = monteCarloStepped({ …mcArgs, years: 40 });
-
-return { projPort, trs, guaranteedPre, preGap, preWR, guaranteed65, postGap, mc20, mc30, mc40 };
+const mc20 = monteCarloStepped({
+…mcArgs,
+years: 20
+});
+const mc30 = monteCarloStepped({
+…mcArgs,
+years: 30
+});
+const mc40 = monteCarloStepped({
+…mcArgs,
+years: 40
+});
+return {
+projPort,
+trs,
+guaranteedPre,
+preGap,
+preWR,
+guaranteed65,
+postGap,
+mc20,
+mc30,
+mc40
+};
 }
 
 // ─── BUDGET CATEGORIES ────────────────────────────────────────────────────────
-const BUDGET_CATS = [
-{ id: “home”, icon: “🏠”, color: C.teal, label: “Home & Property”, items: [
-{ id: “insurance”, label: “Insurance”, monthly: 320, min: 150, max: 600 },
-{ id: “proptax”,   label: “Property Tax”, monthly: 265, min: 100, max: 500 },
-{ id: “electric”,  label: “Electric & Gas”, monthly: 210, min: 80, max: 380 },
-{ id: “water”,     label: “Water, Trash & Sewer”, monthly: 75, min: 30, max: 150 },
-{ id: “internet”,  label: “Internet”, monthly: 70, min: 40, max: 120 },
-{ id: “streaming”, label: “Streaming & TV”, monthly: 60, min: 20, max: 150 },
-{ id: “maint”,     label: “Maintenance”, monthly: 200, min: 50, max: 500 },
-{ id: “lawn”,      label: “Lawn & Landscaping”, monthly: 80, min: 0, max: 250 },
-]},
-{ id: “health”, icon: “🏥”, color: C.pink, label: “Healthcare”, items: [
-{ id: “aca”,    label: “ACA Premiums (2 adults)”, monthly: 900, min: 200, max: 1800 },
-{ id: “oop”,    label: “Out-of-Pocket / Copays”, monthly: 200, min: 50, max: 600 },
-{ id: “dental”, label: “Dental & Vision”, monthly: 120, min: 30, max: 300 },
-{ id: “meds”,   label: “Prescriptions”, monthly: 80, min: 0, max: 400 },
-{ id: “fitnes”, label: “Fitness & Wellness”, monthly: 50, min: 0, max: 200 },
-]},
-{ id: “food”, icon: “🛒”, color: C.green, label: “Food & Dining”, items: [
-{ id: “grocery”, label: “Groceries”, monthly: 700, min: 300, max: 1200 },
-{ id: “dining”,  label: “Dining Out”, monthly: 400, min: 100, max: 1000 },
-{ id: “coffee”,  label: “Coffee & Treats”, monthly: 80, min: 20, max: 200 },
-{ id: “alcohol”, label: “Wine & Spirits”, monthly: 60, min: 0, max: 200 },
-]},
-{ id: “transport”, icon: “🚗”, color: C.gold, label: “Transportation”, items: [
-{ id: “autoins”, label: “Auto Insurance (2 cars)”, monthly: 200, min: 100, max: 400 },
-{ id: “gas”,     label: “Gas & Charging”, monthly: 150, min: 50, max: 300 },
-{ id: “carmnt”,  label: “Car Maintenance”, monthly: 100, min: 30, max: 250 },
-{ id: “tags”,    label: “Tags & Fees”, monthly: 30, min: 10, max: 80 },
-{ id: “carfnd”,  label: “Car Replacement Fund”, monthly: 200, min: 0, max: 500 },
-]},
-{ id: “travel”, icon: “✈️”, color: C.purple, label: “Travel & Fun”, items: [
-{ id: “flights”,  label: “Flights & Airfare”, monthly: 250, min: 0, max: 800 },
-{ id: “hotels”,   label: “Hotels & Lodging”, monthly: 200, min: 0, max: 600 },
-{ id: “activits”, label: “Activities & Admissions”, monthly: 100, min: 0, max: 400 },
-{ id: “hobbies”,  label: “Hobbies & Recreation”, monthly: 150, min: 0, max: 500 },
-]},
-{ id: “personal”, icon: “👤”, color: C.accent, label: “Personal & Lifestyle”, items: [
-{ id: “phones”,   label: “Cell Phones (2 lines)”, monthly: 100, min: 50, max: 200 },
-{ id: “clothing”, label: “Clothing & Shoes”, monthly: 100, min: 30, max: 300 },
-{ id: “pcare”,    label: “Personal Care”, monthly: 100, min: 40, max: 250 },
-{ id: “gifts”,    label: “Gifts & Giving”, monthly: 150, min: 30, max: 400 },
-{ id: “subscr”,   label: “Subscriptions & Apps”, monthly: 50, min: 20, max: 150 },
-{ id: “pets”,     label: “Pets”, monthly: 80, min: 0, max: 300 },
-{ id: “misc”,     label: “Miscellaneous Buffer”, monthly: 150, min: 50, max: 400 },
-]},
-{ id: “family”, icon: “💛”, color: “#f9a825”, label: “Family & Giving”, items: [
-{ id: “libby”,   label: “Libby Support”, monthly: 150, min: 0, max: 500 },
-{ id: “donate”,  label: “Charitable Giving”, monthly: 100, min: 0, max: 500 },
-{ id: “family2”, label: “Family Events”, monthly: 75, min: 0, max: 300 },
-]},
-{ id: “reserve”, icon: “🛡️”, color: C.green, label: “Reserves”, items: [
-{ id: “emerg”,  label: “Emergency Fund”, monthly: 100, min: 0, max: 500 },
-{ id: “repair”, label: “Major Repair Reserve”, monthly: 100, min: 0, max: 300 },
-]},
-];
+const BUDGET_CATS = [{
+id: “home”,
+icon: “🏠”,
+color: C.teal,
+label: “Home & Property”,
+items: [{
+id: “insurance”,
+label: “Insurance”,
+monthly: 320,
+min: 150,
+max: 600
+}, {
+id: “proptax”,
+label: “Property Tax”,
+monthly: 265,
+min: 100,
+max: 500
+}, {
+id: “electric”,
+label: “Electric & Gas”,
+monthly: 210,
+min: 80,
+max: 380
+}, {
+id: “water”,
+label: “Water, Trash & Sewer”,
+monthly: 75,
+min: 30,
+max: 150
+}, {
+id: “internet”,
+label: “Internet”,
+monthly: 70,
+min: 40,
+max: 120
+}, {
+id: “streaming”,
+label: “Streaming & TV”,
+monthly: 60,
+min: 20,
+max: 150
+}, {
+id: “maint”,
+label: “Maintenance”,
+monthly: 200,
+min: 50,
+max: 500
+}, {
+id: “lawn”,
+label: “Lawn & Landscaping”,
+monthly: 80,
+min: 0,
+max: 250
+}]
+}, {
+id: “health”,
+icon: “🏥”,
+color: C.pink,
+label: “Healthcare”,
+items: [{
+id: “aca”,
+label: “ACA Premiums (2 adults)”,
+monthly: 900,
+min: 200,
+max: 1800
+}, {
+id: “oop”,
+label: “Out-of-Pocket / Copays”,
+monthly: 200,
+min: 50,
+max: 600
+}, {
+id: “dental”,
+label: “Dental & Vision”,
+monthly: 120,
+min: 30,
+max: 300
+}, {
+id: “meds”,
+label: “Prescriptions”,
+monthly: 80,
+min: 0,
+max: 400
+}, {
+id: “fitnes”,
+label: “Fitness & Wellness”,
+monthly: 50,
+min: 0,
+max: 200
+}]
+}, {
+id: “food”,
+icon: “🛒”,
+color: C.green,
+label: “Food & Dining”,
+items: [{
+id: “grocery”,
+label: “Groceries”,
+monthly: 700,
+min: 300,
+max: 1200
+}, {
+id: “dining”,
+label: “Dining Out”,
+monthly: 400,
+min: 100,
+max: 1000
+}, {
+id: “coffee”,
+label: “Coffee & Treats”,
+monthly: 80,
+min: 20,
+max: 200
+}, {
+id: “alcohol”,
+label: “Wine & Spirits”,
+monthly: 60,
+min: 0,
+max: 200
+}]
+}, {
+id: “transport”,
+icon: “🚗”,
+color: C.gold,
+label: “Transportation”,
+items: [{
+id: “autoins”,
+label: “Auto Insurance (2 cars)”,
+monthly: 200,
+min: 100,
+max: 400
+}, {
+id: “gas”,
+label: “Gas & Charging”,
+monthly: 150,
+min: 50,
+max: 300
+}, {
+id: “carmnt”,
+label: “Car Maintenance”,
+monthly: 100,
+min: 30,
+max: 250
+}, {
+id: “tags”,
+label: “Tags & Fees”,
+monthly: 30,
+min: 10,
+max: 80
+}, {
+id: “carfnd”,
+label: “Car Replacement Fund”,
+monthly: 200,
+min: 0,
+max: 500
+}]
+}, {
+id: “travel”,
+icon: “✈️”,
+color: C.purple,
+label: “Travel & Fun”,
+items: [{
+id: “flights”,
+label: “Flights & Airfare”,
+monthly: 250,
+min: 0,
+max: 800
+}, {
+id: “hotels”,
+label: “Hotels & Lodging”,
+monthly: 200,
+min: 0,
+max: 600
+}, {
+id: “activits”,
+label: “Activities & Admissions”,
+monthly: 100,
+min: 0,
+max: 400
+}, {
+id: “hobbies”,
+label: “Hobbies & Recreation”,
+monthly: 150,
+min: 0,
+max: 500
+}]
+}, {
+id: “personal”,
+icon: “👤”,
+color: C.accent,
+label: “Personal & Lifestyle”,
+items: [{
+id: “phones”,
+label: “Cell Phones (2 lines)”,
+monthly: 100,
+min: 50,
+max: 200
+}, {
+id: “clothing”,
+label: “Clothing & Shoes”,
+monthly: 100,
+min: 30,
+max: 300
+}, {
+id: “pcare”,
+label: “Personal Care”,
+monthly: 100,
+min: 40,
+max: 250
+}, {
+id: “gifts”,
+label: “Gifts & Giving”,
+monthly: 150,
+min: 30,
+max: 400
+}, {
+id: “subscr”,
+label: “Subscriptions & Apps”,
+monthly: 50,
+min: 20,
+max: 150
+}, {
+id: “pets”,
+label: “Pets”,
+monthly: 80,
+min: 0,
+max: 300
+}, {
+id: “misc”,
+label: “Miscellaneous Buffer”,
+monthly: 150,
+min: 50,
+max: 400
+}]
+}, {
+id: “family”,
+icon: “💛”,
+color: “#f9a825”,
+label: “Family & Giving”,
+items: [{
+id: “libby”,
+label: “Libby Support”,
+monthly: 150,
+min: 0,
+max: 500
+}, {
+id: “donate”,
+label: “Charitable Giving”,
+monthly: 100,
+min: 0,
+max: 500
+}, {
+id: “family2”,
+label: “Family Events”,
+monthly: 75,
+min: 0,
+max: 300
+}]
+}, {
+id: “reserve”,
+icon: “🛡️”,
+color: C.green,
+label: “Reserves”,
+items: [{
+id: “emerg”,
+label: “Emergency Fund”,
+monthly: 100,
+min: 0,
+max: 500
+}, {
+id: “repair”,
+label: “Major Repair Reserve”,
+monthly: 100,
+min: 0,
+max: 300
+}]
+}];
 const ALL_ITEMS = BUDGET_CATS.flatMap(c => c.items);
 
 // ─── RETIREMENT SCENARIOS ─────────────────────────────────────────────────────
-const RETIRE_SCENARIOS = [
-{ id: “2026”, label: “Jun 2026”, retireAge: 46, trsYears: 10, color: C.orange },
-{ id: “2027”, label: “Jun 2027”, retireAge: 47, trsYears: 11, color: C.gold },
-{ id: “2028”, label: “Jun 2028”, retireAge: 48, trsYears: 12, color: C.green },
-{ id: “2029”, label: “Jun 2029”, retireAge: 49, trsYears: 13, color: C.teal },
-{ id: “2030”, label: “Jun 2030”, retireAge: 50, trsYears: 14, color: C.accent },
-];
+const RETIRE_SCENARIOS = [{
+id: “2026”,
+label: “Jun 2026”,
+retireAge: 46,
+trsYears: 10,
+color: C.orange
+}, {
+id: “2027”,
+label: “Jun 2027”,
+retireAge: 47,
+trsYears: 11,
+color: C.gold
+}, {
+id: “2028”,
+label: “Jun 2028”,
+retireAge: 48,
+trsYears: 12,
+color: C.green
+}, {
+id: “2029”,
+label: “Jun 2029”,
+retireAge: 49,
+trsYears: 13,
+color: C.teal
+}, {
+id: “2030”,
+label: “Jun 2030”,
+retireAge: 50,
+trsYears: 14,
+color: C.accent
+}];
 
 // ─── DEFAULTS ─────────────────────────────────────────────────────────────────
 const DEF = {
@@ -227,98 +534,200 @@ condoRental: 18000,
 condoRentalOn: false,
 budgetDrives: true,
 // Live income controls — these drive the main dashboard directly
-wifeMode: “full”,   // “full” | “ssdi_gone” | “all_gone” | “custom”
+wifeMode: “full”,
+// “full” | “ssdi_gone” | “all_gone” | “custom”
 customWifeIncome: 53000,
-sideIncomeOn: false,
+sideIncomeOn: false
 };
 
 // ─── SHARED COMPONENTS ────────────────────────────────────────────────────────
-const Slider = ({ label, value, min, max, step, onChange, display, color = C.accent, note }) => (
-
-  <div style={{ marginBottom: 14 }}>
-    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-      <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color, fontFamily: "monospace" }}>
-        {display ? display(value) : fmtC(value)}
-      </span>
-    </div>
-    {note && <div style={{ fontSize: 9, color: C.dim, marginBottom: 3 }}>{note}</div>}
-    <input type="range" min={min} max={max} step={step} value={value}
-      onChange={e => onChange(Number(e.target.value))}
-      style={{ width: "100%", accentColor: color, cursor: "pointer" }} />
-    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.dim }}>
-      <span>{display ? display(min) : fmtC(min, true)}</span>
-      <span>{display ? display(max) : fmtC(max, true)}</span>
-    </div>
-  </div>
-);
-
-const Toggle = ({ label, value, onChange, color = C.green }) => (
-
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-    <span style={{ fontSize: 12, color: C.text }}>{label}</span>
-    <div onClick={() => onChange(!value)} style={{
-      width: 44, height: 24, borderRadius: 12, cursor: "pointer", position: "relative",
-      background: value ? color : C.dim, transition: "background 0.25s",
-    }}>
-      <div style={{
-        position: "absolute", top: 3, left: value ? 22 : 3, width: 18, height: 18,
-        borderRadius: 9, background: "white", transition: "left 0.25s",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-      }} />
-    </div>
-  </div>
-);
-
-const Card = ({ children, style = {} }) => (
-
-  <div style={{
-    background: C.card, border: `1px solid ${C.border}`,
-    borderRadius: 14, padding: 14, marginBottom: 12, ...style,
-  }}>
-    {children}
-  </div>
-);
-
-const SectionLabel = ({ children, color = C.muted }) => (
-
-  <div style={{ fontSize: 10, color, textTransform: "uppercase", letterSpacing: 1, fontWeight: 700, marginBottom: 8 }}>
-    {children}
-  </div>
-);
-
-const GaugeBar = ({ value, label, compact = false }) => {
+const Slider = ({
+label,
+value,
+min,
+max,
+step,
+onChange,
+display,
+color = C.accent,
+note
+}) => /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: 14
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 3
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color,
+fontFamily: “monospace”
+}
+}, display ? display(value) : fmtC(value))), note && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim,
+marginBottom: 3
+}
+}, note), /*#**PURE***/React.createElement(“input”, {
+type: “range”,
+min: min,
+max: max,
+step: step,
+value: value,
+onChange: e => onChange(Number(e.target.value)),
+style: {
+width: “100%”,
+accentColor: color,
+cursor: “pointer”
+}
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+fontSize: 9,
+color: C.dim
+}
+}, /*#**PURE***/React.createElement(“span”, null, display ? display(min) : fmtC(min, true)), /*#**PURE***/React.createElement(“span”, null, display ? display(max) : fmtC(max, true))));
+const Toggle = ({
+label,
+value,
+onChange,
+color = C.green
+}) => /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+justifyContent: “space-between”,
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.text
+}
+}, label), /*#**PURE***/React.createElement(“div”, {
+onClick: () => onChange(!value),
+style: {
+width: 44,
+height: 24,
+borderRadius: 12,
+cursor: “pointer”,
+position: “relative”,
+background: value ? color : C.dim,
+transition: “background 0.25s”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “absolute”,
+top: 3,
+left: value ? 22 : 3,
+width: 18,
+height: 18,
+borderRadius: 9,
+background: “white”,
+transition: “left 0.25s”,
+boxShadow: “0 1px 4px rgba(0,0,0,0.4)”
+}
+})));
+const Card = ({
+children,
+style = {}
+}) => /*#**PURE***/React.createElement(“div”, {
+style: {
+background: C.card,
+border: `1px solid ${C.border}`,
+borderRadius: 14,
+padding: 14,
+marginBottom: 12,
+…style
+}
+}, children);
+const SectionLabel = ({
+children,
+color = C.muted
+}) => /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color,
+textTransform: “uppercase”,
+letterSpacing: 1,
+fontWeight: 700,
+marginBottom: 8
+}
+}, children);
+const GaugeBar = ({
+value,
+label,
+compact = false
+}) => {
 const pctVal = Math.round((value || 0) * 100);
 const barColor = pctVal >= 95 ? C.greenBright : pctVal >= 88 ? C.green : pctVal >= 80 ? C.gold : pctVal >= 70 ? C.orange : C.red;
-return (
-<div style={{ marginBottom: compact ? 5 : 8 }}>
-<div style={{ display: “flex”, justifyContent: “space-between”, marginBottom: 2 }}>
-<span style={{ fontSize: compact ? 10 : 11, color: C.muted }}>{label}</span>
-<span style={{ fontSize: compact ? 11 : 12, fontWeight: 700, color: barColor, fontFamily: “monospace” }}>{pctVal}%</span>
-</div>
-<div style={{ height: compact ? 5 : 7, background: C.border, borderRadius: 4 }}>
-<div style={{ height: compact ? 5 : 7, borderRadius: 4, width: `${pctVal}%`, background: barColor, transition: “width 0.5s” }} />
-</div>
-</div>
-);
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: compact ? 5 : 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 2
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: compact ? 10 : 11,
+color: C.muted
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: compact ? 11 : 12,
+fontWeight: 700,
+color: barColor,
+fontFamily: “monospace”
+}
+}, pctVal, “%”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+height: compact ? 5 : 7,
+background: C.border,
+borderRadius: 4
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+height: compact ? 5 : 7,
+borderRadius: 4,
+width: `${pctVal}%`,
+background: barColor,
+transition: “width 0.5s”
+}
+})));
 };
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 function FloryFreedomV7() {
 const [tab, setTab] = useState(“home”);
 const [s, setS] = useState(DEF);
-const [budgetVals, setBudgetVals] = useState(
-() => Object.fromEntries(ALL_ITEMS.map(i => [i.id, i.monthly]))
-);
+const [budgetVals, setBudgetVals] = useState(() => Object.fromEntries(ALL_ITEMS.map(i => [i.id, i.monthly])));
 const [budgetOpen, setBudgetOpen] = useState({});
-const set = k => v => setS(p => ({ …p, [k]: v }));
+const set = k => v => setS(p => ({
+…p,
+[k]: v
+}));
 
 // ── Current scenario ──
 const curScenario = RETIRE_SCENARIOS.find(sc => sc.id === s.selectedScenario) || RETIRE_SCENARIOS[1];
 
 // ── Budget total in TODAY’s dollars (2026) ──
-const budgetMonthly = useMemo(() =>
-ALL_ITEMS.reduce((sum, i) => sum + (budgetVals[i.id] ?? i.monthly), 0), [budgetVals]);
+const budgetMonthly = useMemo(() => ALL_ITEMS.reduce((sum, i) => sum + (budgetVals[i.id] ?? i.monthly), 0), [budgetVals]);
 const budgetAnnual = budgetMonthly * 12; // today’s dollars — used for display in budget tab
 
 // ── Years to retirement & inflation factor ──
@@ -337,20 +746,15 @@ const effectiveSpend = s.budgetDrives ? budgetAtRetire : s.annualSpend;
 
 // ── Core calcs — wife income driven by mode selector ──
 const wifeInc = useMemo(() => {
-if (s.wifeMode === “full”)      return s.wifeIncome;
+if (s.wifeMode === “full”) return s.wifeIncome;
 if (s.wifeMode === “ssdi_gone”) return Math.round(s.wifeIncome * 0.45); // OPERS pension only ~$24k
-if (s.wifeMode === “all_gone”)  return 0;
-if (s.wifeMode === “custom”)    return s.customWifeIncome;
+if (s.wifeMode === “all_gone”) return 0;
+if (s.wifeMode === “custom”) return s.customWifeIncome;
 return s.wifeIncome;
 }, [s.wifeMode, s.wifeIncome, s.customWifeIncome]);
-
 const sideInc = s.sideIncomeOn ? s.sideIncome : 0;
-const divs    = s.dividendsOn ? s.dividends : 0;
-
-const condoCF = s.condoOn
-? (s.condoRentalOn ? s.condoRental - s.condoMonthlyCarry * 12 : -s.condoMonthlyCarry * 12)
-: 0;
-
+const divs = s.dividendsOn ? s.dividends : 0;
+const condoCF = s.condoOn ? s.condoRentalOn ? s.condoRental - s.condoMonthlyCarry * 12 : -s.condoMonthlyCarry * 12 : 0;
 const derived = useMemo(() => calcScenario({
 currentPort: s.currentPort,
 monthlyContrib: s.monthlyContrib,
@@ -364,12 +768,11 @@ ssIncome: s.ssIncome,
 trsAge: s.trsAge,
 ssAge: s.ssAge,
 condoCashFlow: condoCF,
-sideIncome: sideInc,
+sideIncome: sideInc
 }), [s, curScenario, wifeInc, divs, condoCF]);
 
 // ── All 5 scenarios for comparison ──
-const allScenarios = useMemo(() =>
-RETIRE_SCENARIOS.map(sc => ({
+const allScenarios = useMemo(() => RETIRE_SCENARIOS.map(sc => ({
 …sc,
 …calcScenario({
 currentPort: s.currentPort,
@@ -384,586 +787,1362 @@ ssIncome: s.ssIncome,
 trsAge: s.trsAge,
 ssAge: s.ssAge,
 condoCashFlow: condoCF,
-sideIncome: sideInc,
-}),
+sideIncome: sideInc
+})
 })), [s, wifeInc, divs, condoCF]);
 
 // ── Backstop scenarios ──
-const backstopScenarios = useMemo(() => [
-{
-label: “Full Picture”, icon: “✅”, color: C.greenBright,
+const backstopScenarios = useMemo(() => [{
+label: “Full Picture”,
+icon: “✅”,
+color: C.greenBright,
 desc: “All income sources intact”,
-gap: calcScenario({ …s, annualSpend: effectiveSpend, retireAge: curScenario.retireAge, trsYears: curScenario.trsYears,
-wifeIncome: wifeInc, dividends: divs, condoCashFlow: condoCF, sideIncome: sideInc }).preGap,
-mc20: derived.mc20, mc30: derived.mc30, mc40: derived.mc40,
-wr: derived.preWR,
-},
-{
-label: “SSDI Gone, Pension Stays”, icon: “⚠️”, color: C.orange,
+gap: calcScenario({
+…s,
+annualSpend: effectiveSpend,
+retireAge: curScenario.retireAge,
+trsYears: curScenario.trsYears,
+wifeIncome: wifeInc,
+dividends: divs,
+condoCashFlow: condoCF,
+sideIncome: sideInc
+}).preGap,
+mc20: derived.mc20,
+mc30: derived.mc30,
+mc40: derived.mc40,
+wr: derived.preWR
+}, {
+label: “SSDI Gone, Pension Stays”,
+icon: “⚠️”,
+color: C.orange,
 desc: “SSDI removed; OPERS disability pension ~$24k remains”,
 …(() => {
-const r = calcScenario({ …s, annualSpend: effectiveSpend, retireAge: curScenario.retireAge, trsYears: curScenario.trsYears,
-wifeIncome: wifeInc * 0.45, dividends: divs, condoCashFlow: condoCF, sideIncome: sideInc });
-return { gap: r.preGap, mc20: r.mc20, mc30: r.mc30, mc40: r.mc40, wr: r.preWR };
-})(),
-},
-{
-label: “All Wife Income Gone”, icon: “🚨”, color: C.red,
+const r = calcScenario({
+…s,
+annualSpend: effectiveSpend,
+retireAge: curScenario.retireAge,
+trsYears: curScenario.trsYears,
+wifeIncome: wifeInc * 0.45,
+dividends: divs,
+condoCashFlow: condoCF,
+sideIncome: sideInc
+});
+return {
+gap: r.preGap,
+mc20: r.mc20,
+mc30: r.mc30,
+mc40: r.mc40,
+wr: r.preWR
+};
+})()
+}, {
+label: “All Wife Income Gone”,
+icon: “🚨”,
+color: C.red,
 desc: “No SSDI, no pension — portfolio + TRS + SS only”,
 …(() => {
-const r = calcScenario({ …s, annualSpend: effectiveSpend, retireAge: curScenario.retireAge, trsYears: curScenario.trsYears,
-wifeIncome: 0, dividends: divs, condoCashFlow: condoCF, sideIncome: sideInc });
-return { gap: r.preGap, mc20: r.mc20, mc30: r.mc30, mc40: r.mc40, wr: r.preWR };
-})(),
-},
-], [s, curScenario, wifeInc, divs, condoCF, derived, effectiveSpend]);
+const r = calcScenario({
+…s,
+annualSpend: effectiveSpend,
+retireAge: curScenario.retireAge,
+trsYears: curScenario.trsYears,
+wifeIncome: 0,
+dividends: divs,
+condoCashFlow: condoCF,
+sideIncome: sideInc
+});
+return {
+gap: r.preGap,
+mc20: r.mc20,
+mc30: r.mc30,
+mc40: r.mc40,
+wr: r.preWR
+};
+})()
+}], [s, curScenario, wifeInc, divs, condoCF, derived, effectiveSpend]);
 
 // ── Headline ──
 const headline = useMemo(() => {
-const wr = derived.preWR, mc = derived.mc20;
-if (wr <= 0.005 && mc >= 0.97) return { text: “Essentially Guaranteed”, sub: “Portfolio barely needed pre-65”, color: C.greenBright };
-if (wr <= 0.02 && mc >= 0.97)  return { text: “You’re More Than Ready”, sub: “Outstanding financial position”, color: C.greenBright };
-if (wr <= 0.035 && mc >= 0.95) return { text: “The Numbers Say Go”, sub: “Strong, safe, and sustainable”, color: C.green };
-if (wr <= 0.05 && mc >= 0.88)  return { text: “Solid — Watch the Gap”, sub: “Pre-65 window needs attention”, color: C.gold };
-if (mc >= 0.80) return { text: “Manageable With Adjustments”, sub: “Some flexibility required”, color: C.orange };
-return { text: “Consider One More Year”, sub: “Build additional buffer first”, color: C.red };
+const wr = derived.preWR,
+mc = derived.mc20;
+if (wr <= 0.005 && mc >= 0.97) return {
+text: “Essentially Guaranteed”,
+sub: “Portfolio barely needed pre-65”,
+color: C.greenBright
+};
+if (wr <= 0.02 && mc >= 0.97) return {
+text: “You’re More Than Ready”,
+sub: “Outstanding financial position”,
+color: C.greenBright
+};
+if (wr <= 0.035 && mc >= 0.95) return {
+text: “The Numbers Say Go”,
+sub: “Strong, safe, and sustainable”,
+color: C.green
+};
+if (wr <= 0.05 && mc >= 0.88) return {
+text: “Solid — Watch the Gap”,
+sub: “Pre-65 window needs attention”,
+color: C.gold
+};
+if (mc >= 0.80) return {
+text: “Manageable With Adjustments”,
+sub: “Some flexibility required”,
+color: C.orange
+};
+return {
+text: “Consider One More Year”,
+sub: “Build additional buffer first”,
+color: C.red
+};
 }, [derived]);
 
 // ─── TAB: HOME ────────────────────────────────────────────────────────────
-const HomeTab = () => (
-<div>
-{/* KPI grid */}
-<div style={{ display: “grid”, gridTemplateColumns: “1fr 1fr”, gap: 8, marginBottom: 12 }}>
-{[
-{ label: “Portfolio at Retire”, val: fmtC(derived.projPort, true), color: C.accent, sub: `${curScenario.label}` },
-{ label: “Spending at Retire”, val: fmtC(effectiveSpend, true), color: C.gold, sub: s.budgetDrives ? `${curScenario.label} dollars` : “manual target” },
-{ label: “Withdrawal Rate”, val: fmtPct(derived.preWR), color: derived.preWR < 0.04 ? C.green : derived.preWR < 0.05 ? C.gold : C.red, sub: “pre-65 gap ÷ portfolio” },
-{ label: “TRS Pension @65”, val: fmtC(derived.trs, true) + “/yr”, color: C.teal, sub: `${curScenario.trsYears} yrs × 2.3%` },
-].map(({ label, val, color, sub }) => (
-<div key={label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: “11px 12px” }}>
-<div style={{ fontSize: 9, color: C.muted, textTransform: “uppercase”, letterSpacing: 0.8 }}>{label}</div>
-<div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: “monospace”, marginTop: 2 }}>{val}</div>
-<div style={{ fontSize: 9, color: C.dim }}>{sub}</div>
-</div>
-))}
-</div>
-
-```
-  {/* Monte Carlo gauges */}
-  <Card>
-    <SectionLabel color={C.accent}>Success Probability</SectionLabel>
-    <GaugeBar value={derived.mc20} label="20-year horizon (to age 67 — bridge period)" />
-    <GaugeBar value={derived.mc30} label="30-year horizon (to age 77)" />
-    <GaugeBar value={derived.mc40} label="40-year horizon (to age 87)" />
-  </Card>
-
-  {/* Income waterfall */}
-  <Card>
-    <SectionLabel color={C.teal}>Income Waterfall (Pre-65)</SectionLabel>
-    {[
-      { label: "Wife's Income", val: wifeInc, color: C.teal, on: wifeInc > 0 },
-      { label: "Portfolio Dividends", val: divs, color: C.purple, on: s.dividendsOn },
-      { label: "Side Income", val: sideInc, color: C.gold, on: s.sideIncomeOn && sideInc > 0 },
-      { label: "Ozarks Net CF", val: condoCF, color: C.lake, on: s.condoOn },
-    ].filter(r => r.on && r.val !== 0).map(({ label, val, color }) => (
-      <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-        <span style={{ fontSize: 12, color }}>{label}</span>
-        <span style={{ fontSize: 12, fontFamily: "monospace", color }}>{fmtC(val, true)}/yr</span>
-      </div>
-    ))}
-    <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 8, marginTop: 4 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 12, color: C.muted }}>Total guaranteed pre-65</span>
-        <span style={{ fontSize: 12, fontFamily: "monospace", color: C.muted }}>{fmtC(derived.guaranteedPre, true)}/yr</span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>Portfolio covers (gap)</span>
-        <span style={{ fontSize: 14, fontWeight: 800, fontFamily: "monospace",
-          color: derived.preGap < 15000 ? C.greenBright : derived.preGap < 35000 ? C.gold : C.red }}>
-          {fmtC(derived.preGap, true)}/yr
-        </span>
-      </div>
-    </div>
-  </Card>
-
-  {/* Age 65 flip card */}
-  <Card style={{ background: `${C.accent}10`, border: `1px solid ${C.accent}30` }}>
-    <SectionLabel color={C.accent}>Age 65 — The Transformation</SectionLabel>
-    {[
-      { label: "TRS Pension", val: derived.trs, color: C.teal },
-      { label: "Social Security", val: s.ssIncome, color: C.greenBright },
-      { label: "Portfolio Dividends", val: divs, color: C.purple },
-    ].map(({ label, val, color }) => (
-      <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <span style={{ fontSize: 12, color }}>{label}</span>
-        <span style={{ fontSize: 12, fontFamily: "monospace", color }}>{fmtC(val, true)}/yr</span>
-      </div>
-    ))}
-    <div style={{ borderTop: `1px solid ${C.accent}40`, paddingTop: 8, marginTop: 4 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>Guaranteed floor @65</span>
-        <span style={{ fontSize: 14, fontWeight: 800, fontFamily: "monospace", color: C.accent }}>
-          {fmtC(derived.guaranteed65, true)}/yr
-        </span>
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-        <span style={{ fontSize: 12, color: C.muted }}>Spending target</span>
-        <span style={{ fontSize: 12, fontFamily: "monospace", color: C.muted }}>{fmtC(effectiveSpend, true)}/yr</span>
-      </div>
-      <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 8,
-        background: derived.postGap <= 0 ? `${C.greenBright}18` : `${C.gold}15`,
-        border: `1px solid ${derived.postGap <= 0 ? C.greenBright : C.gold}40` }}>
-        <div style={{ fontSize: 12, fontWeight: 700,
-          color: derived.postGap <= 0 ? C.greenBright : C.gold }}>
-          {derived.postGap <= 0
-            ? `✓ Fully covered — surplus of ${fmtC(Math.abs(derived.postGap), true)}/yr`
-            : `Remaining gap: ${fmtC(derived.postGap, true)}/yr`}
-        </div>
-        <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>
-          {derived.postGap <= 0
-            ? "Portfolio becomes a legacy asset at 65"
-            : "Small, manageable draw from portfolio"}
-        </div>
-      </div>
-    </div>
-  </Card>
-
-  {/* Live Controls Card */}
-  <Card style={{ background: `${C.cardHi}`, border: `1px solid ${C.gold}35` }}>
-    <SectionLabel color={C.gold}>Live Controls</SectionLabel>
-
-    {/* Retirement date */}
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 10, color: C.muted, marginBottom: 5 }}>Retirement Date</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 4 }}>
-        {RETIRE_SCENARIOS.map(sc => (
-          <button key={sc.id} onClick={() => set("selectedScenario")(sc.id)} style={{
-            background: s.selectedScenario === sc.id ? `${sc.color}30` : "transparent",
-            border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
-            borderRadius: 8, padding: "7px 3px", cursor: "pointer", textAlign: "center",
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: s.selectedScenario === sc.id ? sc.color : C.muted }}>
-              {sc.label.replace("Jun ", "'")}
-            </div>
-            <div style={{ fontSize: 8, color: C.dim }}>{sc.trsYears}yr</div>
-          </button>
-        ))}
-      </div>
-    </div>
-
-    {/* Wife's income mode */}
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ fontSize: 10, color: C.muted, marginBottom: 5 }}>Wife's Income</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 }}>
-        {[
-          { id: "full",      label: "Full",       sub: fmtC(s.wifeIncome, true), color: C.greenBright },
-          { id: "ssdi_gone", label: "SSDI Gone",  sub: fmtC(Math.round(s.wifeIncome*0.45), true), color: C.orange },
-          { id: "all_gone",  label: "All Gone",   sub: "$0", color: C.red },
-          { id: "custom",    label: "Custom",     sub: fmtC(s.customWifeIncome, true), color: C.purple },
-        ].map(m => (
-          <button key={m.id} onClick={() => set("wifeMode")(m.id)} style={{
-            background: s.wifeMode === m.id ? `${m.color}25` : "transparent",
-            border: `1px solid ${s.wifeMode === m.id ? m.color : C.dim}`,
-            borderRadius: 8, padding: "7px 4px", cursor: "pointer", textAlign: "center",
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: s.wifeMode === m.id ? m.color : C.muted }}>{m.label}</div>
-            <div style={{ fontSize: 9, color: C.dim, fontFamily: "monospace" }}>{m.sub}</div>
-          </button>
-        ))}
-      </div>
-      {s.wifeMode === "custom" && (
-        <div style={{ marginTop: 8 }}>
-          <Slider label="Custom wife income" value={s.customWifeIncome}
-            min={0} max={100000} step={1000} onChange={set("customWifeIncome")} color={C.purple} />
-        </div>
-      )}
-      <div style={{ marginTop: 6, fontSize: 10, color: C.muted }}>
-        Active: <strong style={{ color: wifeInc > 0 ? C.teal : C.red, fontFamily: "monospace" }}>
-          {fmtC(wifeInc, true)}/yr
-        </strong>
-        {s.wifeMode === "ssdi_gone" && <span style={{ color: C.dim }}> — OPERS pension only</span>}
-        {s.wifeMode === "all_gone" && <span style={{ color: C.dim }}> — portfolio covers everything</span>}
-      </div>
-    </div>
-
-    {/* Side income */}
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <div style={{ fontSize: 10, color: C.muted }}>Side / Part-Time Income</div>
-        <div onClick={() => set("sideIncomeOn")(!s.sideIncomeOn)} style={{
-          width: 38, height: 20, borderRadius: 10, cursor: "pointer", position: "relative",
-          background: s.sideIncomeOn ? C.gold : C.dim, transition: "background 0.25s",
-        }}>
-          <div style={{
-            position: "absolute", top: 2, left: s.sideIncomeOn ? 19 : 2,
-            width: 16, height: 16, borderRadius: 8, background: "white",
-            transition: "left 0.25s", boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-          }} />
-        </div>
-      </div>
-      {s.sideIncomeOn && (
-        <Slider label="" value={s.sideIncome} min={0} max={80000} step={1000}
-          onChange={set("sideIncome")} color={C.gold} />
-      )}
-      {s.sideIncomeOn && (
-        <div style={{ fontSize: 10, color: C.gold, marginTop: -6, fontFamily: "monospace" }}>
-          +{fmtC(sideInc, true)}/yr reduces portfolio gap
-        </div>
-      )}
-    </div>
-  </Card>
-</div>
-```
-
-);
+const HomeTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 8,
+marginBottom: 12
+}
+}, [{
+label: “Portfolio at Retire”,
+val: fmtC(derived.projPort, true),
+color: C.accent,
+sub: `${curScenario.label}`
+}, {
+label: “Spending at Retire”,
+val: fmtC(effectiveSpend, true),
+color: C.gold,
+sub: s.budgetDrives ? `${curScenario.label} dollars` : “manual target”
+}, {
+label: “Withdrawal Rate”,
+val: fmtPct(derived.preWR),
+color: derived.preWR < 0.04 ? C.green : derived.preWR < 0.05 ? C.gold : C.red,
+sub: “pre-65 gap ÷ portfolio”
+}, {
+label: “TRS Pension @65”,
+val: fmtC(derived.trs, true) + “/yr”,
+color: C.teal,
+sub: `${curScenario.trsYears} yrs × 2.3%`
+}].map(({
+label,
+val,
+color,
+sub
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+background: C.card,
+border: `1px solid ${C.border}`,
+borderRadius: 12,
+padding: “11px 12px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.muted,
+textTransform: “uppercase”,
+letterSpacing: 0.8
+}
+}, label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 18,
+fontWeight: 900,
+color,
+fontFamily: “monospace”,
+marginTop: 2
+}
+}, val), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, sub)))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.accent
+}, “Success Probability”), /*#**PURE***/React.createElement(GaugeBar, {
+value: derived.mc20,
+label: “20-year horizon (to age 67 \u2014 bridge period)”
+}), /*#**PURE***/React.createElement(GaugeBar, {
+value: derived.mc30,
+label: “30-year horizon (to age 77)”
+}), /*#**PURE***/React.createElement(GaugeBar, {
+value: derived.mc40,
+label: “40-year horizon (to age 87)”
+})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.teal
+}, “Income Waterfall (Pre-65)”), [{
+label: “Wife’s Income”,
+val: wifeInc,
+color: C.teal,
+on: wifeInc > 0
+}, {
+label: “Portfolio Dividends”,
+val: divs,
+color: C.purple,
+on: s.dividendsOn
+}, {
+label: “Side Income”,
+val: sideInc,
+color: C.gold,
+on: s.sideIncomeOn && sideInc > 0
+}, {
+label: “Ozarks Net CF”,
+val: condoCF,
+color: C.lake,
+on: s.condoOn
+}].filter(r => r.on && r.val !== 0).map(({
+label,
+val,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontFamily: “monospace”,
+color
+}
+}, fmtC(val, true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+borderTop: `1px solid ${C.border}`,
+paddingTop: 8,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, “Total guaranteed pre-65”), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontFamily: “monospace”,
+color: C.muted
+}
+}, fmtC(derived.guaranteedPre, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: C.text
+}
+}, “Portfolio covers (gap)”), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: derived.preGap < 15000 ? C.greenBright : derived.preGap < 35000 ? C.gold : C.red
+}
+}, fmtC(derived.preGap, true), “/yr”)))), /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.accent}10`,
+border: `1px solid ${C.accent}30`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.accent
+}, “Age 65 \u2014 The Transformation”), [{
+label: “TRS Pension”,
+val: derived.trs,
+color: C.teal
+}, {
+label: “Social Security”,
+val: s.ssIncome,
+color: C.greenBright
+}, {
+label: “Portfolio Dividends”,
+val: divs,
+color: C.purple
+}].map(({
+label,
+val,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 5
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontFamily: “monospace”,
+color
+}
+}, fmtC(val, true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+borderTop: `1px solid ${C.accent}40`,
+paddingTop: 8,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: C.text
+}
+}, “Guaranteed floor @65”), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: C.accent
+}
+}, fmtC(derived.guaranteed65, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, “Spending target”), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontFamily: “monospace”,
+color: C.muted
+}
+}, fmtC(effectiveSpend, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+padding: “8px 10px”,
+borderRadius: 8,
+background: derived.postGap <= 0 ? `${C.greenBright}18` : `${C.gold}15`,
+border: `1px solid ${derived.postGap <= 0 ? C.greenBright : C.gold}40`
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+color: derived.postGap <= 0 ? C.greenBright : C.gold
+}
+}, derived.postGap <= 0 ? `✓ Fully covered — surplus of ${fmtC(Math.abs(derived.postGap), true)}/yr` : `Remaining gap: ${fmtC(derived.postGap, true)}/yr`), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginTop: 2
+}
+}, derived.postGap <= 0 ? “Portfolio becomes a legacy asset at 65” : “Small, manageable draw from portfolio”)))), /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.cardHi}`,
+border: `1px solid ${C.gold}35`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.gold
+}, “Live Controls”), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginBottom: 5
+}
+}, “Retirement Date”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr 1fr 1fr 1fr”,
+gap: 4
+}
+}, RETIRE_SCENARIOS.map(sc => /*#**PURE***/React.createElement(“button”, {
+key: sc.id,
+onClick: () => set(“selectedScenario”)(sc.id),
+style: {
+background: s.selectedScenario === sc.id ? `${sc.color}30` : “transparent”,
+border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
+borderRadius: 8,
+padding: “7px 3px”,
+cursor: “pointer”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+fontWeight: 700,
+color: s.selectedScenario === sc.id ? sc.color : C.muted
+}
+}, sc.label.replace(“Jun “, “’”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 8,
+color: C.dim
+}
+}, sc.trsYears, “yr”))))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginBottom: 5
+}
+}, “Wife’s Income”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr 1fr 1fr”,
+gap: 4
+}
+}, [{
+id: “full”,
+label: “Full”,
+sub: fmtC(s.wifeIncome, true),
+color: C.greenBright
+}, {
+id: “ssdi_gone”,
+label: “SSDI Gone”,
+sub: fmtC(Math.round(s.wifeIncome * 0.45), true),
+color: C.orange
+}, {
+id: “all_gone”,
+label: “All Gone”,
+sub: “$0”,
+color: C.red
+}, {
+id: “custom”,
+label: “Custom”,
+sub: fmtC(s.customWifeIncome, true),
+color: C.purple
+}].map(m => /*#**PURE***/React.createElement(“button”, {
+key: m.id,
+onClick: () => set(“wifeMode”)(m.id),
+style: {
+background: s.wifeMode === m.id ? `${m.color}25` : “transparent”,
+border: `1px solid ${s.wifeMode === m.id ? m.color : C.dim}`,
+borderRadius: 8,
+padding: “7px 4px”,
+cursor: “pointer”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+fontWeight: 700,
+color: s.wifeMode === m.id ? m.color : C.muted
+}
+}, m.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim,
+fontFamily: “monospace”
+}
+}, m.sub)))), s.wifeMode === “custom” && /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8
+}
+}, /*#**PURE***/React.createElement(Slider, {
+label: “Custom wife income”,
+value: s.customWifeIncome,
+min: 0,
+max: 100000,
+step: 1000,
+onChange: set(“customWifeIncome”),
+color: C.purple
+})), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 6,
+fontSize: 10,
+color: C.muted
+}
+}, “Active: “, /*#**PURE***/React.createElement(“strong”, {
+style: {
+color: wifeInc > 0 ? C.teal : C.red,
+fontFamily: “monospace”
+}
+}, fmtC(wifeInc, true), “/yr”), s.wifeMode === “ssdi_gone” && /*#**PURE***/React.createElement(“span”, {
+style: {
+color: C.dim
+}
+}, “ \u2014 OPERS pension only”), s.wifeMode === “all_gone” && /*#**PURE***/React.createElement(“span”, {
+style: {
+color: C.dim
+}
+}, “ \u2014 portfolio covers everything”))), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted
+}
+}, “Side / Part-Time Income”), /*#**PURE***/React.createElement(“div”, {
+onClick: () => set(“sideIncomeOn”)(!s.sideIncomeOn),
+style: {
+width: 38,
+height: 20,
+borderRadius: 10,
+cursor: “pointer”,
+position: “relative”,
+background: s.sideIncomeOn ? C.gold : C.dim,
+transition: “background 0.25s”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “absolute”,
+top: 2,
+left: s.sideIncomeOn ? 19 : 2,
+width: 16,
+height: 16,
+borderRadius: 8,
+background: “white”,
+transition: “left 0.25s”,
+boxShadow: “0 1px 4px rgba(0,0,0,0.4)”
+}
+}))), s.sideIncomeOn && /*#**PURE***/React.createElement(Slider, {
+label: “”,
+value: s.sideIncome,
+min: 0,
+max: 80000,
+step: 1000,
+onChange: set(“sideIncome”),
+color: C.gold
+}), s.sideIncomeOn && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.gold,
+marginTop: -6,
+fontFamily: “monospace”
+}
+}, “+”, fmtC(sideInc, true), “/yr reduces portfolio gap”))));
 
 // ─── TAB: RETIRE (Scenarios) ──────────────────────────────────────────────
-const RetireTab = () => (
-<div>
-<Card style={{ background: `${C.gold}10`, border: `1px solid ${C.gold}30` }}>
-<SectionLabel color={C.gold}>Side-by-Side Scenario Comparison</SectionLabel>
-<div style={{ fontSize: 10, color: C.muted, marginBottom: 10 }}>
-All scenarios use current inputs. Each extra year adds ~1 yr service + contributions.
-</div>
-{/* Header */}
-<div style={{ display: “grid”, gridTemplateColumns: “72px 1fr 1fr 1fr 56px”, gap: 4,
-fontSize: 9, color: C.dim, textTransform: “uppercase”, letterSpacing: 0.5, marginBottom: 6, paddingBottom: 4,
-borderBottom: `1px solid ${C.border}` }}>
-<span>Date</span><span>Portfolio</span><span>Gap/yr</span><span>WR</span><span>20yr</span>
-</div>
-{allScenarios.map(sc => (
-<div key={sc.id} onClick={() => set(“selectedScenario”)(sc.id)}
-style={{
-display: “grid”, gridTemplateColumns: “72px 1fr 1fr 1fr 56px”, gap: 4,
-padding: “8px 0”, cursor: “pointer”, alignItems: “center”,
+const RetireTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.gold}10`,
+border: `1px solid ${C.gold}30`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.gold
+}, “Side-by-Side Scenario Comparison”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginBottom: 10
+}
+}, “All scenarios use current inputs. Each extra year adds ~1 yr service + contributions.”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “72px 1fr 1fr 1fr 56px”,
+gap: 4,
+fontSize: 9,
+color: C.dim,
+textTransform: “uppercase”,
+letterSpacing: 0.5,
+marginBottom: 6,
+paddingBottom: 4,
+borderBottom: `1px solid ${C.border}`
+}
+}, /*#**PURE***/React.createElement(“span”, null, “Date”), /*#**PURE***/React.createElement(“span”, null, “Portfolio”), /*#**PURE***/React.createElement(“span”, null, “Gap/yr”), /*#**PURE***/React.createElement(“span”, null, “WR”), /*#**PURE***/React.createElement(“span”, null, “20yr”)), allScenarios.map(sc => /*#**PURE***/React.createElement(“div”, {
+key: sc.id,
+onClick: () => set(“selectedScenario”)(sc.id),
+style: {
+display: “grid”,
+gridTemplateColumns: “72px 1fr 1fr 1fr 56px”,
+gap: 4,
+padding: “8px 0”,
+cursor: “pointer”,
+alignItems: “center”,
 borderBottom: `1px solid ${C.border}30`,
 background: s.selectedScenario === sc.id ? `${sc.color}08` : “transparent”,
 borderLeft: s.selectedScenario === sc.id ? `3px solid ${sc.color}` : “3px solid transparent”,
-paddingLeft: 6,
-}}>
-<div>
-<div style={{ fontSize: 12, fontWeight: 700, color: sc.color }}>{sc.label}</div>
-<div style={{ fontSize: 9, color: C.dim }}>{sc.trsYears}yr TRS</div>
-</div>
-<div style={{ fontSize: 11, fontFamily: “monospace”, color: C.accent }}>{fmtC(sc.projPort, true)}</div>
-<div style={{ fontSize: 11, fontFamily: “monospace”,
-color: sc.preGap < 15000 ? C.greenBright : sc.preGap < 35000 ? C.gold : C.red }}>
-{fmtC(sc.preGap, true)}
-</div>
-<div style={{ fontSize: 11, fontFamily: “monospace”,
-color: sc.preWR < 0.03 ? C.greenBright : sc.preWR < 0.04 ? C.gold : C.red }}>
-{fmtPct(sc.preWR)}
-</div>
-<div style={{ fontSize: 11, fontFamily: “monospace”,
-color: sc.mc30 >= 0.95 ? C.greenBright : sc.mc30 >= 0.88 ? C.gold : C.red }}>
-{Math.round(sc.mc20 * 100)}%
-</div>
-</div>
-))}
-</Card>
-
-```
-  {/* TRS detail */}
-  <Card>
-    <SectionLabel color={C.teal}>TRS Pension by Scenario</SectionLabel>
-    {allScenarios.map(sc => (
-      <div key={sc.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 2, background: sc.color }} />
-          <span style={{ fontSize: 12, color: C.muted }}>{sc.label} — {sc.trsYears} yrs service</span>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace", color: C.teal }}>
-          {fmtC(calcTRS(sc.trsYears), true)}/yr
-        </span>
-      </div>
-    ))}
-    <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 8,
-      background: `${C.teal}12`, border: `1px solid ${C.teal}30`, fontSize: 11, color: C.muted, lineHeight: 1.7 }}>
-      Formula: 2.3% × years × $195,000 high-5 avg salary. Deferred (not reduced) until age {s.trsAge} — a critical distinction.
-      Each additional year of service adds ~{fmtC(calcTRS(1), true)}/yr at 65.
-    </div>
-  </Card>
-
-  {/* Backstop scenarios */}
-  <Card>
-    <SectionLabel color={C.orange}>Backstop: Wife's Income Stress Test</SectionLabel>
-    <div style={{ fontSize: 10, color: C.muted, marginBottom: 10 }}>
-      All use {curScenario.label}. Active mode on Home tab: <strong style={{color: C.gold}}>{s.wifeMode === "full" ? "Full income" : s.wifeMode === "ssdi_gone" ? "SSDI gone" : s.wifeMode === "all_gone" ? "All gone" : "Custom"}</strong>.
-    </div>
-    {backstopScenarios.map((bs, i) => (
-      <div key={i} style={{
-        marginBottom: 10, padding: "10px 12px", borderRadius: 10,
-        background: `${bs.color}12`, border: `1px solid ${bs.color}35`,
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 16 }}>{bs.icon}</span>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: bs.color }}>{bs.label}</div>
-              <div style={{ fontSize: 9, color: C.muted }}>{bs.desc}</div>
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 9, color: C.muted }}>Gap/yr</div>
-            <div style={{ fontSize: 14, fontWeight: 800, fontFamily: "monospace",
-              color: bs.gap < 20000 ? C.greenBright : bs.gap < 40000 ? C.gold : C.red }}>
-              {fmtC(bs.gap, true)}
-            </div>
-          </div>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 }}>
-          {[
-            { label: "WR", val: fmtPct(bs.wr), color: bs.wr < 0.04 ? C.green : bs.wr < 0.055 ? C.gold : C.red },
-            { label: "20yr", val: `${Math.round(bs.mc20 * 100)}%`, color: bs.mc20 >= 0.95 ? C.green : bs.mc20 >= 0.85 ? C.gold : C.red },
-            { label: "30yr", val: `${Math.round(bs.mc30 * 100)}%`, color: bs.mc30 >= 0.95 ? C.green : bs.mc30 >= 0.85 ? C.gold : C.red },
-            { label: "40yr", val: `${Math.round(bs.mc40 * 100)}%`, color: bs.mc40 >= 0.9 ? C.green : bs.mc40 >= 0.8 ? C.gold : C.red },
-          ].map(({ label, val, color }) => (
-            <div key={label} style={{ background: "rgba(0,0,0,0.2)", borderRadius: 6, padding: "5px 4px", textAlign: "center" }}>
-              <div style={{ fontSize: 8, color: C.dim, textTransform: "uppercase" }}>{label}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color, fontFamily: "monospace" }}>{val}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    ))}
-  </Card>
-
-  {/* Layered safety net */}
-  <Card style={{ background: `${C.greenBright}08`, border: `1px solid ${C.greenBright}25` }}>
-    <SectionLabel color={C.greenBright}>Your 6 Backstops</SectionLabel>
-    {[
-      { n: 1, label: "Portfolio", detail: `${fmtC(derived.projPort, true)} at retirement`, color: C.accent },
-      { n: 2, label: "Portfolio Dividends", detail: `~${fmtC(divs, true)}/yr even in down markets`, color: C.purple },
-      { n: 3, label: "TRS Pension at 65", detail: `${fmtC(derived.trs, true)}/yr — deferred, not reduced`, color: C.teal },
-      { n: 4, label: "Social Security at 65", detail: `${fmtC(s.ssIncome, true)}/yr estimated`, color: C.greenBright },
-      { n: 5, label: "Oklahoma Tax Advantages", detail: "No SS tax, lower property tax, ACA subsidy window", color: C.gold },
-      { n: 6, label: "Wife's Income (if intact)", detail: `${fmtC(s.wifeIncome, true)}/yr OPERS + SSDI`, color: C.orange },
-    ].map(({ n, label, detail, color }) => (
-      <div key={n} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
-        <div style={{
-          width: 22, height: 22, borderRadius: 11, background: `${color}20`,
-          border: `1px solid ${color}50`, display: "flex", alignItems: "center",
-          justifyContent: "center", fontSize: 10, fontWeight: 700, color, flexShrink: 0,
-        }}>{n}</div>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 700, color }}>{label}</div>
-          <div style={{ fontSize: 10, color: C.muted }}>{detail}</div>
-        </div>
-      </div>
-    ))}
-    <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 8,
-      background: `${C.greenBright}12`, border: `1px solid ${C.greenBright}30`,
-      fontSize: 11, color: C.greenBright, lineHeight: 1.7 }}>
-      At 65: TRS + SS + dividends = <strong>{fmtC(derived.guaranteed65, true)}/yr</strong> vs. spending of <strong>{fmtC(effectiveSpend, true)}</strong>.
-      {derived.postGap <= 0 ? " Portfolio becomes entirely a legacy asset. ✓" : ` Small residual gap of ${fmtC(derived.postGap, true)}/yr.`}
-    </div>
-  </Card>
-</div>
-```
-
-);
+paddingLeft: 6
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+color: sc.color
+}
+}, sc.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, sc.trsYears, “yr TRS”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontFamily: “monospace”,
+color: C.accent
+}
+}, fmtC(sc.projPort, true)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontFamily: “monospace”,
+color: sc.preGap < 15000 ? C.greenBright : sc.preGap < 35000 ? C.gold : C.red
+}
+}, fmtC(sc.preGap, true)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontFamily: “monospace”,
+color: sc.preWR < 0.03 ? C.greenBright : sc.preWR < 0.04 ? C.gold : C.red
+}
+}, fmtPct(sc.preWR)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontFamily: “monospace”,
+color: sc.mc30 >= 0.95 ? C.greenBright : sc.mc30 >= 0.88 ? C.gold : C.red
+}
+}, Math.round(sc.mc20 * 100), “%”)))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.teal
+}, “TRS Pension by Scenario”), allScenarios.map(sc => /*#**PURE***/React.createElement(“div”, {
+key: sc.id,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 8,
+height: 8,
+borderRadius: 2,
+background: sc.color
+}
+}), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, sc.label, “ \u2014 “, sc.trsYears, “ yrs service”)), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+fontFamily: “monospace”,
+color: C.teal
+}
+}, fmtC(calcTRS(sc.trsYears), true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+padding: “8px 10px”,
+borderRadius: 8,
+background: `${C.teal}12`,
+border: `1px solid ${C.teal}30`,
+fontSize: 11,
+color: C.muted,
+lineHeight: 1.7
+}
+}, “Formula: 2.3% \xD7 years \xD7 $195,000 high-5 avg salary. Deferred (not reduced) until age “, s.trsAge, “ \u2014 a critical distinction. Each additional year of service adds ~“, fmtC(calcTRS(1), true), “/yr at 65.”)), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.orange
+}, “Backstop: Wife’s Income Stress Test”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginBottom: 10
+}
+}, “All use “, curScenario.label, “. Active mode on Home tab: “, /*#**PURE***/React.createElement(“strong”, {
+style: {
+color: C.gold
+}
+}, s.wifeMode === “full” ? “Full income” : s.wifeMode === “ssdi_gone” ? “SSDI gone” : s.wifeMode === “all_gone” ? “All gone” : “Custom”), “.”), backstopScenarios.map((bs, i) => /*#**PURE***/React.createElement(“div”, {
+key: i,
+style: {
+marginBottom: 10,
+padding: “10px 12px”,
+borderRadius: 10,
+background: `${bs.color}12`,
+border: `1px solid ${bs.color}35`
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 6
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 16
+}
+}, bs.icon), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+color: bs.color
+}
+}, bs.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.muted
+}
+}, bs.desc))), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.muted
+}
+}, “Gap/yr”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: bs.gap < 20000 ? C.greenBright : bs.gap < 40000 ? C.gold : C.red
+}
+}, fmtC(bs.gap, true)))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr 1fr 1fr”,
+gap: 4
+}
+}, [{
+label: “WR”,
+val: fmtPct(bs.wr),
+color: bs.wr < 0.04 ? C.green : bs.wr < 0.055 ? C.gold : C.red
+}, {
+label: “20yr”,
+val: `${Math.round(bs.mc20 * 100)}%`,
+color: bs.mc20 >= 0.95 ? C.green : bs.mc20 >= 0.85 ? C.gold : C.red
+}, {
+label: “30yr”,
+val: `${Math.round(bs.mc30 * 100)}%`,
+color: bs.mc30 >= 0.95 ? C.green : bs.mc30 >= 0.85 ? C.gold : C.red
+}, {
+label: “40yr”,
+val: `${Math.round(bs.mc40 * 100)}%`,
+color: bs.mc40 >= 0.9 ? C.green : bs.mc40 >= 0.8 ? C.gold : C.red
+}].map(({
+label,
+val,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+background: “rgba(0,0,0,0.2)”,
+borderRadius: 6,
+padding: “5px 4px”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 8,
+color: C.dim,
+textTransform: “uppercase”
+}
+}, label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+color,
+fontFamily: “monospace”
+}
+}, val))))))), /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.greenBright}08`,
+border: `1px solid ${C.greenBright}25`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.greenBright
+}, “Your 6 Backstops”), [{
+n: 1,
+label: “Portfolio”,
+detail: `${fmtC(derived.projPort, true)} at retirement`,
+color: C.accent
+}, {
+n: 2,
+label: “Portfolio Dividends”,
+detail: `~${fmtC(divs, true)}/yr even in down markets`,
+color: C.purple
+}, {
+n: 3,
+label: “TRS Pension at 65”,
+detail: `${fmtC(derived.trs, true)}/yr — deferred, not reduced`,
+color: C.teal
+}, {
+n: 4,
+label: “Social Security at 65”,
+detail: `${fmtC(s.ssIncome, true)}/yr estimated`,
+color: C.greenBright
+}, {
+n: 5,
+label: “Oklahoma Tax Advantages”,
+detail: “No SS tax, lower property tax, ACA subsidy window”,
+color: C.gold
+}, {
+n: 6,
+label: “Wife’s Income (if intact)”,
+detail: `${fmtC(s.wifeIncome, true)}/yr OPERS + SSDI`,
+color: C.orange
+}].map(({
+n,
+label,
+detail,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: n,
+style: {
+display: “flex”,
+gap: 10,
+marginBottom: 8,
+alignItems: “flex-start”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 22,
+height: 22,
+borderRadius: 11,
+background: `${color}20`,
+border: `1px solid ${color}50`,
+display: “flex”,
+alignItems: “center”,
+justifyContent: “center”,
+fontSize: 10,
+fontWeight: 700,
+color,
+flexShrink: 0
+}
+}, n), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+color
+}
+}, label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted
+}
+}, detail)))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+padding: “8px 10px”,
+borderRadius: 8,
+background: `${C.greenBright}12`,
+border: `1px solid ${C.greenBright}30`,
+fontSize: 11,
+color: C.greenBright,
+lineHeight: 1.7
+}
+}, “At 65: TRS + SS + dividends = “, /*#**PURE***/React.createElement(“strong”, null, fmtC(derived.guaranteed65, true), “/yr”), “ vs. spending of “, /*#**PURE***/React.createElement(“strong”, null, fmtC(effectiveSpend, true)), “.”, derived.postGap <= 0 ? “ Portfolio becomes entirely a legacy asset. ✓” : ` Small residual gap of ${fmtC(derived.postGap, true)}/yr.`)));
 
 // ─── TAB: BUDGET ──────────────────────────────────────────────────────────
 const BudgetTab = () => {
-const catTotals = useMemo(() =>
-Object.fromEntries(BUDGET_CATS.map(c => [c.id, c.items.reduce((s, i) => s + (budgetVals[i.id] ?? i.monthly), 0)])),
-[budgetVals]);
+const catTotals = useMemo(() => Object.fromEntries(BUDGET_CATS.map(c => [c.id, c.items.reduce((s, i) => s + (budgetVals[i.id] ?? i.monthly), 0)])), [budgetVals]);
 const budgetDiff = budgetAnnual - (s.budgetDrives ? budgetAnnual : s.annualSpend);
 const diffColor = budgetDiff <= 0 ? C.green : budgetDiff < 6000 ? C.gold : C.red;
-
-```
-return (
-  <div>
-    {/* Edmond Benchmark Card */}
-    <div style={{
-      background: C.card, border: `1px solid ${C.border}`,
-      borderRadius: 14, padding: 14, marginBottom: 12,
-    }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: C.gold, marginBottom: 10 }}>
-        📍 What Does This Buy You in Edmond, OK?
-      </div>
-
-      {/* Lifestyle tier indicator */}
-      {(() => {
-        const annual = budgetAnnual;
-        const tiers = [
-          { max: 48000,  label: "Lean",               color: C.teal,       desc: "Core needs covered, very little discretionary. Below median Edmond household." },
-          { max: 65000,  label: "Modest Comfort",     color: C.accent,     desc: "Comfortable day-to-day. Similar to median Oklahoma retiree household (~$52k). Some travel." },
-          { max: 82000,  label: "Comfortable",        color: C.green,      desc: "Good life. Above median Edmond income ($84k). Healthcare, travel, dining out, hobbies." },
-          { max: 100000, label: "Comfortably Well-Off",color: C.gold,      desc: "Generous lifestyle. Top 25% of Edmond households. International travel, no trade-offs." },
-          { max: Infinity,label: "Affluent",          color: C.orange,     desc: "Top 10% in Edmond. Fully covers healthcare, travel, ADU, any lifestyle choice." },
-        ];
-        const tier = tiers.find(t => annual <= t.max);
-        return (
-          <div style={{ padding: "10px 12px", borderRadius: 10, background: `${tier.color}15`, border: `1px solid ${tier.color}40`, marginBottom: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: tier.color }}>{tier.label}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: tier.color }}>{fmtC(annual, true)}/yr</div>
-            </div>
-            <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.6 }}>{tier.desc}</div>
-          </div>
-        );
-      })()}
-
-      {/* Benchmark comparisons */}
-      <div style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }>Edmond &amp; National Benchmarks</div>
-      {[
-        { label: "Median Oklahoma retiree spending",    val: 52000,  color: C.dim },
-        { label: "Median Edmond household income",      val: 84000,  color: C.dim },
-        { label: "BLS avg retired household spending",  val: 57800,  color: C.dim },
-        { label: ""Comfortable" Edmond retirement",   val: 72000,  color: C.teal },
-        { label: "Your current budget (today's $)",     val: budgetAnnual, color: C.accent, bold: true },
-        { label: `At ${curScenario.label} (inflated)`,  val: budgetAtRetire, color: C.gold, bold: true },
-      ].map(({ label, val, color, bold }) => (
-        <div key={label} style={{ marginBottom: 7 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-            <span style={{ fontSize: 10, color: bold ? C.text : C.muted, fontWeight: bold ? 700 : 400 }}>{label}</span>
-            <span style={{ fontSize: 11, fontFamily: "monospace", color, fontWeight: bold ? 800 : 400 }}>{fmtC(val, true)}</span>
-          </div>
-          <div style={{ height: 4, background: C.border, borderRadius: 2 }}>
-            <div style={{
-              height: 4, borderRadius: 2,
-              width: `${Math.min(100, (val / 130000) * 100)}%`,
-              background: color, opacity: bold ? 1 : 0.5,
-            }} />
-          </div>
-        </div>
-      ))}
-
-      {/* Specific context notes */}
-      <div style={{ marginTop: 12, fontSize: 10, color: C.muted, lineHeight: 1.8, borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
-        <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>What $80–95k covers in Edmond with no mortgage:</div>
-        {[
-          "✓ Full healthcare (ACA ~$900–1,800/mo depending on subsidy eligibility)",
-          "✓ Groceries & dining well ($1,100–1,400/mo)",
-          "✓ 2–3 domestic trips/year + 1 international",
-          "✓ Two vehicles, fully maintained",
-          "✓ Hobbies, entertainment, golf, fitness",
-          "✓ Generous giving & Libby support",
-          "✓ Full home maintenance buffer",
-          "✓ Meaningful emergency reserves",
-        ].map((line, i) => (
-          <div key={i} style={{ color: C.greenBright, fontSize: 10, marginBottom: 2 }}>{line}</div>
-        ))}
-      </div>
-      <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-        <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: "7px 10px" }}>
-          <div style={{ fontSize: 9, color: C.dim, textTransform: "uppercase", letterSpacing: 0.5 }}>Today (2026)</div>
-          <div style={{ fontSize: 14, fontWeight: 800, fontFamily: "monospace", color: C.muted }}>{fmtC(budgetAnnual, true)}/yr</div>
-          <div style={{ fontSize: 9, color: C.dim }}>{fmtC(budgetMonthly)}/mo</div>
-        </div>
-        <div style={{ background: `${C.gold}15`, borderRadius: 8, padding: "7px 10px", border: `1px solid ${C.gold}30` }}>
-          <div style={{ fontSize: 9, color: C.gold, textTransform: "uppercase", letterSpacing: 0.5 }}>At {curScenario.label}</div>
-          <div style={{ fontSize: 14, fontWeight: 800, fontFamily: "monospace", color: C.gold }}>{fmtC(budgetAtRetire, true)}/yr</div>
-          <div style={{ fontSize: 9, color: C.dim }}>+{((inflFactor-1)*100).toFixed(1)}% inflation over {yearsToRetire}yr</div>
-        </div>
-      </div>
-      {s.budgetDrives && (
-        <div style={{ marginTop: 8, fontSize: 10, color: C.teal, padding: "5px 8px", borderRadius: 6, background: `${C.teal}12`, border: `1px solid ${C.teal}25` }}>
-          ✓ FIRE engine uses <strong>{fmtC(budgetAtRetire, true)}/yr</strong> — budget inflated to {curScenario.label}. Change the scenario and this updates instantly.
-        </div>
-      )}
-    </div>
-
-    {/* Sticky summary */}
-    <div style={{
-      background: C.cardHi, border: `1px solid ${C.border}`, borderRadius: 14,
-      padding: 14, marginBottom: 12,
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontSize: 10, color: C.muted }}>Monthly total</div>
-          <div style={{ fontSize: 24, fontWeight: 900, fontFamily: "monospace", color: C.accent }}>
-            {fmtC(budgetMonthly)}/mo
-          </div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 10, color: C.muted }}>Annual</div>
-          <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "monospace", color: C.gold }}>
-            {fmtC(budgetAnnual, true)}/yr
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: budgetDiff <= 0 ? C.green : C.red }}>
-            {budgetDiff <= 0 ? `✓ ${fmtC(Math.abs(budgetDiff), true)} under target` : `${fmtC(budgetDiff, true)} over target`}
-          </div>
-        </div>
-      </div>
-      <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", gap: 1, marginTop: 10 }}>
-        {BUDGET_CATS.map(cat => {
-          const p = budgetMonthly > 0 ? (catTotals[cat.id] / budgetMonthly) * 100 : 0;
-          return <div key={cat.id} style={{ width: `${p}%`, background: cat.color, transition: "width 0.4s" }} />;
-        })}
-      </div>
-    </div>
-
-    {/* Category cards */}
-    {BUDGET_CATS.map(cat => {
-      const isOpen = !!budgetOpen[cat.id];
-      const catTotal = catTotals[cat.id];
-      return (
-        <div key={cat.id} style={{
-          background: C.card, border: `1px solid ${C.border}`,
-          borderRadius: 12, marginBottom: 9, overflow: "hidden",
-        }}>
-          <div onClick={() => setBudgetOpen(o => ({ ...o, [cat.id]: !isOpen }))}
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "12px 14px", cursor: "pointer",
-              borderLeft: `3px solid ${cat.color}` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 18 }}>{cat.icon}</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{cat.label}</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: cat.color }}>
-                {fmtC(catTotal * 12, true)}/yr
-              </span>
-              <span style={{ color: C.dim, fontSize: 11 }}>{isOpen ? "▲" : "▼"}</span>
-            </div>
-          </div>
-          {isOpen && (
-            <div style={{ padding: "4px 14px 12px", borderTop: `1px solid ${C.border}` }}>
-              {cat.items.map((item, idx) => {
-                const v = budgetVals[item.id] ?? item.monthly;
-                return (
-                  <div key={item.id} style={{ marginTop: 10, paddingTop: idx > 0 ? 10 : 0,
-                    borderTop: idx > 0 ? `1px solid ${C.border}30` : "none" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 11, color: C.text }}>{item.label}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace", color: C.accent }}>
-                        {fmtC(v)}/mo
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4 }}>
-                      <span style={{ fontSize: 9, color: C.dim }}>{fmtC(item.min, true)}</span>
-                      <input type="range" min={item.min} max={item.max} step={5} value={v}
-                        onChange={e => setBudgetVals(prev => ({ ...prev, [item.id]: Number(e.target.value) }))}
-                        style={{ flex: 1, accentColor: cat.color, cursor: "pointer" }} />
-                      <span style={{ fontSize: 9, color: C.dim }}>{fmtC(item.max, true)}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${cat.color}40`,
-                display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-                <span style={{ color: cat.color }}>Category total</span>
-                <span style={{ fontFamily: "monospace", fontWeight: 700, color: cat.color }}>
-                  {fmtC(catTotal)}/mo · {fmtC(catTotal * 12, true)}/yr
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    })}
-
-    <div style={{ padding: "10px 12px", borderRadius: 10, background: `${C.pink}12`, border: `1px solid ${C.pink}30`,
-      fontSize: 11, color: C.muted, lineHeight: 1.7, marginTop: 4 }}>
-      ⚕️ <strong style={{ color: C.pink }}>ACA is your biggest lever pre-65.</strong> Full-price couple ≈ $1,800/mo in 2026.
-      Managing MAGI below 400% FPL (~$79k/couple) can save $500–1,000/mo. SSDI income counts toward MAGI.
-    </div>
-  </div>
-);
-```
-
+return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+background: C.card,
+border: `1px solid ${C.border}`,
+borderRadius: 14,
+padding: 14,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontWeight: 700,
+color: C.gold,
+marginBottom: 10
+}
+}, “\uD83D\uDCCD What Does This Buy You in Edmond, OK?”), (() => {
+const annual = budgetAnnual;
+const tiers = [{
+max: 48000,
+label: “Lean”,
+color: C.teal,
+desc: “Core needs covered, very little discretionary. Below median Edmond household.”
+}, {
+max: 65000,
+label: “Modest Comfort”,
+color: C.accent,
+desc: “Comfortable day-to-day. Similar to median Oklahoma retiree household (~$52k). Some travel.”
+}, {
+max: 82000,
+label: “Comfortable”,
+color: C.green,
+desc: “Good life. Above median Edmond income ($84k). Healthcare, travel, dining out, hobbies.”
+}, {
+max: 100000,
+label: “Comfortably Well-Off”,
+color: C.gold,
+desc: “Generous lifestyle. Top 25% of Edmond households. International travel, no trade-offs.”
+}, {
+max: Infinity,
+label: “Affluent”,
+color: C.orange,
+desc: “Top 10% in Edmond. Fully covers healthcare, travel, ADU, any lifestyle choice.”
+}];
+const tier = tiers.find(t => annual <= t.max);
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “10px 12px”,
+borderRadius: 10,
+background: `${tier.color}15`,
+border: `1px solid ${tier.color}40`,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+marginBottom: 4
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+color: tier.color
+}
+}, tier.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+fontFamily: “monospace”,
+color: tier.color
+}
+}, fmtC(annual, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: C.muted,
+lineHeight: 1.6
+}
+}, tier.desc));
+})(), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+textTransform: “uppercase”,
+letterSpacing: 0.8,
+marginBottom: 8
+}
+}, “Edmond & National Benchmarks”), [{
+label: “Median Oklahoma retiree spending”,
+val: 52000,
+color: C.dim
+}, {
+label: “Median Edmond household income”,
+val: 84000,
+color: C.dim
+}, {
+label: “BLS avg retired household spending”,
+val: 57800,
+color: C.dim
+}, {
+label: “Comfortable Edmond retirement”,
+val: 72000,
+color: C.teal
+}, {
+label: “Your current budget (today’s $)”,
+val: budgetAnnual,
+color: C.accent,
+bold: true
+}, {
+label: `At ${curScenario.label} (inflated)`,
+val: budgetAtRetire,
+color: C.gold,
+bold: true
+}].map(({
+label,
+val,
+color,
+bold
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+marginBottom: 7
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 2
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 10,
+color: bold ? C.text : C.muted,
+fontWeight: bold ? 700 : 400
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 11,
+fontFamily: “monospace”,
+color,
+fontWeight: bold ? 800 : 400
+}
+}, fmtC(val, true))), /*#**PURE***/React.createElement(“div”, {
+style: {
+height: 4,
+background: C.border,
+borderRadius: 2
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+height: 4,
+borderRadius: 2,
+width: `${Math.min(100, val / 130000 * 100)}%`,
+background: color,
+opacity: bold ? 1 : 0.5
+}
+})))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 12,
+fontSize: 10,
+color: C.muted,
+lineHeight: 1.8,
+borderTop: `1px solid ${C.border}`,
+paddingTop: 10
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontWeight: 700,
+color: C.text,
+marginBottom: 4
+}
+}, “What $80\u201395k covers in Edmond with no mortgage:”), [“✓ Full healthcare (ACA ~$900–1,800/mo depending on subsidy eligibility)”, “✓ Groceries & dining well ($1,100–1,400/mo)”, “✓ 2–3 domestic trips/year + 1 international”, “✓ Two vehicles, fully maintained”, “✓ Hobbies, entertainment, golf, fitness”, “✓ Generous giving & Libby support”, “✓ Full home maintenance buffer”, “✓ Meaningful emergency reserves”].map((line, i) => /*#**PURE***/React.createElement(“div”, {
+key: i,
+style: {
+color: C.greenBright,
+fontSize: 10,
+marginBottom: 2
+}
+}, line))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 6
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+background: “rgba(0,0,0,0.2)”,
+borderRadius: 8,
+padding: “7px 10px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim,
+textTransform: “uppercase”,
+letterSpacing: 0.5
+}
+}, “Today (2026)”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: C.muted
+}
+}, fmtC(budgetAnnual, true), “/yr”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, fmtC(budgetMonthly), “/mo”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+background: `${C.gold}15`,
+borderRadius: 8,
+padding: “7px 10px”,
+border: `1px solid ${C.gold}30`
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.gold,
+textTransform: “uppercase”,
+letterSpacing: 0.5
+}
+}, “At “, curScenario.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: C.gold
+}
+}, fmtC(budgetAtRetire, true), “/yr”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, “+”, ((inflFactor - 1) * 100).toFixed(1), “% inflation over “, yearsToRetire, “yr”))), s.budgetDrives && /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+fontSize: 10,
+color: C.teal,
+padding: “5px 8px”,
+borderRadius: 6,
+background: `${C.teal}12`,
+border: `1px solid ${C.teal}25`
+}
+}, “\u2713 FIRE engine uses “, /*#**PURE***/React.createElement(“strong”, null, fmtC(budgetAtRetire, true), “/yr”), “ \u2014 budget inflated to “, curScenario.label, “. Change the scenario and this updates instantly.”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+background: C.cardHi,
+border: `1px solid ${C.border}`,
+borderRadius: 14,
+padding: 14,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “flex-start”
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted
+}
+}, “Monthly total”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 24,
+fontWeight: 900,
+fontFamily: “monospace”,
+color: C.accent
+}
+}, fmtC(budgetMonthly), “/mo”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted
+}
+}, “Annual”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 18,
+fontWeight: 800,
+fontFamily: “monospace”,
+color: C.gold
+}
+}, fmtC(budgetAnnual, true), “/yr”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+fontWeight: 700,
+color: budgetDiff <= 0 ? C.green : C.red
+}
+}, budgetDiff <= 0 ? `✓ ${fmtC(Math.abs(budgetDiff), true)} under target` : `${fmtC(budgetDiff, true)} over target`))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+height: 8,
+borderRadius: 4,
+overflow: “hidden”,
+gap: 1,
+marginTop: 10
+}
+}, BUDGET_CATS.map(cat => {
+const p = budgetMonthly > 0 ? catTotals[cat.id] / budgetMonthly * 100 : 0;
+return /*#**PURE***/React.createElement(“div”, {
+key: cat.id,
+style: {
+width: `${p}%`,
+background: cat.color,
+transition: “width 0.4s”
+}
+});
+}))), BUDGET_CATS.map(cat => {
+const isOpen = !!budgetOpen[cat.id];
+const catTotal = catTotals[cat.id];
+return /*#**PURE***/React.createElement(“div”, {
+key: cat.id,
+style: {
+background: C.card,
+border: `1px solid ${C.border}`,
+borderRadius: 12,
+marginBottom: 9,
+overflow: “hidden”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+onClick: () => setBudgetOpen(o => ({
+…o,
+[cat.id]: !isOpen
+})),
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+padding: “12px 14px”,
+cursor: “pointer”,
+borderLeft: `3px solid ${cat.color}`
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 8
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 18
+}
+}, cat.icon), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: C.text
+}
+}, cat.label)), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 8
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+fontFamily: “monospace”,
+color: cat.color
+}
+}, fmtC(catTotal * 12, true), “/yr”), /*#**PURE***/React.createElement(“span”, {
+style: {
+color: C.dim,
+fontSize: 11
+}
+}, isOpen ? “▲” : “▼”))), isOpen && /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “4px 14px 12px”,
+borderTop: `1px solid ${C.border}`
+}
+}, cat.items.map((item, idx) => {
+const v = budgetVals[item.id] ?? item.monthly;
+return /*#**PURE***/React.createElement(“div”, {
+key: item.id,
+style: {
+marginTop: 10,
+paddingTop: idx > 0 ? 10 : 0,
+borderTop: idx > 0 ? `1px solid ${C.border}30` : “none”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 11,
+color: C.text
+}
+}, item.label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+fontWeight: 700,
+fontFamily: “monospace”,
+color: C.accent
+}
+}, fmtC(v), “/mo”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 6,
+alignItems: “center”,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, fmtC(item.min, true)), /*#**PURE***/React.createElement(“input”, {
+type: “range”,
+min: item.min,
+max: item.max,
+step: 5,
+value: v,
+onChange: e => setBudgetVals(prev => ({
+…prev,
+[item.id]: Number(e.target.value)
+})),
+style: {
+flex: 1,
+accentColor: cat.color,
+cursor: “pointer”
+}
+}), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 9,
+color: C.dim
+}
+}, fmtC(item.max, true))));
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 10,
+paddingTop: 8,
+borderTop: `1px solid ${cat.color}40`,
+display: “flex”,
+justifyContent: “space-between”,
+fontSize: 11
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+color: cat.color
+}
+}, “Category total”), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontFamily: “monospace”,
+fontWeight: 700,
+color: cat.color
+}
+}, fmtC(catTotal), “/mo \xB7 “, fmtC(catTotal * 12, true), “/yr”))));
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “10px 12px”,
+borderRadius: 10,
+background: `${C.pink}12`,
+border: `1px solid ${C.pink}30`,
+fontSize: 11,
+color: C.muted,
+lineHeight: 1.7,
+marginTop: 4
+}
+}, “\u2695\uFE0F “, /*#**PURE***/React.createElement(“strong”, {
+style: {
+color: C.pink
+}
+}, “ACA is your biggest lever pre-65.”), “ Full-price couple \u2248 $1,800/mo in 2026. Managing MAGI below 400% FPL (~$79k/couple) can save $500\u20131,000/mo. SSDI income counts toward MAGI.”));
 };
 
 // ─── TAB: OZARKS ──────────────────────────────────────────────────────────
@@ -972,62 +2151,112 @@ const netCF = s.condoRentalOn ? s.condoRental - s.condoMonthlyCarry * 12 : -s.co
 const portfolioHit = s.condoDown;
 const portAfterDown = derived.projPort - portfolioHit;
 const wrWithCondo = portAfterDown > 0 ? Math.max(0, effectiveSpend - wifeInc - divs - sideInc - netCF) / portAfterDown : 0;
-
-```
-return (
-  <div>
-    <Card style={{ background: `${C.lake}15`, border: `1px solid ${C.lake}40` }}>
-      <SectionLabel color={C.accent}>Lake of the Ozarks Scenario</SectionLabel>
-      <Toggle label="Model Ozarks Condo" value={s.condoOn} onChange={set("condoOn")} color={C.accent} />
-    </Card>
-
-    {s.condoOn && (
-      <>
-        <Card>
-          <SectionLabel>Condo Financials</SectionLabel>
-          <Slider label="Purchase Price" value={s.condoCost} min={150000} max={600000} step={5000} onChange={set("condoCost")} />
-          <Slider label="Down Payment" value={s.condoDown} min={20000} max={s.condoCost * 0.5} step={5000} onChange={set("condoDown")} />
-          <Slider label="Monthly Carry Cost" value={s.condoMonthlyCarry} min={500} max={4000} step={50} onChange={set("condoMonthlyCarry")}
-            note="Mortgage, HOA, insurance, taxes, utilities" />
-          <Toggle label="Rental Income Enabled" value={s.condoRentalOn} onChange={set("condoRentalOn")} color={C.green} />
-          {s.condoRentalOn && (
-            <Slider label="Annual Rental Income" value={s.condoRental} min={5000} max={50000} step={500} onChange={set("condoRental")} />
-          )}
-        </Card>
-
-        <Card>
-          <SectionLabel color={C.gold}>Condo P&amp;L</SectionLabel>
-          {[
-            { label: "Annual Carry Cost", val: -s.condoMonthlyCarry * 12, color: C.red },
-            ...(s.condoRentalOn ? [{ label: "Rental Income", val: s.condoRental, color: C.green }] : []),
-            { label: "Net Annual Cash Flow", val: netCF, color: netCF >= 0 ? C.greenBright : C.orange },
-          ].map(({ label, val, color }) => (
-            <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
-              <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", color }}>
-                {val >= 0 ? "" : "-"}{fmtC(Math.abs(val), true)}/yr
-              </span>
-            </div>
-          ))}
-          <div style={{ marginTop: 10, padding: "8px 10px", borderRadius: 8,
-            background: `${C.orange}12`, border: `1px solid ${C.orange}30`, fontSize: 11, color: C.muted, lineHeight: 1.7 }}>
-            Down payment of {fmtC(s.condoDown, true)} reduces portfolio at retirement.
-            Net annual cost {netCF < 0 ? `increases spending gap by ${fmtC(-netCF, true)}/yr` : `reduces gap by ${fmtC(netCF, true)}/yr`}.
-            WR with condo: <strong style={{ color: wrWithCondo < 0.05 ? C.green : C.orange }}>{fmtPct(wrWithCondo)}</strong>
-          </div>
-        </Card>
-      </>
-    )}
-
-    {!s.condoOn && (
-      <div style={{ padding: "24px 16px", textAlign: "center", color: C.muted, fontSize: 13 }}>
-        Toggle above to model the Lake of the Ozarks condo scenario
-      </div>
-    )}
-  </div>
-);
-```
-
+return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.lake}15`,
+border: `1px solid ${C.lake}40`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.accent
+}, “Lake of the Ozarks Scenario”), /*#**PURE***/React.createElement(Toggle, {
+label: “Model Ozarks Condo”,
+value: s.condoOn,
+onChange: set(“condoOn”),
+color: C.accent
+})), s.condoOn && /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Condo Financials”), /*#**PURE***/React.createElement(Slider, {
+label: “Purchase Price”,
+value: s.condoCost,
+min: 150000,
+max: 600000,
+step: 5000,
+onChange: set(“condoCost”)
+}), /*#**PURE***/React.createElement(Slider, {
+label: “Down Payment”,
+value: s.condoDown,
+min: 20000,
+max: s.condoCost * 0.5,
+step: 5000,
+onChange: set(“condoDown”)
+}), /*#**PURE***/React.createElement(Slider, {
+label: “Monthly Carry Cost”,
+value: s.condoMonthlyCarry,
+min: 500,
+max: 4000,
+step: 50,
+onChange: set(“condoMonthlyCarry”),
+note: “Mortgage, HOA, insurance, taxes, utilities”
+}), /*#**PURE***/React.createElement(Toggle, {
+label: “Rental Income Enabled”,
+value: s.condoRentalOn,
+onChange: set(“condoRentalOn”),
+color: C.green
+}), s.condoRentalOn && /*#**PURE***/React.createElement(Slider, {
+label: “Annual Rental Income”,
+value: s.condoRental,
+min: 5000,
+max: 50000,
+step: 500,
+onChange: set(“condoRental”)
+})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.gold
+}, “Condo P&L”), [{
+label: “Annual Carry Cost”,
+val: -s.condoMonthlyCarry * 12,
+color: C.red
+}, …(s.condoRentalOn ? [{
+label: “Rental Income”,
+val: s.condoRental,
+color: C.green
+}] : []), {
+label: “Net Annual Cash Flow”,
+val: netCF,
+color: netCF >= 0 ? C.greenBright : C.orange
+}].map(({
+label,
+val,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+fontFamily: “monospace”,
+color
+}
+}, val >= 0 ? “” : “-”, fmtC(Math.abs(val), true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 10,
+padding: “8px 10px”,
+borderRadius: 8,
+background: `${C.orange}12`,
+border: `1px solid ${C.orange}30`,
+fontSize: 11,
+color: C.muted,
+lineHeight: 1.7
+}
+}, “Down payment of “, fmtC(s.condoDown, true), “ reduces portfolio at retirement. Net annual cost “, netCF < 0 ? `increases spending gap by ${fmtC(-netCF, true)}/yr` : `reduces gap by ${fmtC(netCF, true)}/yr`, “. WR with condo: “, /*#**PURE***/React.createElement(“strong”, {
+style: {
+color: wrWithCondo < 0.05 ? C.green : C.orange
+}
+}, fmtPct(wrWithCondo))))), !s.condoOn && /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “24px 16px”,
+textAlign: “center”,
+color: C.muted,
+fontSize: 13
+}
+}, “Toggle above to model the Lake of the Ozarks condo scenario”));
 };
 
 // ─── TAB: LEGACY ──────────────────────────────────────────────────────────
@@ -1036,259 +2265,499 @@ const LegacyTab = () => {
 const portAt65 = growPortfolio(derived.projPort, 0, (s.trsAge - curScenario.retireAge) * 12, 0.069);
 const portAt75 = growPortfolio(portAt65, 0, 10 * 12, 0.04); // slower draw phase
 const portAt85 = growPortfolio(portAt75, 0, 10 * 12, 0.04);
-
-```
-return (
-  <div>
-    <Card style={{ background: `${C.gold}10`, border: `1px solid ${C.gold}30` }}>
-      <SectionLabel color={C.gold}>Legacy Projection for Libby</SectionLabel>
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 12, lineHeight: 1.7 }}>
-        At 65, guaranteed income covers spending — your portfolio stops being a drawdown vehicle
-        and becomes a growth asset. Here's what it could look like at modest real returns.
-      </div>
-      {[
-        { label: `Age ${s.trsAge} (pension starts)`, val: portAt65, color: C.accent },
-        { label: `Age ${s.trsAge + 10}`, val: portAt75, color: C.gold },
-        { label: `Age ${s.trsAge + 20}`, val: portAt85, color: C.teal },
-      ].map(({ label, val, color }) => (
-        <div key={label} style={{ display: "flex", justifyContent: "space-between",
-          alignItems: "center", marginBottom: 10, padding: "8px 10px",
-          background: `${color}12`, borderRadius: 8, border: `1px solid ${color}30` }}>
-          <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
-          <span style={{ fontSize: 18, fontWeight: 900, fontFamily: "monospace", color }}>{fmtC(val, true)}</span>
-        </div>
-      ))}
-      <div style={{ fontSize: 10, color: C.dim, marginTop: 4 }}>
-        Assumes 6.9% real return pre-65, 4% post-65 (conservative draw phase). No portfolio withdrawals after pension starts in this scenario.
-      </div>
-    </Card>
-
-    <Card>
-      <SectionLabel color={C.teal}>Estate &amp; Family Notes</SectionLabel>
-      {[
-        "🏠 Edmond home — paid off, fully owned legacy asset",
-        "📈 Portfolio shifts to legacy vehicle when TRS + SS + dividends cover spending",
-        "👧 Libby benefits from financial stability now (ADU option) and inheritance later",
-        `💛 At 65, combined guaranteed income: ${fmtC(derived.guaranteed65, true)}/yr`,
-        "📋 Consider Roth conversions in low-income years (pre-65) to optimize Libby's inheritance tax efficiency",
-        "🏦 SoonerSave accounts compound untouched during low-draw retirement phase",
-      ].map((note, i) => (
-        <div key={i} style={{ fontSize: 11, color: C.muted, marginBottom: 8,
-          padding: "6px 10px", background: `${C.border}30`, borderRadius: 6 }}>
-          {note}
-        </div>
-      ))}
-    </Card>
-  </div>
-);
-```
-
+return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, {
+style: {
+background: `${C.gold}10`,
+border: `1px solid ${C.gold}30`
+}
+}, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.gold
+}, “Legacy Projection for Libby”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: C.muted,
+marginBottom: 12,
+lineHeight: 1.7
+}
+}, “At 65, guaranteed income covers spending \u2014 your portfolio stops being a drawdown vehicle and becomes a growth asset. Here’s what it could look like at modest real returns.”), [{
+label: `Age ${s.trsAge} (pension starts)`,
+val: portAt65,
+color: C.accent
+}, {
+label: `Age ${s.trsAge + 10}`,
+val: portAt75,
+color: C.gold
+}, {
+label: `Age ${s.trsAge + 20}`,
+val: portAt85,
+color: C.teal
+}].map(({
+label,
+val,
+color
+}) => /*#**PURE***/React.createElement(“div”, {
+key: label,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+marginBottom: 10,
+padding: “8px 10px”,
+background: `${color}12`,
+borderRadius: 8,
+border: `1px solid ${color}30`
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, label), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 18,
+fontWeight: 900,
+fontFamily: “monospace”,
+color
+}
+}, fmtC(val, true)))), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.dim,
+marginTop: 4
+}
+}, “Assumes 6.9% real return pre-65, 4% post-65 (conservative draw phase). No portfolio withdrawals after pension starts in this scenario.”)), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, {
+color: C.teal
+}, “Estate & Family Notes”), [“🏠 Edmond home — paid off, fully owned legacy asset”, “📈 Portfolio shifts to legacy vehicle when TRS + SS + dividends cover spending”, “👧 Libby benefits from financial stability now (ADU option) and inheritance later”, `💛 At 65, combined guaranteed income: ${fmtC(derived.guaranteed65, true)}/yr`, “📋 Consider Roth conversions in low-income years (pre-65) to optimize Libby’s inheritance tax efficiency”, “🏦 SoonerSave accounts compound untouched during low-draw retirement phase”].map((note, i) => /*#**PURE***/React.createElement(“div”, {
+key: i,
+style: {
+fontSize: 11,
+color: C.muted,
+marginBottom: 8,
+padding: “6px 10px”,
+background: `${C.border}30`,
+borderRadius: 6
+}
+}, note))));
 };
 
 // ─── TAB: INPUTS ──────────────────────────────────────────────────────────
-const InputsTab = () => (
-<div>
-<Card>
-<SectionLabel>Portfolio</SectionLabel>
-<Slider label=“Current Portfolio” value={s.currentPort} min={800000} max={2000000} step={5000} onChange={set(“currentPort”)} />
-<Slider label=“Monthly Contributions” value={s.monthlyContrib} min={0} max={15000} step={250} onChange={set(“monthlyContrib”)} />
-<Slider label=“Annual Dividend Income” value={s.dividends} min={0} max={30000} step={500} onChange={set(“dividends”)} />
-<Toggle label=“Dividends Active” value={s.dividendsOn} onChange={set(“dividendsOn”)} color={C.purple} />
-</Card>
-
-```
-  <Card>
-    <SectionLabel>Spending &amp; Inflation</SectionLabel>
-    <Slider label="Inflation Rate" value={s.inflation} min={0.01} max={0.06} step={0.005}
-      onChange={set("inflation")} display={v => `${(v*100).toFixed(1)}%`} color={C.orange}
-      note="Applied to budget to project retirement-year costs. Affects all scenarios." />
-    <Toggle label="Budget tab drives spending" value={s.budgetDrives} onChange={set("budgetDrives")} color={C.teal} />
-    {s.budgetDrives ? (
-      <div style={{ padding: "10px 12px", borderRadius: 10, background: `${C.teal}12`,
-        border: `1px solid ${C.teal}30`, marginBottom: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <div>
-            <div style={{ fontSize: 9, color: C.dim, textTransform: "uppercase" }}>Today (2026)</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: C.muted, fontFamily: "monospace" }}>{fmtC(budgetAnnual, true)}/yr</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 9, color: C.gold, textTransform: "uppercase" }}>At {curScenario.label}</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: C.gold, fontFamily: "monospace" }}>{fmtC(budgetAtRetire, true)}/yr</div>
-          </div>
-        </div>
-        <div style={{ fontSize: 10, color: C.teal, marginTop: 6 }}>
-          Budget inflated {yearsToRetire}yr @ {(s.inflation*100).toFixed(1)}% — adjust in Budget tab or change scenario
-        </div>
-      </div>
-    ) : (
-      <Slider label="Annual Spending (manual, retirement-year $)" value={s.annualSpend} min={40000} max={200000} step={1000} onChange={set("annualSpend")} color={C.gold} />
-    )}
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <span style={{ fontSize: 12, color: C.muted }}>Side / Part-Time Income</span>
-        <div onClick={() => set("sideIncomeOn")(!s.sideIncomeOn)} style={{
-          width: 44, height: 24, borderRadius: 12, cursor: "pointer", position: "relative",
-          background: s.sideIncomeOn ? C.gold : C.dim, transition: "background 0.25s",
-        }}>
-          <div style={{
-            position: "absolute", top: 3, left: s.sideIncomeOn ? 22 : 3, width: 18, height: 18,
-            borderRadius: 9, background: "white", transition: "left 0.25s",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-          }} />
-        </div>
-      </div>
-      <Slider label="" value={s.sideIncome} min={0} max={80000} step={1000}
-        onChange={set("sideIncome")} color={C.gold} />
-      <div style={{ fontSize: 10, color: s.sideIncomeOn ? C.gold : C.dim }}>
-        {s.sideIncomeOn ? `Active: +${fmtC(sideInc, true)}/yr` : "Toggle on to include in calculations"}
-      </div>
-    </div>
-  </Card>
-
-  <Card>
-    <SectionLabel>Wife's Income</SectionLabel>
-    <div style={{ fontSize: 10, color: C.muted, marginBottom: 8 }}>
-      Use the Live Controls on the Home tab to toggle income scenarios. Set the base amount here.
-    </div>
-    <Slider label="Base Annual Amount (Full)" value={s.wifeIncome} min={0} max={100000} step={1000} onChange={set("wifeIncome")} />
-  </Card>
-
-  <Card>
-    <SectionLabel>Retirement Income (Age 65)</SectionLabel>
-    <Slider label="Social Security Annual" value={s.ssIncome} min={12000} max={48000} step={500} onChange={set("ssIncome")} />
-    <Slider label="SS Start Age" value={s.ssAge} min={62} max={70} step={1} onChange={set("ssAge")} display={v => `${v}`} />
-    <Slider label="TRS Start Age" value={s.trsAge} min={55} max={70} step={1} onChange={set("trsAge")} display={v => `${v}`} />
-    <div style={{ padding: "8px 10px", borderRadius: 8, background: `${C.teal}12`,
-      border: `1px solid ${C.teal}30`, fontSize: 11, color: C.muted, lineHeight: 1.7 }}>
-      TRS is <strong style={{ color: C.teal }}>deferred, not reduced</strong> — you receive full benefit at {s.trsAge} regardless of when you retire. This is a critical distinction from early retirement reduction.
-    </div>
-  </Card>
-
-  <Card>
-    <SectionLabel>Scenario</SectionLabel>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 5, marginBottom: 8 }}>
-      {RETIRE_SCENARIOS.map(sc => (
-        <button key={sc.id} onClick={() => set("selectedScenario")(sc.id)} style={{
-          background: s.selectedScenario === sc.id ? `${sc.color}30` : "transparent",
-          border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
-          borderRadius: 8, padding: "7px 3px", cursor: "pointer", textAlign: "center",
-        }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: s.selectedScenario === sc.id ? sc.color : C.muted }}>
-            {sc.label.replace("Jun ", "'")}
-          </div>
-        </button>
-      ))}
-    </div>
-  </Card>
-</div>
-```
-
-);
+const InputsTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Portfolio”), /*#**PURE***/React.createElement(Slider, {
+label: “Current Portfolio”,
+value: s.currentPort,
+min: 800000,
+max: 2000000,
+step: 5000,
+onChange: set(“currentPort”)
+}), /*#**PURE***/React.createElement(Slider, {
+label: “Monthly Contributions”,
+value: s.monthlyContrib,
+min: 0,
+max: 15000,
+step: 250,
+onChange: set(“monthlyContrib”)
+}), /*#**PURE***/React.createElement(Slider, {
+label: “Annual Dividend Income”,
+value: s.dividends,
+min: 0,
+max: 30000,
+step: 500,
+onChange: set(“dividends”)
+}), /*#**PURE***/React.createElement(Toggle, {
+label: “Dividends Active”,
+value: s.dividendsOn,
+onChange: set(“dividendsOn”),
+color: C.purple
+})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Spending & Inflation”), /*#**PURE***/React.createElement(Slider, {
+label: “Inflation Rate”,
+value: s.inflation,
+min: 0.01,
+max: 0.06,
+step: 0.005,
+onChange: set(“inflation”),
+display: v => `${(v * 100).toFixed(1)}%`,
+color: C.orange,
+note: “Applied to budget to project retirement-year costs. Affects all scenarios.”
+}), /*#**PURE***/React.createElement(Toggle, {
+label: “Budget tab drives spending”,
+value: s.budgetDrives,
+onChange: set(“budgetDrives”),
+color: C.teal
+}), s.budgetDrives ? /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “10px 12px”,
+borderRadius: 10,
+background: `${C.teal}12`,
+border: `1px solid ${C.teal}30`,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 8
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.dim,
+textTransform: “uppercase”
+}
+}, “Today (2026)”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+color: C.muted,
+fontFamily: “monospace”
+}
+}, fmtC(budgetAnnual, true), “/yr”)), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: C.gold,
+textTransform: “uppercase”
+}
+}, “At “, curScenario.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+color: C.gold,
+fontFamily: “monospace”
+}
+}, fmtC(budgetAtRetire, true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.teal,
+marginTop: 6
+}
+}, “Budget inflated “, yearsToRetire, “yr @ “, (s.inflation * 100).toFixed(1), “% \u2014 adjust in Budget tab or change scenario”)) : /*#**PURE***/React.createElement(Slider, {
+label: “Annual Spending (manual, retirement-year $)”,
+value: s.annualSpend,
+min: 40000,
+max: 200000,
+step: 1000,
+onChange: set(“annualSpend”),
+color: C.gold
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: 14
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”,
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 12,
+color: C.muted
+}
+}, “Side / Part-Time Income”), /*#**PURE***/React.createElement(“div”, {
+onClick: () => set(“sideIncomeOn”)(!s.sideIncomeOn),
+style: {
+width: 44,
+height: 24,
+borderRadius: 12,
+cursor: “pointer”,
+position: “relative”,
+background: s.sideIncomeOn ? C.gold : C.dim,
+transition: “background 0.25s”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “absolute”,
+top: 3,
+left: s.sideIncomeOn ? 22 : 3,
+width: 18,
+height: 18,
+borderRadius: 9,
+background: “white”,
+transition: “left 0.25s”,
+boxShadow: “0 1px 4px rgba(0,0,0,0.4)”
+}
+}))), /*#**PURE***/React.createElement(Slider, {
+label: “”,
+value: s.sideIncome,
+min: 0,
+max: 80000,
+step: 1000,
+onChange: set(“sideIncome”),
+color: C.gold
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: s.sideIncomeOn ? C.gold : C.dim
+}
+}, s.sideIncomeOn ? `Active: +${fmtC(sideInc, true)}/yr` : “Toggle on to include in calculations”))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Wife’s Income”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: C.muted,
+marginBottom: 8
+}
+}, “Use the Live Controls on the Home tab to toggle income scenarios. Set the base amount here.”), /*#**PURE***/React.createElement(Slider, {
+label: “Base Annual Amount (Full)”,
+value: s.wifeIncome,
+min: 0,
+max: 100000,
+step: 1000,
+onChange: set(“wifeIncome”)
+})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Retirement Income (Age 65)”), /*#**PURE***/React.createElement(Slider, {
+label: “Social Security Annual”,
+value: s.ssIncome,
+min: 12000,
+max: 48000,
+step: 500,
+onChange: set(“ssIncome”)
+}), /*#**PURE***/React.createElement(Slider, {
+label: “SS Start Age”,
+value: s.ssAge,
+min: 62,
+max: 70,
+step: 1,
+onChange: set(“ssAge”),
+display: v => `${v}`
+}), /*#**PURE***/React.createElement(Slider, {
+label: “TRS Start Age”,
+value: s.trsAge,
+min: 55,
+max: 70,
+step: 1,
+onChange: set(“trsAge”),
+display: v => `${v}`
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “8px 10px”,
+borderRadius: 8,
+background: `${C.teal}12`,
+border: `1px solid ${C.teal}30`,
+fontSize: 11,
+color: C.muted,
+lineHeight: 1.7
+}
+}, “TRS is “, /*#**PURE***/React.createElement(“strong”, {
+style: {
+color: C.teal
+}
+}, “deferred, not reduced”), “ \u2014 you receive full benefit at “, s.trsAge, “ regardless of when you retire. This is a critical distinction from early retirement reduction.”)), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(SectionLabel, null, “Scenario”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr 1fr 1fr 1fr”,
+gap: 5,
+marginBottom: 8
+}
+}, RETIRE_SCENARIOS.map(sc => /*#**PURE***/React.createElement(“button”, {
+key: sc.id,
+onClick: () => set(“selectedScenario”)(sc.id),
+style: {
+background: s.selectedScenario === sc.id ? `${sc.color}30` : “transparent”,
+border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
+borderRadius: 8,
+padding: “7px 3px”,
+cursor: “pointer”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+fontWeight: 700,
+color: s.selectedScenario === sc.id ? sc.color : C.muted
+}
+}, sc.label.replace(“Jun “, “’”)))))));
 
 // ─── TABS CONFIG ──────────────────────────────────────────────────────────
-const TABS = [
-{ id: “home”,    icon: “🏠”, label: “Home”,      content: <HomeTab /> },
-{ id: “retire”,  icon: “📈”, label: “Scenarios”,  content: <RetireTab /> },
-{ id: “budget”,  icon: “💰”, label: “Budget”,    content: <BudgetTab /> },
-{ id: “ozarks”,  icon: “🏖️”, label: “Ozarks”,    content: <OzarksTab /> },
-{ id: “legacy”,  icon: “🏛️”, label: “Legacy”,    content: <LegacyTab /> },
-{ id: “inputs”,  icon: “⚙️”, label: “Inputs”,    content: <InputsTab /> },
-];
-
+const TABS = [{
+id: “home”,
+icon: “🏠”,
+label: “Home”,
+content: /*#**PURE***/React.createElement(HomeTab, null)
+}, {
+id: “retire”,
+icon: “📈”,
+label: “Scenarios”,
+content: /*#**PURE***/React.createElement(RetireTab, null)
+}, {
+id: “budget”,
+icon: “💰”,
+label: “Budget”,
+content: /*#**PURE***/React.createElement(BudgetTab, null)
+}, {
+id: “ozarks”,
+icon: “🏖️”,
+label: “Ozarks”,
+content: /*#**PURE***/React.createElement(OzarksTab, null)
+}, {
+id: “legacy”,
+icon: “🏛️”,
+label: “Legacy”,
+content: /*#**PURE***/React.createElement(LegacyTab, null)
+}, {
+id: “inputs”,
+icon: “⚙️”,
+label: “Inputs”,
+content: /*#**PURE***/React.createElement(InputsTab, null)
+}];
 const activeTab = TABS.find(t => t.id === tab) || TABS[0];
 
 // ─── RENDER ───────────────────────────────────────────────────────────────
-return (
-<div style={{
-background: C.bg, minHeight: “100vh”, color: C.text,
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+background: C.bg,
+minHeight: “100vh”,
+color: C.text,
 fontFamily: “‘Georgia’, ‘Times New Roman’, serif”,
-maxWidth: 480, margin: “0 auto”, paddingBottom: 88,
-}}>
-{/* ── STICKY HEADER ── */}
-<div style={{
+maxWidth: 480,
+margin: “0 auto”,
+paddingBottom: 88
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
 background: “linear-gradient(160deg, #06111f 0%, #0d2d50 55%, #071828 100%)”,
 padding: “16px 16px 12px”,
-position: “sticky”, top: 0, zIndex: 100,
+position: “sticky”,
+top: 0,
+zIndex: 100,
 boxShadow: “0 4px 24px rgba(0,0,0,0.7)”,
-borderBottom: `1px solid ${C.border}`,
-}}>
-<div style={{ display: “flex”, justifyContent: “space-between”, alignItems: “flex-start” }}>
-<div>
-<div style={{ fontSize: 21, fontWeight: 900, color: “white”, fontStyle: “italic” }}>
-🌊 Flory Freedom
-</div>
-<div style={{ fontSize: 9, color: “rgba(255,255,255,0.45)”, letterSpacing: 2, textTransform: “uppercase” }}>
-Financial Independence · Edmond, OK · v7
-</div>
-</div>
-<div style={{ textAlign: “right” }}>
-<div style={{ fontSize: 9, color: “rgba(255,255,255,0.4)”, textTransform: “uppercase”, letterSpacing: 1 }}>
-{curScenario.label} · {curScenario.trsYears}yr TRS
-</div>
-<div style={{ fontSize: 15, fontWeight: 800, color: curScenario.color, fontFamily: “monospace” }}>
-{fmtC(derived.projPort, true)}
-</div>
-</div>
-</div>
-
-```
-    {/* Headline */}
-    <div style={{
-      marginTop: 10, padding: "8px 12px", borderRadius: 9,
-      background: `${headline.color}18`, border: `1px solid ${headline.color}45`,
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: headline.color }}>{headline.text}</div>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{headline.sub}</div>
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>withdrawal rate</div>
-          <div style={{ fontSize: 18, fontWeight: 900, fontFamily: "monospace",
-            color: derived.preWR < 0.03 ? C.greenBright : derived.preWR < 0.04 ? C.gold : C.orange }}>
-            {fmtPct(derived.preWR)}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {/* ── TAB CONTENT ── */}
-  <div style={{ padding: "14px 12px 0" }}>
-    {activeTab.content}
-  </div>
-
-  {/* ── BOTTOM NAV ── */}
-  <div style={{
-    position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-    width: "100%", maxWidth: 480,
-    background: "rgba(6,15,28,0.97)", backdropFilter: "blur(14px)",
-    borderTop: `1px solid ${C.border}`,
-    display: "flex", justifyContent: "space-around",
-    padding: "8px 0 14px", zIndex: 200,
-  }}>
-    {TABS.map(({ id, icon, label }) => (
-      <button key={id} onClick={() => setTab(id)} style={{
-        background: "none", border: "none", cursor: "pointer",
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-      }}>
-        <span style={{ fontSize: 20, filter: tab === id ? "none" : "grayscale(80%) opacity(0.45)" }}>{icon}</span>
-        <span style={{ fontSize: 8, color: tab === id ? C.accent : C.dim,
-          fontWeight: tab === id ? 700 : 400, letterSpacing: 0.5, textTransform: "uppercase" }}>
-          {label}
-        </span>
-        {tab === id && <div style={{ width: 4, height: 3, borderRadius: 2, background: C.accent }} />}
-      </button>
-    ))}
-  </div>
-</div>
-```
-
-);
+borderBottom: `1px solid ${C.border}`
 }
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “flex-start”
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 21,
+fontWeight: 900,
+color: “white”,
+fontStyle: “italic”
+}
+}, “\uD83C\uDF0A Flory Freedom”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “rgba(255,255,255,0.45)”,
+letterSpacing: 2,
+textTransform: “uppercase”
+}
+}, “Financial Independence \xB7 Edmond, OK \xB7 v7”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “rgba(255,255,255,0.4)”,
+textTransform: “uppercase”,
+letterSpacing: 1
+}
+}, curScenario.label, “ \xB7 “, curScenario.trsYears, “yr TRS”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 15,
+fontWeight: 800,
+color: curScenario.color,
+fontFamily: “monospace”
+}
+}, fmtC(derived.projPort, true)))), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 10,
+padding: “8px 12px”,
+borderRadius: 9,
+background: `${headline.color}18`,
+border: `1px solid ${headline.color}45`
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+alignItems: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 800,
+color: headline.color
+}
+}, headline.text), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “rgba(255,255,255,0.4)”
+}
+}, headline.sub)), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “rgba(255,255,255,0.4)”
+}
+}, “withdrawal rate”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 18,
+fontWeight: 900,
+fontFamily: “monospace”,
+color: derived.preWR < 0.03 ? C.greenBright : derived.preWR < 0.04 ? C.gold : C.orange
+}
+}, fmtPct(derived.preWR)))))), /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “14px 12px 0”
+}
+}, activeTab.content), /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “fixed”,
+bottom: 0,
+left: “50%”,
+transform: “translateX(-50%)”,
+width: “100%”,
+maxWidth: 480,
+background: “rgba(6,15,28,0.97)”,
+backdropFilter: “blur(14px)”,
+borderTop: `1px solid ${C.border}`,
+display: “flex”,
+justifyContent: “space-around”,
+padding: “8px 0 14px”,
+zIndex: 200
+}
+}, TABS.map(({
+id,
+icon,
+label
+}) => /*#**PURE***/React.createElement(“button”, {
+key: id,
+onClick: () => setTab(id),
+style: {
+background: “none”,
+border: “none”,
+cursor: “pointer”,
+display: “flex”,
+flexDirection: “column”,
+alignItems: “center”,
+gap: 2
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 20,
+filter: tab === id ? “none” : “grayscale(80%) opacity(0.45)”
+}
+}, icon), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 8,
+color: tab === id ? C.accent : C.dim,
+fontWeight: tab === id ? 700 : 400,
+letterSpacing: 0.5,
+textTransform: “uppercase”
+}
+}, label), tab === id && /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 4,
+height: 3,
+borderRadius: 2,
+background: C.accent
+}
+})))));
 }
 const root = ReactDOM.createRoot(document.getElementById(‘root’));
-root.render(<FloryFreedomV7 />);
+root.render(React.createElement(FloryFreedomV7));
 </script>
 
   <script>
