@@ -415,7 +415,7 @@ input[type=range]::-moz-range-thumb {
   max-width: 520px;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   background: rgba(8,16,15,0.97);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(18px);
@@ -500,6 +500,13 @@ var DEF = {
   retireAge: 47,
   retireDateLabel: "June 30, 2027",
   spendMonthly: 10000,
+  budgetHousing: 2800,
+  budgetFood: 1600,
+  budgetHealthcare: 1200,
+  budgetTransportation: 800,
+  budgetTravel: 1600,
+  budgetTaxesInsurance: 1200,
+  budgetFamilyGiving: 800,
   horizonYears: 40,
   inflation: 0.03,
   incomeGrowth: 0.02,
@@ -1294,6 +1301,77 @@ function MichaelTab(props) {
     h(PortfolioTab, { s: props.s, e: props.e, set: props.set })
   );
 }
+function budgetCategories(s) {
+  return [
+    { key: "budgetHousing", label: "Housing + utilities", value: s.budgetHousing, color: COLORS.green2 },
+    { key: "budgetFood", label: "Groceries + dining", value: s.budgetFood, color: COLORS.green },
+    { key: "budgetHealthcare", label: "Healthcare", value: s.budgetHealthcare, color: COLORS.cyan },
+    { key: "budgetTransportation", label: "Transportation", value: s.budgetTransportation, color: COLORS.gold },
+    { key: "budgetTravel", label: "Travel + experiences", value: s.budgetTravel, color: COLORS.orange },
+    { key: "budgetTaxesInsurance", label: "Taxes + insurance", value: s.budgetTaxesInsurance, color: COLORS.cyan },
+    { key: "budgetFamilyGiving", label: "Family + giving", value: s.budgetFamilyGiving, color: COLORS.green }
+  ];
+}
+function BudgetTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  var categories = budgetCategories(s);
+  var categoryTotal = categories.reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0);
+  var annualBudget = categoryTotal * 12;
+  var variance = categoryTotal - s.spendMonthly;
+  var projectedMonthly = e.spendAtRetire / 12;
+  var incomeMonthly = e.bridgeIncome / 12;
+  var drawMonthly = e.bridgeDraw / 12;
+  var age65Income = incomeForYear(Math.max(0, s.trsAge - s.retireAge), s, e) / 12;
+  var age67Income = incomeForYear(Math.max(0, s.ssAge - s.retireAge), s, e) / 12;
+  var largest = Math.max.apply(null, categories.map(function (row) { return row.value; }).concat([1]));
+  var varianceText = Math.abs(variance) < 50
+    ? "Category budget matches the projection target."
+    : (variance > 0 ? "Category budget is above" : "Category budget is below") + " the projection target by " + fmt(Math.abs(variance)) + "/mo.";
+  return h("div", null,
+    h(Panel, { title: "Family Budget", meta: "Monthly" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Category total", value: fmt(categoryTotal, true), note: fmt(annualBudget, true) + "/yr", color: COLORS.green2 }),
+        h(Stat, { label: "Projection target", value: fmt(s.spendMonthly, true), note: "Used in Monte Carlo", color: COLORS.cyan }),
+        h(Stat, { label: "Gap vs model", value: (variance >= 0 ? "+" : "") + fmt(variance, true), note: "Budget categories minus target", color: Math.abs(variance) < 250 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: "Retirement month", value: fmt(projectedMonthly, true), note: "Inflation-adjusted day 0", color: COLORS.gold })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, varianceText),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "Projection monthly spending", value: s.spendMonthly, min: 5000, max: 18000, step: 100, onChange: set("spendMonthly") })
+      )
+    ),
+    h(Panel, { title: "Pre-65 Bridge Budget", meta: "Family draw" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Income covers", value: fmt(incomeMonthly, true) + "/mo", note: pct(incomeMonthly / Math.max(projectedMonthly, 1), 0) + " of budget", color: COLORS.green2 }),
+        h(Stat, { label: "Shared portfolio draw", value: fmt(drawMonthly, true) + "/mo", note: pct(e.withdrawalRate, 1) + " annual draw rate", color: COLORS.gold }),
+        h(Stat, { label: "Annual draw", value: fmt(e.bridgeDraw, true), note: "Before TRS and SS fully arrive" }),
+        h(Stat, { label: "Monte Carlo", value: Math.round(e.mc.successRate * 100) + "%", note: "Current family plan", color: COLORS.cyan })
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(BarRow, { label: "Guaranteed income vs budget", value: fmt(incomeMonthly, true) + " / " + fmt(projectedMonthly, true), pct: incomeMonthly / Math.max(projectedMonthly, 1) * 100, color: COLORS.green2 }),
+        h(BarRow, { label: "Shared portfolio draw vs budget", value: fmt(drawMonthly, true) + " / " + fmt(projectedMonthly, true), pct: drawMonthly / Math.max(projectedMonthly, 1) * 100, color: COLORS.gold })
+      )
+    ),
+    h(Panel, { title: "Budget Categories" },
+      categories.map(function (row) {
+        return h("div", { key: row.key, style: { marginBottom: 12 } },
+          h(BarRow, { label: row.label, value: fmt(row.value) + "/mo", pct: row.value / largest * 100, color: row.color }),
+          h(RangeControl, { label: row.label, value: row.value, min: 0, max: 5000, step: 50, onChange: set(row.key) })
+        );
+      })
+    ),
+    h(Panel, { title: "Later Income Coverage", meta: "Pressure drops" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Age 65 income", value: fmt(age65Income, true) + "/mo", note: "TRS begins", color: COLORS.cyan }),
+        h(Stat, { label: "Age 67 income", value: fmt(age67Income, true) + "/mo", note: "TRS + Social Security", color: COLORS.green2 }),
+        h(Stat, { label: "Age 65 budget", value: fmt(s.spendMonthly * Math.pow(1 + s.inflation, Math.max(0, s.trsAge - s.retireAge)), true), note: "Inflation adjusted" }),
+        h(Stat, { label: "Age 67 coverage", value: pct(age67Income / Math.max(1, s.spendMonthly * Math.pow(1 + s.inflation, Math.max(0, s.ssAge - s.retireAge))), 0), note: "Income floor vs budget", color: COLORS.gold })
+      )
+    )
+  );
+}
 function ColleenTab(props) {
   var s = props.s;
   var c = props.c;
@@ -1466,6 +1544,7 @@ function GuideTab(props) {
 var TABS = [
   { id: "command", label: "Home", icon: "command" },
   { id: "income", label: "Income", icon: "income" },
+  { id: "budget", label: "Budget", icon: "list" },
   { id: "colleen", label: "Colleen", icon: "shield" },
   { id: "adu", label: "ADU", icon: "adu" },
   { id: "guide", label: "Guide", icon: "guide" }
@@ -1505,6 +1584,7 @@ function App() {
       "Projected portfolio: " + fmt(e.startBalance),
       "Monte Carlo survival: " + Math.round(e.mc.successRate * 100) + "%",
       "Family bridge draw rate: " + pct(e.withdrawalRate, 1),
+      "Family monthly budget: " + fmt(budgetCategories(s).reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0)),
       "TRS annual at 65: " + fmt(e.trsAnnual),
       "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
       "Colleen target: " + c.targetLabel,
@@ -1530,6 +1610,7 @@ function App() {
     h("main", { className: "content" },
       tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set }),
       tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
+      tab === "budget" && h(BudgetTab, { s: s, e: e, set: set }),
       tab === "colleen" && h(ColleenTab, { s: s, c: c, set: set }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
       tab === "guide" && h(GuideTab, { s: s, e: e, set: set }),
