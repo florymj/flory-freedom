@@ -1,40 +1,41 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Flory Dream"/>
-  <meta name="mobile-web-app-capable" content="yes"/>
-  <meta name="theme-color" content="#060e1a"/>
-  <title>Flory Dream — $10k/Month</title>
-  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Flory+Dream%22%2C%22short_name%22%3A%22Dream%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23060e1a%22%2C%22theme_color%22%3A%22%23060e1a%22%7D"/>
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDYwZTFhIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMTMwNjNkIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjYmcpIi8+PHBhdGggZD0iTTAgMzUwIFE4MCAzMDAgMTYwIDMzMCBRMjQwIDM2MCAzMjAgMzEwIFE0MDAgMjYwIDQ4MCAzMDAgUTQ5NiAzMDggNTEyIDMxNSBMNTEyIDUxMiBMMCA1MTJaIiBmaWxsPSIjMGYyNDM4Ii8+PHBhdGggZD0iTTAgMzIwIFE2NCAyNzAgMTI4IDI5NSBRMTKYIDM3MCAyNTYgMjgwIFEzMjAgMjQwIDM4NCAyNjUgUTQ0OCAyOTAgNTEyIDI2MCBMNTEyIDM0MCBRNDQ4IDM3MCAzODQgMzQ1IFEzMjAgMzIwIDI1NiAzNTUgUTE5MiAzOTAgMTI4IDM2NSBRNjQgMzQwIDAgMzcwWiIgZmlsbD0iIzdjNGRmZiIgb3BhY2l0eT0iMC42Ii8+PHBhdGggZD0iTTAgMzAwIFE2NCAyNjAgMTI4IDI3NSBRMTKYIDM0MCAyNTYgMjYwIFEzMjAgMjIwIDM4NCAyNDUgUTQ0OCAyNzAgNTEyIDI0NSBMNTEyIDMyMCBRNDQ4IDM0NSAzODQgMzIwIFEzMjAgMjk1IDI1NiAzMzAgUTE5MiAzNjUgMTI4IDM0NSBRNCA4IDM0NSAzMjBaIiBmaWxsPSIjYjM4OGZmIiBvcGFjaXR5PSIwLjQiLz48dGV4dCB4PSI4MCIgeT0iMjA1IiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSI3NiIgZm9udC13ZWlnaHQ9IjkwMCIgZm9udC1zdHlsZT0iaXRhbGljIiBmaWxsPSIjYjM4OGZmIj4kMTBrPC90ZXh0Pjx0ZXh0IHg9IjgwIiB5PSIyNzAiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjMyIiBmaWxsPSIjNGZjM2Y3IiBvcGFjaXR5PSIwLjgiPi9tb250aDwvdGV4dD48Y2lyY2xlIGN4PSIyNTYiIGN5PSI0MjAiIHI9IjgiIGZpbGw9IiNiMzg4ZmYiIG9wYWNpdHk9IjAuOCIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjQyNSIgcj0iNSIgZmlsbD0iIzRmYzNmNyIgb3BhY2l0eT0iMC42Ii8+PGNpcmNsZSBjeD0iMzEyIiBjeT0iNDI1IiByPSI1IiBmaWxsPSIjZmZkNTRmIiBvcGFjaXR5PSIwLjYiLz48L3N2Zz4="/>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;overflow:hidden;background:#060e1a;}
-    body{font-family:Georgia,serif;}
-    input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:#1a3050;outline:none;cursor:pointer;}
-    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.6);}
-    input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;}
-    ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#1a3050;border-radius:2px;}
-    button{font-family:inherit;-webkit-tap-highlight-color:transparent;}
-    #root{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070d18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flory Freedom">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Flory Freedom</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#070d18;}
+body{font-family:Georgia,serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:#1b2c44;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;background:#4fc3f7;box-shadow:0 2px 8px rgba(0,0,0,0.6);}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;background:#4fc3f7;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#1b2c44;border-radius:2px;}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent;}
+#root{min-height:100vh;}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script>
-    const { useState, useMemo } = React;
-const C = {
-  bg: "#060e1a",
-  card: "#0b1c2c",
-  cardHi: "#0f2438",
-  border: "#1a3050",
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+var STORAGE_KEY = "flory-freedom-v1";
+var C = {
+  bg: "#070d18",
+  card: "#0b1626",
+  cardHi: "#101f34",
+  border: "#1b2c44",
   accent: "#4fc3f7",
   gold: "#ffd54f",
   green: "#52c97a",
@@ -43,1464 +44,1597 @@ const C = {
   orange: "#ffa726",
   teal: "#26c6da",
   purple: "#ab47bc",
-  pink: "#e07bb5",
-  dream: "#7c4dff",
-  dreamBright: "#b388ff",
-  text: "#ddeeff",
-  muted: "#6b93b8",
-  dim: "#2e4a66"
+  text: "#dde8f5",
+  muted: "#7089a8",
+  dim: "#33465f"
 };
-const fmt = (n, compact = false) => {
-  if (n === undefined || isNaN(n)) return "$0";
-  const abs = Math.abs(n);
-  if (compact && abs >= 1_000_000) return `$${(n / 1e6).toFixed(2)}M`;
-  if (compact && abs >= 1_000) return `$${(n / 1e3).toFixed(0)}k`;
+var DEF = {
+  currentPort: 1200000,
+  monthlyContrib: 9000,
+  currentAge: 46,
+  retireAge: 48,
+  spendTarget: 10000,
+  horizonYears: 30,
+  yearsServiceSoFar: 10,
+  trsHigh5: 195000,
+  trsAge: 65,
+  equityPct: 70,
+  bondShareOfFixed: 80,
+  ssAmt: 24000,
+  ssAge: 67,
+  inflation: 0.03,
+  wifeOn: true,
+  wifeAmt: 53000,
+  divsOn: true,
+  divsAmt: 14000,
+  sideOn: false,
+  sideAmt: 0,
+  aduOn: false,
+  aduAmt: 0,
+  ozarksOn: false,
+  ozarksAmt: 0,
+  fidelity401k: 850000,
+  fidelityBrokerage: 250000,
+  outsideSavings: 60000,
+  hsa: 40000,
+  realEstateEquity: 0,
+  vtiPct: 35,
+  vooPct: 20,
+  itotPct: 15,
+  intlPct: 8,
+  householdSize: 2,
+  benchmarkPremium: 14000
+};
+function fmt(n, compact) {
+  if (n === undefined || n === null || isNaN(n)) return "$0";
+  var abs = Math.abs(n);
+  if (compact && abs >= 1000000) return "$" + (n / 1000000).toFixed(2) + "M";
+  if (compact && abs >= 1000) return "$" + (n / 1000).toFixed(0) + "k";
   return n.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0
   });
-};
-const pct = (n, d = 1) => `${((n || 0) * 100).toFixed(d)}%`;
-
-// Monte Carlo with pension step-down
-function mc(port, retireAge, trsAge, ssAge, years, spend, wife, divs, side, condoCF, trs, ss, sims = 1000) {
-if (port <= 0) return 0;
-let ok = 0;
-for (let sim = 0; sim < sims; sim++) {
-let b = port,
-alive = true;
-for (let y = 0; y < years; y++) {
-const age = retireAge + y;
-const inf = Math.pow(1.03, y);
-const inc = wife * inf + divs * inf + side * inf + condoCF * inf + (age >= trsAge ? trs * inf : 0) + (age >= ssAge ? ss * inf : 0);
-const wd = Math.max(0, spend * inf - inc);
-const u1 = Math.random(),
-u2 = Math.random();
-const z = Math.sqrt(-2 * Math.log(Math.max(u1, 1e-10))) * Math.cos(2 * Math.PI * u2);
-b = b * (1 + 0.069 + 0.155 * z) - wd;
-if (b <= 0) {
-alive = false;
-break;
 }
+function pct(n, d) {
+  d = d === undefined ? 1 : d;
+  return ((n || 0) * 100).toFixed(d) + "%";
 }
-if (alive) ok++;
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
 }
-return ok / sims;
+function boxMuller() {
+  var u1 = Math.random();
+  var u2 = Math.random();
+  var u = Math.max(u1, 1e-10);
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * u2);
 }
-function grow(port, mo, months) {
-const r = 0.069 / 12;
-let b = port;
-for (let m = 0; m < months; m++) b = b * (1 + r) + mo;
-return Math.round(b);
+function computeReturnVol(equityPct, bondPct, cashPct) {
+  var eq = equityPct / 100;
+  var bo = bondPct / 100;
+  var ca = cashPct / 100;
+  var mean = eq * 0.095 + bo * 0.045 + ca * 0.02;
+  var vol = Math.sqrt(Math.pow(eq * 0.18, 2) + Math.pow(bo * 0.06, 2) + Math.pow(ca * 0.01, 2));
+  return {
+    mean: mean,
+    vol: vol
+  };
 }
-function calcTRS(yrs) {
-return Math.round(0.023 * yrs * 195000);
+function calcTRS(years, high5) {
+  return Math.round(0.023 * years * high5);
 }
-
-// Income sources
-const INCOME_SOURCES = [{
-id: “wife”,
-label: “Wife SSDI + OPERS”,
-icon: “💙”,
-base: 53000,
-color: C.teal,
-note: “Current guaranteed”
+function grow(start, monthly, months, annualRate) {
+  var r = annualRate / 12;
+  var b = start;
+  for (var m = 0; m < months; m++) b = b * (1 + r) + monthly;
+  return Math.round(b);
+}
+function requiredWithdrawal(y, params) {
+  var age = params.retireAge + y;
+  var infl = Math.pow(1 + params.inflation, y);
+  var spend = params.spendTarget * 12 * infl;
+  var income = 0;
+  if (params.wifeOn) income += params.wifeAmt * infl;
+  if (params.divsOn) income += params.divsAmt * infl;
+  if (params.sideOn) income += params.sideAmt * infl;
+  if (params.aduOn) income += params.aduAmt * infl;
+  if (params.ozarksOn) income += params.ozarksAmt * infl;
+  if (age >= params.trsAge) income += params.trsAnnual * infl;
+  if (age >= params.ssAge) income += params.ssAmt * infl;
+  return Math.max(0, spend - income);
+}
+function runMC(startBalance, years, meanReturn, vol, params, sims) {
+  sims = sims || 800;
+  var successCount = 0;
+  var yearBuckets = [];
+  for (var y = 0; y < years; y++) yearBuckets.push([]);
+  for (var sim = 0; sim < sims; sim++) {
+    var b = startBalance;
+    var alive = true;
+    for (var y2 = 0; y2 < years; y2++) {
+      var wd = requiredWithdrawal(y2, params);
+      if (alive) {
+        var z = boxMuller();
+        b = b * (1 + meanReturn + vol * z) - wd;
+        if (b <= 0) {
+          b = 0;
+          alive = false;
+        }
+      }
+      yearBuckets[y2].push(b);
+    }
+    if (alive) successCount++;
+  }
+  var percentiles = yearBuckets.map(function (arr, i) {
+    var sorted = arr.slice().sort(function (a, b2) {
+      return a - b2;
+    });
+    var p10 = sorted[Math.floor(sorted.length * 0.10)];
+    var p50 = sorted[Math.floor(sorted.length * 0.50)];
+    var p90 = sorted[Math.floor(sorted.length * 0.90)];
+    return {
+      year: i,
+      age: params.retireAge + i,
+      p10: p10,
+      p50: p50,
+      p90: p90
+    };
+  });
+  return {
+    successRate: successCount / sims,
+    percentiles: percentiles
+  };
+}
+function deterministicPath(startBalance, years, meanReturn, params, shockFirstYear) {
+  var b = startBalance;
+  var path = [b];
+  var depleted = false;
+  for (var y = 0; y < years; y++) {
+    var r = shockFirstYear && y === 0 ? meanReturn - 0.25 : meanReturn;
+    var wd = requiredWithdrawal(y, params);
+    b = b * (1 + r) - wd;
+    if (b <= 0) {
+      b = 0;
+      depleted = true;
+    }
+    path.push(b);
+    if (depleted) break;
+  }
+  return {
+    path: path,
+    ending: b,
+    depleted: depleted
+  };
+}
+function fplForHousehold(size) {
+  return 15060 + Math.max(0, size - 1) * 5380;
+}
+function applicablePct(fplPctValue) {
+  if (fplPctValue < 150) return 0;
+  if (fplPctValue < 200) return (fplPctValue - 150) / 50 * 0.02;
+  if (fplPctValue < 250) return 0.02 + (fplPctValue - 200) / 50 * 0.02;
+  if (fplPctValue < 300) return 0.04 + (fplPctValue - 250) / 50 * 0.02;
+  if (fplPctValue < 400) return 0.06 + (fplPctValue - 300) / 100 * 0.025;
+  return 0.085;
+}
+function calcACA(magi, householdSize, benchmarkPremium) {
+  var fpl = fplForHousehold(householdSize);
+  var fplPctValue = fpl > 0 ? magi / fpl * 100 : 0;
+  var ap = applicablePct(fplPctValue);
+  var premiumCap = magi * ap;
+  var subsidy = Math.max(0, benchmarkPremium - premiumCap);
+  var netPremium = Math.max(0, benchmarkPremium - subsidy);
+  return {
+    fpl: fpl,
+    fplPct: fplPctValue,
+    applicablePct: ap,
+    premiumCap: premiumCap,
+    subsidy: subsidy,
+    netPremium: netPremium
+  };
+}
+function buildEngine(s) {
+  var remainder = 100 - s.equityPct;
+  var bondPct = remainder * (s.bondShareOfFixed / 100);
+  var cashPct = remainder - bondPct;
+  var alloc = computeReturnVol(s.equityPct, bondPct, cashPct);
+  alloc.equityPct = s.equityPct;
+  alloc.bondPct = Math.round(bondPct * 10) / 10;
+  alloc.cashPct = Math.round(cashPct * 10) / 10;
+  var yearsService = s.yearsServiceSoFar + Math.max(0, s.retireAge - s.currentAge);
+  var trsAnnual = calcTRS(yearsService, s.trsHigh5);
+  var monthsToRetire = Math.max(0, Math.round((s.retireAge - s.currentAge) * 12));
+  var projPortAtRetire = grow(s.currentPort, s.monthlyContrib, monthsToRetire, alloc.mean);
+  var inflToRetire = Math.pow(1 + s.inflation, Math.max(0, s.retireAge - s.currentAge));
+  var inflatedSpendAtRetire = Math.round(s.spendTarget * 12 * inflToRetire);
+  var totalActiveIncome = (s.wifeOn ? s.wifeAmt : 0) + (s.divsOn ? s.divsAmt : 0) + (s.sideOn ? s.sideAmt : 0) + (s.aduOn ? s.aduAmt : 0) + (s.ozarksOn ? s.ozarksAmt : 0);
+  var preGap = Math.max(0, inflatedSpendAtRetire - totalActiveIncome);
+  var safePortNeeded = preGap > 0 ? preGap / 0.035 : 0;
+  var readinessScore = safePortNeeded > 0 ? clamp(Math.round(projPortAtRetire / safePortNeeded * 100), 0, 150) : 100;
+  var mcParams = {
+    retireAge: s.retireAge,
+    inflation: s.inflation,
+    spendTarget: s.spendTarget,
+    wifeOn: s.wifeOn,
+    wifeAmt: s.wifeAmt,
+    divsOn: s.divsOn,
+    divsAmt: s.divsAmt,
+    sideOn: s.sideOn,
+    sideAmt: s.sideAmt,
+    aduOn: s.aduOn,
+    aduAmt: s.aduAmt,
+    ozarksOn: s.ozarksOn,
+    ozarksAmt: s.ozarksAmt,
+    trsAge: s.trsAge,
+    trsAnnual: trsAnnual,
+    ssAge: s.ssAge,
+    ssAmt: s.ssAmt
+  };
+  var mc = runMC(projPortAtRetire, s.horizonYears, alloc.mean, alloc.vol, mcParams, 800);
+  var glidePath = [];
+  var gb = projPortAtRetire;
+  for (var y = 0; y < s.horizonYears; y++) {
+    var wd = requiredWithdrawal(y, mcParams);
+    var rate = gb > 0 ? wd / gb : 0;
+    glidePath.push({
+      year: y,
+      age: s.retireAge + y,
+      rate: rate
+    });
+    gb = gb * (1 + alloc.mean) - wd;
+    if (gb < 0) gb = 0;
+  }
+  var hiddenAssets = {
+    trsCapitalized: trsAnnual / 0.03,
+    spouseCapitalized: s.wifeAmt / 0.03
+  };
+  var netWorth = {
+    fidelity: s.fidelity401k + s.fidelityBrokerage,
+    outside: s.outsideSavings + s.hsa,
+    realEstate: s.realEstateEquity,
+    total: s.fidelity401k + s.fidelityBrokerage + s.outsideSavings + s.hsa + s.realEstateEquity
+  };
+  var breakdown = [{
+    label: "Equity",
+    pct: alloc.equityPct,
+    value: netWorth.total * alloc.equityPct / 100,
+    color: C.accent
+  }, {
+    label: "Bonds",
+    pct: alloc.bondPct,
+    value: netWorth.total * alloc.bondPct / 100,
+    color: C.teal
+  }, {
+    label: "Cash",
+    pct: alloc.cashPct,
+    value: netWorth.total * alloc.cashPct / 100,
+    color: C.gold
+  }, {
+    label: "Real Estate",
+    pct: netWorth.total > 0 ? Math.round(s.realEstateEquity / netWorth.total * 100) : 0,
+    value: s.realEstateEquity,
+    color: C.purple
+  }];
+  var usOverlapPct = s.vtiPct + s.vooPct + s.itotPct;
+  var concentration = {
+    usOverlapPct: usOverlapPct,
+    intlPct: s.intlPct,
+    overlapWarning: usOverlapPct > 60,
+    intlWarning: s.intlPct < 15
+  };
+  var magi = totalActiveIncome;
+  var aca = calcACA(magi, s.householdSize, s.benchmarkPremium);
+  var baseline = deterministicPath(projPortAtRetire, s.horizonYears, alloc.mean, mcParams, false);
+  var shocked = deterministicPath(projPortAtRetire, s.horizonYears, alloc.mean, mcParams, true);
+  var stress = {
+    baselineEnding: baseline.ending,
+    baselineDepleted: baseline.depleted,
+    shockEnding: shocked.ending,
+    shockDepleted: shocked.depleted
+  };
+  var successByDate = [];
+  for (var age = s.currentAge + 1; age <= s.currentAge + 15; age++) {
+    var months = Math.max(0, Math.round((age - s.currentAge) * 12));
+    var pp = grow(s.currentPort, s.monthlyContrib, months, alloc.mean);
+    var yrsSvc = s.yearsServiceSoFar + Math.max(0, age - s.currentAge);
+    var trsAmt = calcTRS(yrsSvc, s.trsHigh5);
+    var p2 = {
+      retireAge: age,
+      inflation: s.inflation,
+      spendTarget: s.spendTarget,
+      wifeOn: s.wifeOn,
+      wifeAmt: s.wifeAmt,
+      divsOn: s.divsOn,
+      divsAmt: s.divsAmt,
+      sideOn: s.sideOn,
+      sideAmt: s.sideAmt,
+      aduOn: s.aduOn,
+      aduAmt: s.aduAmt,
+      ozarksOn: s.ozarksOn,
+      ozarksAmt: s.ozarksAmt,
+      trsAge: s.trsAge,
+      trsAnnual: trsAmt,
+      ssAge: s.ssAge,
+      ssAmt: s.ssAmt
+    };
+    var res = runMC(pp, s.horizonYears, alloc.mean, alloc.vol, p2, 200);
+    successByDate.push({
+      age: age,
+      projPort: pp,
+      success: res.successRate
+    });
+  }
+  return {
+    alloc: alloc,
+    trsAnnual: trsAnnual,
+    yearsService: yearsService,
+    projPortAtRetire: projPortAtRetire,
+    inflatedSpendAtRetire: inflatedSpendAtRetire,
+    totalActiveIncome: totalActiveIncome,
+    preGap: preGap,
+    safePortNeeded: safePortNeeded,
+    readinessScore: readinessScore,
+    mc: mc,
+    glidePath: glidePath,
+    hiddenAssets: hiddenAssets,
+    netWorth: netWorth,
+    breakdown: breakdown,
+    concentration: concentration,
+    aca: aca,
+    stress: stress,
+    successByDate: successByDate,
+    mcParams: mcParams
+  };
+}
+function Card({
+  children,
+  style
+}) {
+  return React.createElement("div", {
+    style: Object.assign({
+      background: C.card,
+      border: "1px solid " + C.border,
+      borderRadius: 14,
+      padding: 14,
+      marginBottom: 12
+    }, style || {})
+  }, children);
+}
+function SectionLabel({
+  children,
+  color
+}) {
+  return React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: color || C.muted,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      fontWeight: 700,
+      marginBottom: 8
+    }
+  }, children);
+}
+function Slider({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  display,
+  color,
+  note
+}) {
+  var col = color || C.accent;
+  return React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 3
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.muted
+    }
+  }, label), React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: col,
+      fontFamily: "monospace"
+    }
+  }, display ? display(value) : fmt(value))), note && React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.dim,
+      marginBottom: 3
+    }
+  }, note), React.createElement("input", {
+    type: "range",
+    min: min,
+    max: max,
+    step: step,
+    value: value,
+    onChange: function (e) {
+      onChange(Number(e.target.value));
+    },
+    style: {
+      width: "100%",
+      accentColor: col,
+      cursor: "pointer"
+    }
+  }), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 9,
+      color: C.dim
+    }
+  }, React.createElement("span", null, display ? display(min) : fmt(min, true)), React.createElement("span", null, display ? display(max) : fmt(max, true))));
+}
+function Toggle({
+  label,
+  value,
+  onChange,
+  color
+}) {
+  var col = color || C.green;
+  return React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.text
+    }
+  }, label), React.createElement("div", {
+    onClick: function () {
+      onChange(!value);
+    },
+    style: {
+      width: 44,
+      height: 24,
+      borderRadius: 12,
+      cursor: "pointer",
+      position: "relative",
+      background: value ? col : C.dim,
+      transition: "background 0.25s"
+    }
+  }, React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 3,
+      left: value ? 22 : 3,
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      background: "white",
+      transition: "left 0.25s",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.4)"
+    }
+  })));
+}
+function StatBox({
+  label,
+  value,
+  color
+}) {
+  return React.createElement("div", {
+    style: {
+      background: "rgba(0,0,0,0.2)",
+      borderRadius: 8,
+      padding: "7px 8px"
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.dim
+    }
+  }, label), React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: color || C.text,
+      fontFamily: "monospace"
+    }
+  }, value));
+}
+function RadialGauge({
+  value,
+  size,
+  color
+}) {
+  var sz = size || 140;
+  var v = clamp(value, 0, 100);
+  var r = sz / 2 - 12;
+  var circumference = 2 * Math.PI * r;
+  var offset = circumference * (1 - v / 100);
+  var col = color || (v >= 100 ? C.greenBright : v >= 85 ? C.green : v >= 70 ? C.gold : v >= 50 ? C.orange : C.red);
+  return React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 " + sz + " " + sz
+  }, React.createElement("circle", {
+    cx: sz / 2,
+    cy: sz / 2,
+    r: r,
+    fill: "none",
+    stroke: C.border,
+    strokeWidth: "12"
+  }), React.createElement("circle", {
+    cx: sz / 2,
+    cy: sz / 2,
+    r: r,
+    fill: "none",
+    stroke: col,
+    strokeWidth: "12",
+    strokeDasharray: circumference,
+    strokeDashoffset: offset,
+    strokeLinecap: "round",
+    transform: "rotate(-90 " + sz / 2 + " " + sz / 2 + ")"
+  }), React.createElement("text", {
+    x: sz / 2,
+    y: sz / 2 - 4,
+    textAnchor: "middle",
+    fontSize: "26",
+    fontWeight: "900",
+    fill: col,
+    fontFamily: "monospace"
+  }, Math.round(v) + "%"), React.createElement("text", {
+    x: sz / 2,
+    y: sz / 2 + 16,
+    textAnchor: "middle",
+    fontSize: "9",
+    fill: C.muted
+  }, "READY"));
+}
+function FanChart({
+  data,
+  width,
+  height,
+  color
+}) {
+  var w = width || 300;
+  var h = height || 140;
+  if (!data || data.length === 0) return React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.dim
+    }
+  }, "No data");
+  var maxV = Math.max.apply(null, data.map(function (d) {
+    return d.p90 || 0;
+  }).concat([1]));
+  var pad = 6;
+  var n = data.length;
+  function X(i) {
+    return pad + i / Math.max(1, n - 1) * (w - pad * 2);
+  }
+  function Y(v) {
+    return h - pad - Math.max(0, v) / maxV * (h - pad * 2);
+  }
+  var topPts = data.map(function (d, i) {
+    return X(i) + "," + Y(d.p90);
+  }).join(" ");
+  var botPts = data.slice().reverse().map(function (d, i) {
+    return X(n - 1 - i) + "," + Y(d.p10);
+  }).join(" ");
+  var medPts = data.map(function (d, i) {
+    return X(i) + "," + Y(d.p50);
+  }).join(" ");
+  return React.createElement("svg", {
+    width: "100%",
+    height: h,
+    viewBox: "0 0 " + w + " " + h,
+    preserveAspectRatio: "none"
+  }, React.createElement("polygon", {
+    points: topPts + " " + botPts,
+    fill: color || C.accent,
+    opacity: "0.15"
+  }), React.createElement("polyline", {
+    points: medPts,
+    fill: "none",
+    stroke: color || C.accent,
+    strokeWidth: "2"
+  }));
+}
+function LineChartSimple({
+  data,
+  valueKey,
+  width,
+  height,
+  color
+}) {
+  var w = width || 300;
+  var h = height || 110;
+  if (!data || data.length === 0) return React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.dim
+    }
+  }, "No data");
+  var vals = data.map(function (d) {
+    return d[valueKey] || 0;
+  });
+  var maxV = Math.max.apply(null, vals.concat([0.0001]));
+  var pad = 6;
+  var n = data.length;
+  function X(i) {
+    return pad + i / Math.max(1, n - 1) * (w - pad * 2);
+  }
+  function Y(v) {
+    return h - pad - v / maxV * (h - pad * 2);
+  }
+  var pts = data.map(function (d, i) {
+    return X(i) + "," + Y(d[valueKey] || 0);
+  }).join(" ");
+  return React.createElement("svg", {
+    width: "100%",
+    height: h,
+    viewBox: "0 0 " + w + " " + h,
+    preserveAspectRatio: "none"
+  }, React.createElement("polyline", {
+    points: pts,
+    fill: "none",
+    stroke: color || C.orange,
+    strokeWidth: "2"
+  }));
+}
+function BarRow({
+  label,
+  valuePct,
+  displayValue,
+  color
+}) {
+  return React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 2,
+      fontSize: 10
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, label), React.createElement("span", {
+    style: {
+      color: color,
+      fontFamily: "monospace"
+    }
+  }, displayValue)), React.createElement("div", {
+    style: {
+      height: 8,
+      background: C.border,
+      borderRadius: 4,
+      overflow: "hidden"
+    }
+  }, React.createElement("div", {
+    style: {
+      height: 8,
+      width: clamp(valuePct, 0, 100) + "%",
+      background: color
+    }
+  })));
+}
+function ReadyTab({
+  s,
+  engine
+}) {
+  var e = engine;
+  var col = e.readinessScore >= 100 ? C.greenBright : e.readinessScore >= 85 ? C.green : e.readinessScore >= 70 ? C.gold : C.orange;
+  return React.createElement("div", null, React.createElement(Card, {
+    style: {
+      textAlign: "center"
+    }
+  }, React.createElement(SectionLabel, null, "Readiness at Age ", s.retireAge), React.createElement(RadialGauge, {
+    value: e.readinessScore,
+    color: col
+  }), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginTop: 6
+    }
+  }, "Portfolio at retirement: ", React.createElement("strong", {
+    style: {
+      color: C.accent
+    }
+  }, fmt(e.projPortAtRetire, true)))), React.createElement(Card, null, React.createElement(SectionLabel, null, "Monte Carlo Success (", s.horizonYears, "yr horizon, 800 sims)"), React.createElement("div", {
+    style: {
+      fontSize: 32,
+      fontWeight: 900,
+      color: col,
+      fontFamily: "monospace"
+    }
+  }, Math.round(e.mc.successRate * 100), "%"), React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.dim,
+      marginTop: 4
+    }
+  }, "Probability the portfolio survives to age ", s.retireAge + s.horizonYears, ", drawing down for spending net of income sources.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Percentile Wealth Fan (10th / 50th / 90th)"), React.createElement(FanChart, {
+    data: e.mc.percentiles
+  }), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 9,
+      color: C.dim,
+      marginTop: 4
+    }
+  }, React.createElement("span", null, "Age ", s.retireAge), React.createElement("span", null, "Age ", s.retireAge + s.horizonYears))), React.createElement(Card, null, React.createElement(SectionLabel, null, "Withdrawal Rate Glide Path"), React.createElement(LineChartSimple, {
+    data: e.glidePath,
+    valueKey: "rate",
+    color: C.orange
+  }), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 9,
+      color: C.dim,
+      marginTop: 4
+    }
+  }, React.createElement("span", null, "Age ", s.retireAge), React.createElement("span", null, "Age ", s.retireAge + s.horizonYears))), React.createElement(Card, {
+    style: {
+      background: C.teal + "12",
+      border: "1px solid " + C.teal + "30"
+    }
+  }, React.createElement(SectionLabel, {
+    color: C.teal
+  }, "Hidden Assets (valued at 3% withdrawal rate)"), React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8
+    }
+  }, React.createElement(StatBox, {
+    label: "TRS Pension Value",
+    value: fmt(e.hiddenAssets.trsCapitalized, true),
+    color: C.teal
+  }), React.createElement(StatBox, {
+    label: "Spouse Income Floor",
+    value: fmt(e.hiddenAssets.spouseCapitalized, true),
+    color: C.accent
+  })), React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.dim,
+      marginTop: 8
+    }
+  }, "These guaranteed income streams are not counted in the investable portfolio above, but they function like a bond ladder worth this much capital at a conservative 3% withdrawal rate.")));
+}
+function PortfolioTab({
+  s,
+  set,
+  engine
+}) {
+  var e = engine;
+  var hasWarning = e.concentration.overlapWarning || e.concentration.intlWarning;
+  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Net Worth Reconciliation"), React.createElement("div", {
+    style: {
+      marginBottom: 6
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "Fidelity (401k + brokerage)"), React.createElement("span", {
+    style: {
+      color: C.accent,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.netWorth.fidelity, true))), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "Outside accounts (savings + HSA)"), React.createElement("span", {
+    style: {
+      color: C.teal,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.netWorth.outside, true))), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "Real estate equity"), React.createElement("span", {
+    style: {
+      color: C.purple,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.netWorth.realEstate, true)))), React.createElement("div", {
+    style: {
+      borderTop: "1px solid " + C.border,
+      paddingTop: 8
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: C.text
+    }
+  }, "Total net worth"), React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 800,
+      color: C.greenBright,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.netWorth.total, true)))), React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: C.dim,
+      marginTop: 8
+    }
+  }, "The Inputs tab's ", fmt(s.currentPort, true), " portfolio figure drives all projections; the account sliders below track actual custodial balances for reconciliation.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Account Balances"), React.createElement(Slider, {
+    label: "Fidelity 401k",
+    value: s.fidelity401k,
+    min: 0,
+    max: 2000000,
+    step: 5000,
+    onChange: set("fidelity401k"),
+    color: C.accent
+  }), React.createElement(Slider, {
+    label: "Fidelity Brokerage",
+    value: s.fidelityBrokerage,
+    min: 0,
+    max: 1000000,
+    step: 5000,
+    onChange: set("fidelityBrokerage"),
+    color: C.accent
+  }), React.createElement(Slider, {
+    label: "Outside Savings",
+    value: s.outsideSavings,
+    min: 0,
+    max: 300000,
+    step: 2500,
+    onChange: set("outsideSavings"),
+    color: C.teal
+  }), React.createElement(Slider, {
+    label: "HSA",
+    value: s.hsa,
+    min: 0,
+    max: 150000,
+    step: 1000,
+    onChange: set("hsa"),
+    color: C.teal
+  }), React.createElement(Slider, {
+    label: "Real Estate Equity (ADU / Lake Ozarks)",
+    value: s.realEstateEquity,
+    min: 0,
+    max: 500000,
+    step: 5000,
+    onChange: set("realEstateEquity"),
+    color: C.purple
+  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Real Asset-Class Breakdown"), e.breakdown.map(function (b) {
+    return React.createElement(BarRow, {
+      key: b.label,
+      label: b.label,
+      valuePct: b.pct,
+      displayValue: fmt(b.value, true) + " (" + b.pct + "%)",
+      color: b.color
+    });
+  })), React.createElement(Card, {
+    style: {
+      background: hasWarning ? C.orange + "12" : C.greenBright + "10",
+      border: "1px solid " + (hasWarning ? C.orange + "40" : C.greenBright + "30")
+    }
+  }, React.createElement(SectionLabel, {
+    color: hasWarning ? C.orange : C.greenBright
+  }, "Concentration Check"), React.createElement(Slider, {
+    label: "VTI (Total US)",
+    value: s.vtiPct,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("vtiPct"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.accent
+  }), React.createElement(Slider, {
+    label: "VOO (S&P 500)",
+    value: s.vooPct,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("vooPct"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.gold
+  }), React.createElement(Slider, {
+    label: "ITOT (Total US)",
+    value: s.itotPct,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("itotPct"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.teal
+  }), React.createElement(Slider, {
+    label: "International",
+    value: s.intlPct,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("intlPct"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.purple
+  }), e.concentration.overlapWarning && React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.orange,
+      marginTop: 4,
+      lineHeight: 1.6
+    }
+  }, "VTI + VOO + ITOT are ", e.concentration.usOverlapPct, "% of the equity sleeve - these three funds overlap heavily since they all hold the same US large caps. Consider consolidating into one."), e.concentration.intlWarning && React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.orange,
+      marginTop: 4,
+      lineHeight: 1.6
+    }
+  }, "International exposure is only ", s.intlPct, "% - below the 15-20% typically recommended for diversification."), !hasWarning && React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.greenBright,
+      marginTop: 4
+    }
+  }, "No major concentration issues detected.")));
+}
+function IncomeTab({
+  s,
+  set,
+  engine
+}) {
+  var e = engine;
+  return React.createElement("div", null, React.createElement(Card, null, React.createElement(Toggle, {
+    label: "Spouse SSDI + OPERS",
+    value: s.wifeOn,
+    onChange: set("wifeOn"),
+    color: C.teal
+  }), s.wifeOn && React.createElement(Slider, {
+    label: "Annual Amount",
+    value: s.wifeAmt,
+    min: 0,
+    max: 80000,
+    step: 1000,
+    onChange: set("wifeAmt"),
+    color: C.teal
+  })), React.createElement(Card, null, React.createElement(Toggle, {
+    label: "Portfolio Dividends",
+    value: s.divsOn,
+    onChange: set("divsOn"),
+    color: C.purple
+  }), s.divsOn && React.createElement(Slider, {
+    label: "Annual Dividend Income",
+    value: s.divsAmt,
+    min: 0,
+    max: 30000,
+    step: 500,
+    onChange: set("divsAmt"),
+    color: C.purple
+  })), React.createElement(Card, null, React.createElement(Toggle, {
+    label: "Consulting / Side Income",
+    value: s.sideOn,
+    onChange: set("sideOn"),
+    color: C.gold
+  }), s.sideOn && React.createElement(Slider, {
+    label: "Annual Side Income",
+    value: s.sideAmt,
+    min: 0,
+    max: 60000,
+    step: 1000,
+    onChange: set("sideAmt"),
+    color: C.gold
+  })), React.createElement(Card, null, React.createElement(Toggle, {
+    label: "ADU Rent",
+    value: s.aduOn,
+    onChange: set("aduOn"),
+    color: C.green
+  }), s.aduOn && React.createElement(Slider, {
+    label: "Annual Net Rent",
+    value: s.aduAmt,
+    min: 0,
+    max: 24000,
+    step: 600,
+    onChange: set("aduAmt"),
+    color: C.green
+  })), React.createElement(Card, null, React.createElement(Toggle, {
+    label: "Lake Ozarks Net Cash Flow",
+    value: s.ozarksOn,
+    onChange: set("ozarksOn"),
+    color: C.accent
+  }), s.ozarksOn && React.createElement(Slider, {
+    label: "Annual Net Cash Flow",
+    value: s.ozarksAmt,
+    min: -30000,
+    max: 30000,
+    step: 1000,
+    onChange: set("ozarksAmt"),
+    color: C.accent,
+    note: "Rental income minus carry costs. Can be negative if costs exceed revenue."
+  })), React.createElement(Card, {
+    style: {
+      background: C.accent + "10",
+      border: "1px solid " + C.accent + "30"
+    }
+  }, React.createElement(SectionLabel, {
+    color: C.accent
+  }, "ACA Subsidy Modeler"), React.createElement(Slider, {
+    label: "Household Size",
+    value: s.householdSize,
+    min: 1,
+    max: 6,
+    step: 1,
+    onChange: set("householdSize"),
+    display: function (v) {
+      return String(v);
+    },
+    color: C.accent
+  }), React.createElement(Slider, {
+    label: "Benchmark Silver Premium (annual)",
+    value: s.benchmarkPremium,
+    min: 4000,
+    max: 30000,
+    step: 500,
+    onChange: set("benchmarkPremium"),
+    color: C.accent
+  }), React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "MAGI (active income)"), React.createElement("span", {
+    style: {
+      color: C.text,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.totalActiveIncome, true))), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "Federal Poverty Line (", s.householdSize, ")"), React.createElement("span", {
+    style: {
+      color: C.text,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.aca.fpl, true))), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "% of FPL"), React.createElement("span", {
+    style: {
+      color: C.text,
+      fontFamily: "monospace"
+    }
+  }, Math.round(e.aca.fplPct), "%")), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 11,
+      marginBottom: 4
+    }
+  }, React.createElement("span", {
+    style: {
+      color: C.muted
+    }
+  }, "Applicable %"), React.createElement("span", {
+    style: {
+      color: C.text,
+      fontFamily: "monospace"
+    }
+  }, (e.aca.applicablePct * 100).toFixed(2), "%")), React.createElement("div", {
+    style: {
+      borderTop: "1px solid " + C.border,
+      paddingTop: 6,
+      marginTop: 4
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: C.text
+    }
+  }, "Estimated subsidy"), React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800,
+      color: C.greenBright,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.aca.subsidy, true), "/yr")), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: 2
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.muted
+    }
+  }, "Net premium"), React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: C.gold,
+      fontFamily: "monospace"
+    }
+  }, fmt(e.aca.netPremium, true), "/yr"))))));
+}
+function PathsTab({
+  s,
+  set,
+  engine
+}) {
+  var e = engine;
+  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Retirement Date"), React.createElement(Slider, {
+    label: "Planned Retirement Age",
+    value: s.retireAge,
+    min: s.currentAge + 1,
+    max: s.currentAge + 15,
+    step: 1,
+    onChange: set("retireAge"),
+    display: function (v) {
+      return String(v);
+    },
+    color: C.orange
+  })), React.createElement(Card, {
+    style: {
+      background: C.red + "10",
+      border: "1px solid " + C.red + "30"
+    }
+  }, React.createElement(SectionLabel, {
+    color: C.red
+  }, "Sequence-of-Returns Stress Test"), React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.dim,
+      marginBottom: 8
+    }
+  }, "Deterministic projection at expected return vs. a -25% shock in year one of retirement."), React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8
+    }
+  }, React.createElement(StatBox, {
+    label: "Baseline Ending Balance",
+    value: fmt(e.stress.baselineEnding, true),
+    color: e.stress.baselineDepleted ? C.red : C.greenBright
+  }), React.createElement(StatBox, {
+    label: "Shocked Ending Balance",
+    value: fmt(e.stress.shockEnding, true),
+    color: e.stress.shockDepleted ? C.red : C.gold
+  })), e.stress.shockDepleted && !e.stress.baselineDepleted && React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.red,
+      marginTop: 8
+    }
+  }, "A year-one -25% shock depletes the portfolio before the baseline scenario would."), !e.stress.shockDepleted && React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.greenBright,
+      marginTop: 8
+    }
+  }, "Portfolio survives the full horizon even with a -25% year-one shock.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Success Probability by Retirement Date"), e.successByDate.map(function (d) {
+    return React.createElement(BarRow, {
+      key: d.age,
+      label: "Age " + d.age,
+      valuePct: d.success * 100,
+      displayValue: Math.round(d.success * 100) + "%",
+      color: d.success >= 0.9 ? C.greenBright : d.success >= 0.75 ? C.gold : C.red
+    });
+  })));
+}
+function InputsTab({
+  s,
+  set
+}) {
+  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Portfolio & Contributions"), React.createElement(Slider, {
+    label: "Current Portfolio",
+    value: s.currentPort,
+    min: 200000,
+    max: 3000000,
+    step: 5000,
+    onChange: set("currentPort")
+  }), React.createElement(Slider, {
+    label: "Monthly Contributions",
+    value: s.monthlyContrib,
+    min: 0,
+    max: 15000,
+    step: 250,
+    onChange: set("monthlyContrib")
+  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Age & Spending"), React.createElement(Slider, {
+    label: "Current Age",
+    value: s.currentAge,
+    min: 35,
+    max: 65,
+    step: 1,
+    onChange: set("currentAge"),
+    display: function (v) {
+      return String(v);
+    }
+  }), React.createElement(Slider, {
+    label: "Monthly Spending Goal",
+    value: s.spendTarget,
+    min: 4000,
+    max: 20000,
+    step: 250,
+    onChange: set("spendTarget"),
+    display: function (v) {
+      return fmt(v) + "/mo";
+    }
+  }), React.createElement(Slider, {
+    label: "Retirement Horizon",
+    value: s.horizonYears,
+    min: 15,
+    max: 45,
+    step: 1,
+    onChange: set("horizonYears"),
+    display: function (v) {
+      return v + "yr";
+    }
+  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "TRS Pension"), React.createElement(Slider, {
+    label: "Years of Service So Far",
+    value: s.yearsServiceSoFar,
+    min: 0,
+    max: 35,
+    step: 1,
+    onChange: set("yearsServiceSoFar"),
+    display: function (v) {
+      return String(v);
+    }
+  }), React.createElement(Slider, {
+    label: "High-5 Average Salary",
+    value: s.trsHigh5,
+    min: 80000,
+    max: 300000,
+    step: 2500,
+    onChange: set("trsHigh5")
+  }), React.createElement(Slider, {
+    label: "TRS Start Age",
+    value: s.trsAge,
+    min: 55,
+    max: 70,
+    step: 1,
+    onChange: set("trsAge"),
+    display: function (v) {
+      return String(v);
+    }
+  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Allocation (drives expected return & volatility)"), React.createElement(Slider, {
+    label: "Equity %",
+    value: s.equityPct,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("equityPct"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.accent
+  }), React.createElement(Slider, {
+    label: "Bond Share of Fixed Income",
+    value: s.bondShareOfFixed,
+    min: 0,
+    max: 100,
+    step: 1,
+    onChange: set("bondShareOfFixed"),
+    display: function (v) {
+      return v + "%";
+    },
+    color: C.teal,
+    note: "Remainder (" + (100 - s.equityPct) + "%) splits between bonds and cash by this ratio"
+  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Social Security & Inflation"), React.createElement(Slider, {
+    label: "Social Security Annual",
+    value: s.ssAmt,
+    min: 12000,
+    max: 48000,
+    step: 500,
+    onChange: set("ssAmt")
+  }), React.createElement(Slider, {
+    label: "SS Start Age",
+    value: s.ssAge,
+    min: 62,
+    max: 70,
+    step: 1,
+    onChange: set("ssAge"),
+    display: function (v) {
+      return String(v);
+    }
+  }), React.createElement(Slider, {
+    label: "Inflation Rate",
+    value: s.inflation,
+    min: 0.01,
+    max: 0.06,
+    step: 0.005,
+    onChange: set("inflation"),
+    display: function (v) {
+      return (v * 100).toFixed(1) + "%";
+    },
+    color: C.orange
+  })));
+}
+var TABS = [{
+  id: "ready",
+  icon: "🎯",
+  label: "Ready"
 }, {
-id: “divs”,
-label: “Portfolio Dividends”,
-icon: “📈”,
-base: 14000,
-color: C.purple,
-note: “~1.2% of portfolio”
+  id: "portfolio",
+  icon: "📊",
+  label: "Portfolio"
 }, {
-id: “side”,
-label: “Side Income”,
-icon: “💼”,
-base: 0,
-color: C.gold,
-note: “Consulting, tutoring, etc.”
+  id: "income",
+  icon: "💰",
+  label: "Income"
 }, {
-id: “adu”,
-label: “ADU / Rental”,
-icon: “🏠”,
-base: 0,
-color: C.teal,
-note: “Kaitlyn or other tenant”
+  id: "paths",
+  icon: "🗺",
+  label: "Paths"
 }, {
-id: “ozarks”,
-label: “Lake Ozarks Net”,
-icon: “🏖️”,
-base: 0,
-color: C.accent,
-note: “Rental income minus carry”
+  id: "inputs",
+  icon: "⚙",
+  label: "Inputs"
 }];
-
-// Retirement date scenarios
-const SCENARIOS = [{
-id: “2026”,
-label: “Jun ’26”,
-age: 46,
-trs: 10,
-color: C.orange
-}, {
-id: “2027”,
-label: “Jun ’27”,
-age: 47,
-trs: 11,
-color: C.gold
-}, {
-id: “2028”,
-label: “Jun ’28”,
-age: 48,
-trs: 12,
-color: C.green
-}, {
-id: “2029”,
-label: “Jun ’29”,
-age: 49,
-trs: 13,
-color: C.teal
-}, {
-id: “2030”,
-label: “Jun ‘30”,
-age: 50,
-trs: 14,
-color: C.accent
-}];
-const DEF = {
-// Core
-currentPort: 1200000,
-monthlyContrib: 9000,
-currentAge: 46,
-target: 10000,
-// monthly spending goal in today’s dollars
-selectedScenario: “2027”,
-// Income toggles
-wifeOn: true,
-wifeAmt: 53000,
-divsOn: true,
-divsAmt: 14000,
-sideOn: false,
-sideAmt: 0,
-aduOn: false,
-aduAmt: 0,
-ozarksOn: false,
-ozarksAmt: 0,
-// Age 65
-trsAge: 65,
-ssAge: 65,
-ssAmt: 24000,
-inflation: 0.03
-};
-const Slider = ({
-label,
-value,
-min,
-max,
-step,
-onChange,
-display,
-color = C.accent,
-note
-}) => /*#**PURE***/React.createElement(“div”, {
-style: {
-marginBottom: 14
+function loadState() {
+  try {
+    var raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      var merged = {};
+      for (var k in DEF) merged[k] = DEF[k];
+      for (var k2 in parsed) merged[k2] = parsed[k2];
+      return merged;
+    }
+  } catch (err) {}
+  return DEF;
+}
+function App() {
+  var stateHook = React.useState(function () {
+    return loadState();
+  });
+  var s = stateHook[0];
+  var setS = stateHook[1];
+  var tabHook = React.useState("ready");
+  var tab = tabHook[0];
+  var setTab = tabHook[1];
+  React.useEffect(function () {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    } catch (err) {}
+  }, [s]);
+  function set(key) {
+    return function (value) {
+      setS(function (prev) {
+        var next = {};
+        for (var k in prev) next[k] = prev[k];
+        next[key] = value;
+        return next;
+      });
+    };
+  }
+  var engine = React.useMemo(function () {
+    return buildEngine(s);
+  }, [s]);
+  return React.createElement("div", {
+    style: {
+      background: C.bg,
+      minHeight: "100vh",
+      color: C.text,
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      maxWidth: 480,
+      margin: "0 auto",
+      paddingBottom: 90
+    }
+  }, React.createElement("div", {
+    style: {
+      background: "linear-gradient(160deg, #060f1c 0%, #0d1830 60%, #070d18 100%)",
+      padding: "16px 16px 12px",
+      position: "sticky",
+      top: 0,
+      zIndex: 100,
+      boxShadow: "0 4px 24px rgba(0,0,0,0.8)",
+      borderBottom: "1px solid " + C.border,
+      paddingTop: "calc(16px + env(safe-area-inset-top))"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start"
+    }
+  }, React.createElement("div", null, React.createElement("div", {
+    style: {
+      fontSize: 21,
+      fontWeight: 900,
+      color: "white",
+      fontStyle: "italic"
+    }
+  }, "Flory Freedom"), React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.4)",
+      letterSpacing: 2,
+      textTransform: "uppercase"
+    }
+  }, "Retirement Dashboard")), React.createElement("div", {
+    style: {
+      textAlign: "right"
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.4)",
+      textTransform: "uppercase",
+      letterSpacing: 1
+    }
+  }, "Age ", s.retireAge), React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 800,
+      color: C.accent,
+      fontFamily: "monospace"
+    }
+  }, fmt(engine.projPortAtRetire, true))))), React.createElement("div", {
+    style: {
+      padding: "14px 12px 0"
+    }
+  }, tab === "ready" && React.createElement(ReadyTab, {
+    s: s,
+    set: set,
+    engine: engine
+  }), tab === "portfolio" && React.createElement(PortfolioTab, {
+    s: s,
+    set: set,
+    engine: engine
+  }), tab === "income" && React.createElement(IncomeTab, {
+    s: s,
+    set: set,
+    engine: engine
+  }), tab === "paths" && React.createElement(PathsTab, {
+    s: s,
+    set: set,
+    engine: engine
+  }), tab === "inputs" && React.createElement(InputsTab, {
+    s: s,
+    set: set,
+    engine: engine
+  })), React.createElement("div", {
+    style: {
+      position: "fixed",
+      bottom: 0,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "100%",
+      maxWidth: 480,
+      background: "rgba(7,13,24,0.97)",
+      backdropFilter: "blur(14px)",
+      borderTop: "1px solid " + C.border,
+      display: "flex",
+      justifyContent: "space-around",
+      padding: "8px 0 calc(14px + env(safe-area-inset-bottom))",
+      zIndex: 200
+    }
+  }, TABS.map(function (t) {
+    return React.createElement("button", {
+      key: t.id,
+      onClick: function () {
+        setTab(t.id);
+      },
+      style: {
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2
+      }
+    }, React.createElement("span", {
+      style: {
+        fontSize: 20,
+        filter: tab === t.id ? "none" : "grayscale(80%) opacity(0.4)"
+      }
+    }, t.icon), React.createElement("span", {
+      style: {
+        fontSize: 8,
+        color: tab === t.id ? C.accent : C.dim,
+        fontWeight: tab === t.id ? 700 : 400,
+        letterSpacing: 0.5,
+        textTransform: "uppercase"
+      }
+    }, t.label));
+  })));
+}
+var rootEl = document.getElementById("root");
+if (rootEl) {
+  var root = ReactDOM.createRoot(rootEl);
+  root.render(React.createElement(App));
 }
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 3
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 12,
-color: C.muted
-}
-}, label), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 13,
-fontWeight: 700,
-color,
-fontFamily: “monospace”
-}
-}, display ? display(value) : fmt(value))), note && /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: C.dim,
-marginBottom: 3
-}
-}, note), /*#**PURE***/React.createElement(“input”, {
-type: “range”,
-min: min,
-max: max,
-step: step,
-value: value,
-onChange: e => onChange(Number(e.target.value)),
-style: {
-width: “100%”,
-accentColor: color,
-cursor: “pointer”
-}
-}), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-fontSize: 9,
-color: C.dim
-}
-}, /*#**PURE***/React.createElement(“span”, null, display ? display(min) : fmt(min, true)), /*#**PURE***/React.createElement(“span”, null, display ? display(max) : fmt(max, true))));
-const Toggle = ({
-label,
-value,
-onChange,
-color = C.green
-}) => /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-alignItems: “center”,
-justifyContent: “space-between”,
-marginBottom: 8
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 12,
-color: C.text
-}
-}, label), /*#**PURE***/React.createElement(“div”, {
-onClick: () => onChange(!value),
-style: {
-width: 44,
-height: 24,
-borderRadius: 12,
-cursor: “pointer”,
-position: “relative”,
-background: value ? color : C.dim,
-transition: “background 0.25s”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-position: “absolute”,
-top: 3,
-left: value ? 22 : 3,
-width: 18,
-height: 18,
-borderRadius: 9,
-background: “white”,
-transition: “left 0.25s”,
-boxShadow: “0 1px 4px rgba(0,0,0,0.4)”
-}
-})));
-const Card = ({
-children,
-style = {}
-}) => /*#**PURE***/React.createElement(“div”, {
-style: {
-background: C.card,
-border: `1px solid ${C.border}`,
-borderRadius: 14,
-padding: 14,
-marginBottom: 12,
-…style
-}
-}, children);
-const Gauge = ({
-value,
-label,
-compact = false
-}) => {
-const p = Math.round((value || 0) * 100);
-const col = p >= 95 ? C.greenBright : p >= 88 ? C.green : p >= 80 ? C.gold : p >= 70 ? C.orange : C.red;
-return /*#**PURE***/React.createElement(“div”, {
-style: {
-marginBottom: compact ? 5 : 8
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 2
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: compact ? 10 : 11,
-color: C.muted
-}
-}, label), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: compact ? 11 : 12,
-fontWeight: 700,
-color: col,
-fontFamily: “monospace”
-}
-}, p, “%”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-height: compact ? 5 : 7,
-background: C.border,
-borderRadius: 4
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-height: compact ? 5 : 7,
-borderRadius: 4,
-width: `${p}%`,
-background: col,
-transition: “width 0.5s”
-}
-})));
-};
-function FloryDream() {
-const [tab, setTab] = useState(“dream”);
-const [s, setS] = useState(DEF);
-const set = k => v => setS(p => ({
-…p,
-[k]: v
-}));
-const sc = SCENARIOS.find(x => x.id === s.selectedScenario) || SCENARIOS[1];
-const trs = calcTRS(sc.trs);
-const annualTarget = s.target * 12;
-const inflatedTarget = Math.round(annualTarget * Math.pow(1 + s.inflation, sc.age - s.currentAge));
-
-// Active income
-const wifeInc = s.wifeOn ? s.wifeAmt : 0;
-const divsInc = s.divsOn ? s.divsAmt : 0;
-const sideInc = s.sideOn ? s.sideAmt : 0;
-const aduInc = s.aduOn ? s.aduAmt : 0;
-const ozarksInc = s.ozarksOn ? s.ozarksAmt : 0;
-const totalOther = sideInc + aduInc + ozarksInc;
-const totalPreIncome = wifeInc + divsInc + totalOther;
-const preGap = Math.max(0, inflatedTarget - totalPreIncome);
-
-// Portfolio at retire
-const months = Math.round((sc.age - s.currentAge) * 12);
-const projPort = grow(s.currentPort, s.monthlyContrib, months);
-const wr = projPort > 0 ? preGap / projPort : 0;
-
-// Post-65
-const post65Inc = divsInc + trs + s.ssAmt;
-const post65Gap = Math.max(0, inflatedTarget - post65Inc);
-const post65Surplus = Math.max(0, post65Inc - inflatedTarget);
-
-// Monte Carlo
-const mc20 = useMemo(() => mc(projPort, sc.age, s.trsAge, s.ssAge, 20, inflatedTarget, wifeInc, divsInc, sideInc + aduInc + ozarksInc, 0, trs, s.ssAmt), [projPort, sc, s, wifeInc, divsInc, sideInc, aduInc, ozarksInc, trs, inflatedTarget]);
-const mc30 = useMemo(() => mc(projPort, sc.age, s.trsAge, s.ssAge, 30, inflatedTarget, wifeInc, divsInc, sideInc + aduInc + ozarksInc, 0, trs, s.ssAmt), [projPort, sc, s, wifeInc, divsInc, sideInc, aduInc, ozarksInc, trs, inflatedTarget]);
-const mc40 = useMemo(() => mc(projPort, sc.age, s.trsAge, s.ssAge, 40, inflatedTarget, wifeInc, divsInc, sideInc + aduInc + ozarksInc, 0, trs, s.ssAmt), [projPort, sc, s, wifeInc, divsInc, sideInc, aduInc, ozarksInc, trs, inflatedTarget]);
-
-// How close are we to $10k safely?
-const safePortNeeded = preGap / 0.035; // 3.5% target WR
-const shortfall = Math.max(0, safePortNeeded - projPort);
-const readinessScore = Math.min(100, Math.round(projPort / safePortNeeded * 100));
-const monthsToReady = shortfall > 0 ? Math.ceil(Math.log(1 + shortfall * (0.069 / 12) / s.monthlyContrib) / Math.log(1 + 0.069 / 12)) : 0;
-
-// Headline
-const headline = useMemo(() => {
-if (wr <= 0.03 && mc20 >= 0.95) return {
-text: “Dream Unlocked”,
-sub: “You can live on $10k/mo safely”,
-color: C.dreamBright,
-emoji: “🚀”
-};
-if (wr <= 0.04 && mc20 >= 0.90) return {
-text: “Very Close”,
-sub: “One more lever gets you there”,
-color: C.greenBright,
-emoji: “✨”
-};
-if (wr <= 0.05 && mc20 >= 0.85) return {
-text: “On the Path”,
-sub: “Bridge period manageable”,
-color: C.green,
-emoji: “🌊”
-};
-if (wr <= 0.06 && mc20 >= 0.78) return {
-text: “Getting There”,
-sub: “More income or time needed”,
-color: C.gold,
-emoji: “📈”
-};
-return {
-text: “Gap to Close”,
-sub: “Add income sources or wait”,
-color: C.orange,
-emoji: “🎯”
-};
-}, [wr, mc20]);
-
-// All 5 scenarios computed
-const allScenarios = useMemo(() => SCENARIOS.map(scenario => {
-const t = calcTRS(scenario.trs);
-const mo = Math.round((scenario.age - s.currentAge) * 12);
-const pp = grow(s.currentPort, s.monthlyContrib, mo);
-const inf = Math.round(annualTarget * Math.pow(1 + s.inflation, scenario.age - s.currentAge));
-const gap = Math.max(0, inf - totalPreIncome);
-const w = pp > 0 ? gap / pp : 0;
-const success = mc(pp, scenario.age, s.trsAge, s.ssAge, 20, inf, wifeInc, divsInc, sideInc + aduInc + ozarksInc, 0, t, s.ssAmt, 600);
-return {
-…scenario,
-projPort: pp,
-trsAmt: t,
-gap,
-wr: w,
-mc20: success
-};
-}), [s, totalPreIncome, wifeInc, divsInc, sideInc, aduInc, ozarksInc, annualTarget]);
-
-// ── DREAM TAB ──────────────────────────────────────────────────────────────
-const DreamTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, {
-style: {
-background: `${C.dream}15`,
-border: `2px solid ${C.dream}50`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-color: C.dreamBright,
-fontWeight: 700,
-marginBottom: 10
-}
-}, “\uD83C\uDFAF Your Dream Retirement Target”), /*#**PURE***/React.createElement(Slider, {
-label: “Monthly Spending Goal”,
-value: s.target,
-min: 5000,
-max: 20000,
-step: 250,
-onChange: set(“target”),
-color: C.dreamBright,
-display: v => `${fmt(v)}/mo`
-}), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “grid”,
-gridTemplateColumns: “1fr 1fr 1fr”,
-gap: 8,
-marginTop: 4
-}
-}, [{
-label: “Annual”,
-val: fmt(annualTarget, true) + “/yr”,
-color: C.dreamBright
-}, {
-label: `At ${sc.label}`,
-val: fmt(inflatedTarget, true) + “/yr”,
-color: C.gold
-}, {
-label: “Post-65 gap”,
-val: post65Gap > 0 ? fmt(post65Gap, true) : “✓ Covered”,
-color: post65Gap > 0 ? C.orange : C.greenBright
-}].map(({
-label,
-val,
-color
-}) => /*#**PURE***/React.createElement(“div”, {
-key: label,
-style: {
-background: “rgba(0,0,0,0.25)”,
-borderRadius: 8,
-padding: “8px 6px”,
-textAlign: “center”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: C.dim,
-textTransform: “uppercase”,
-letterSpacing: 0.5
-}
-}, label), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 13,
-fontWeight: 800,
-color,
-fontFamily: “monospace”,
-marginTop: 2
-}
-}, val))))), /*#**PURE***/React.createElement(Card, {
-style: {
-background: `${headline.color}12`,
-border: `1px solid ${headline.color}40`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-alignItems: “center”,
-marginBottom: 10
-}
-}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 20,
-fontWeight: 900,
-color: headline.color
-}
-}, headline.emoji, “ “, headline.text), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-color: C.muted
-}
-}, headline.sub)), /*#**PURE***/React.createElement(“div”, {
-style: {
-textAlign: “right”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: C.muted
-}
-}, “Readiness”), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 32,
-fontWeight: 900,
-color: headline.color,
-fontFamily: “monospace”,
-lineHeight: 1
-}
-}, readinessScore, “%”))), /*#**PURE***/React.createElement(“div”, {
-style: {
-height: 12,
-background: C.border,
-borderRadius: 6,
-marginBottom: 6,
-overflow: “hidden”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-height: 12,
-borderRadius: 6,
-transition: “width 0.6s”,
-width: `${readinessScore}%`,
-background: readinessScore >= 100 ? `linear-gradient(90deg, ${C.green}, ${C.dreamBright})` : `linear-gradient(90deg, ${C.orange}, ${C.gold})`
-}
-})), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “grid”,
-gridTemplateColumns: “1fr 1fr”,
-gap: 6
-}
-}, [{
-label: “Portfolio at Retire”,
-val: fmt(projPort, true),
-color: C.accent
-}, {
-label: “Withdrawal Rate”,
-val: pct(wr),
-color: wr < 0.035 ? C.greenBright : wr < 0.045 ? C.gold : C.red
-}, {
-label: “Portfolio Needed (3.5%)”,
-val: fmt(safePortNeeded, true),
-color: C.muted
-}, {
-label: shortfall > 0 ? “Shortfall” : “✓ Surplus”,
-val: shortfall > 0 ? fmt(shortfall, true) : fmt(projPort - safePortNeeded, true),
-color: shortfall > 0 ? C.orange : C.greenBright
-}].map(({
-label,
-val,
-color
-}) => /*#**PURE***/React.createElement(“div”, {
-key: label,
-style: {
-background: “rgba(0,0,0,0.2)”,
-borderRadius: 8,
-padding: “7px 8px”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: C.dim
-}
-}, label), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 13,
-fontWeight: 700,
-color,
-fontFamily: “monospace”
-}
-}, val)))), shortfall > 0 && /*#**PURE***/React.createElement(“div”, {
-style: {
-marginTop: 10,
-padding: “8px 10px”,
-borderRadius: 8,
-background: `${C.gold}15`,
-border: `1px solid ${C.gold}35`,
-fontSize: 11,
-color: C.muted,
-lineHeight: 1.7
-}
-}, “\uD83D\uDCA1 Gap closes in approximately “, /*#**PURE***/React.createElement(“strong”, {
-style: {
-color: C.gold
-}
-}, monthsToReady > 24 ? `${Math.ceil(monthsToReady / 12)} years` : `${monthsToReady} months`), “ at current contribution rate \u2014 or sooner with added income sources below.”)), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Success Probability at $”, s.target.toLocaleString(), “/mo”), /*#**PURE***/React.createElement(Gauge, {
-value: mc20,
-label: `20yr — bridge to 65 (${sc.label} retire)`
-}), /*#**PURE***/React.createElement(Gauge, {
-value: mc30,
-label: “30yr \u2014 to age 77”
-}), /*#**PURE***/React.createElement(Gauge, {
-value: mc40,
-label: “40yr \u2014 to age 87”
-}), /*#**PURE***/React.createElement(“div”, {
-style: {
-marginTop: 6,
-fontSize: 10,
-color: C.dim
-}
-}, “Monte Carlo runs actual year-by-year income steps: TRS $”, fmt(trs, true), “/yr kicks in at “, s.trsAge, “, SS $”, fmt(s.ssAmt, true), “/yr at “, s.ssAge, “.”)), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Income vs $”, s.target.toLocaleString(), “/mo Target”), /*#**PURE***/React.createElement(“div”, {
-style: {
-marginBottom: 12
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 4,
-fontSize: 10
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-color: C.muted
-}
-}, “Income sources”), /*#**PURE***/React.createElement(“span”, {
-style: {
-color: C.muted,
-fontFamily: “monospace”
-}
-}, fmt(totalPreIncome, true), “/”, fmt(inflatedTarget, true), “ needed”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-height: 28,
-background: C.border,
-borderRadius: 6,
-overflow: “hidden”,
-display: “flex”
-}
-}, [{
-val: wifeInc,
-color: C.teal
-}, {
-val: divsInc,
-color: C.purple
-}, {
-val: sideInc,
-color: C.gold
-}, {
-val: aduInc,
-color: C.green
-}, {
-val: ozarksInc,
-color: C.accent
-}].filter(x => x.val > 0).map((x, i) => /*#**PURE***/React.createElement(“div”, {
-key: i,
-style: {
-width: `${Math.min(100, x.val / inflatedTarget * 100)}%`,
-background: x.color,
-height: “100%”
-}
-}))), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginTop: 3,
-fontSize: 9
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-color: totalPreIncome >= inflatedTarget ? C.greenBright : C.muted
-}
-}, pct(totalPreIncome / inflatedTarget), “ covered by guaranteed income”), /*#**PURE***/React.createElement(“span”, {
-style: {
-color: preGap > 0 ? C.gold : C.greenBright
-}
-}, preGap > 0 ? `Portfolio covers ${fmt(preGap, true)}/yr` : “✓ Fully covered”))), [{
-label: “Wife SSDI + OPERS”,
-val: wifeInc,
-on: s.wifeOn,
-color: C.teal
-}, {
-label: “Portfolio Dividends”,
-val: divsInc,
-on: s.divsOn,
-color: C.purple
-}, {
-label: “Side Income”,
-val: sideInc,
-on: s.sideOn,
-color: C.gold
-}, {
-label: “ADU / Rental”,
-val: aduInc,
-on: s.aduOn,
-color: C.green
-}, {
-label: “Lake Ozarks”,
-val: ozarksInc,
-on: s.ozarksOn,
-color: C.accent
-}].map(({
-label,
-val,
-on,
-color
-}) => on && val > 0 ? /*#**PURE***/React.createElement(“div”, {
-key: label,
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 5
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 11,
-color
-}
-}, label), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color
-}
-}, fmt(val, true), “/yr”)) : null), /*#**PURE***/React.createElement(“div”, {
-style: {
-borderTop: `1px solid ${C.border}`,
-paddingTop: 8,
-marginTop: 4
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 12,
-fontWeight: 700,
-color: C.text
-}
-}, “Portfolio covers”), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 14,
-fontWeight: 800,
-fontFamily: “monospace”,
-color: preGap < 20000 ? C.greenBright : preGap < 50000 ? C.gold : C.red
-}
-}, fmt(preGap, true), “/yr”)))), /*#**PURE***/React.createElement(Card, {
-style: {
-background: `${C.accent}10`,
-border: `1px solid ${C.accent}30`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.accent,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Age 65 \u2014 The Transformation”), [{
-label: `TRS Pension (${sc.trs} yrs × 2.3% × $195k)`,
-val: trs,
-color: C.teal
-}, {
-label: “Social Security”,
-val: s.ssAmt,
-color: C.greenBright
-}, {
-label: “Portfolio Dividends”,
-val: divsInc,
-color: C.purple
-}].map(({
-label,
-val,
-color
-}) => /*#**PURE***/React.createElement(“div”, {
-key: label,
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 5
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 11,
-color
-}
-}, label), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color
-}
-}, fmt(val, true), “/yr”))), /*#**PURE***/React.createElement(“div”, {
-style: {
-borderTop: `1px solid ${C.accent}40`,
-paddingTop: 8,
-marginTop: 4
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 13,
-fontWeight: 700,
-color: C.text
-}
-}, “Guaranteed floor @65”), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 14,
-fontWeight: 800,
-fontFamily: “monospace”,
-color: C.accent
-}
-}, fmt(post65Inc, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-marginTop: 8,
-padding: “8px 10px”,
-borderRadius: 8,
-background: post65Gap <= 0 ? `${C.greenBright}18` : `${C.gold}15`,
-border: `1px solid ${post65Gap <= 0 ? C.greenBright : C.gold}40`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 12,
-fontWeight: 700,
-color: post65Gap <= 0 ? C.greenBright : C.gold
-}
-}, post65Gap <= 0 ? `✓ Fully covered — surplus ${fmt(post65Surplus, true)}/yr` : `Gap at 65: ${fmt(post65Gap, true)}/yr from portfolio`), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-marginTop: 2
-}
-}, post65Gap <= 0 ? “Portfolio becomes legacy wealth for Libby” : “Modest portfolio draw — very manageable”)))));
-
-// ── INCOME TAB ─────────────────────────────────────────────────────────────
-const IncomeTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-color: C.muted,
-marginBottom: 12,
-lineHeight: 1.7,
-padding: “10px 12px”,
-background: `${C.border}40`,
-borderRadius: 10
-}
-}, “Toggle and adjust each income source. Every change instantly updates your withdrawal rate, Monte Carlo gauges, and readiness score on the Dream tab.”), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(Toggle, {
-label: “Wife SSDI + OPERS”,
-value: s.wifeOn,
-onChange: set(“wifeOn”),
-color: C.teal
-}), s.wifeOn && /*#**PURE***/React.createElement(Slider, {
-label: “Annual Amount”,
-value: s.wifeAmt,
-min: 0,
-max: 80000,
-step: 1000,
-onChange: set(“wifeAmt”),
-color: C.teal,
-note: “SSDI + OPERS disability pension \u2014 OPERS portion is rock solid”
-})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(Toggle, {
-label: “Portfolio Dividends”,
-value: s.divsOn,
-onChange: set(“divsOn”),
-color: C.purple
-}), s.divsOn && /*#**PURE***/React.createElement(Slider, {
-label: “Annual Dividend Income”,
-value: s.divsAmt,
-min: 0,
-max: 30000,
-step: 500,
-onChange: set(“divsAmt”),
-color: C.purple,
-note: “~1.2% of portfolio \u2014 grows as portfolio grows”
-})), /*#**PURE***/React.createElement(Card, {
-style: {
-border: s.sideOn ? `1px solid ${C.gold}50` : `1px solid ${C.border}`
-}
-}, /*#**PURE***/React.createElement(Toggle, {
-label: “Side / Consulting Income”,
-value: s.sideOn,
-onChange: set(“sideOn”),
-color: C.gold
-}), s.sideOn && /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(Slider, {
-label: “Annual Side Income”,
-value: s.sideAmt,
-min: 0,
-max: 60000,
-step: 1000,
-onChange: set(“sideAmt”),
-color: C.gold
-}), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.dim,
-lineHeight: 1.7
-}
-}, “Even $1,000/mo cuts your portfolio gap by $12k/yr. $2,000/mo brings it down $24k/yr. This is your biggest lever.”))), /*#**PURE***/React.createElement(Card, {
-style: {
-border: s.aduOn ? `1px solid ${C.green}50` : `1px solid ${C.border}`
-}
-}, /*#**PURE***/React.createElement(Toggle, {
-label: “ADU / Rental Income (Kaitlyn)”,
-value: s.aduOn,
-onChange: set(“aduOn”),
-color: C.green
-}), s.aduOn && /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(Slider, {
-label: “Annual Rental Income (net)”,
-value: s.aduAmt,
-min: 0,
-max: 24000,
-step: 600,
-onChange: set(“aduAmt”),
-color: C.green
-}), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.dim,
-lineHeight: 1.7
-}
-}, “$700\u20131,000/mo is realistic for Edmond ADU. Jeremiah can GC it. Cuts your portfolio gap dollar-for-dollar.”))), /*#**PURE***/React.createElement(Card, {
-style: {
-border: s.ozarksOn ? `1px solid ${C.accent}50` : `1px solid ${C.border}`
-}
-}, /*#**PURE***/React.createElement(Toggle, {
-label: “Lake Ozarks Net Cash Flow”,
-value: s.ozarksOn,
-onChange: set(“ozarksOn”),
-color: C.accent
-}), s.ozarksOn && /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(Slider, {
-label: “Annual Net Cash Flow”,
-value: s.ozarksAmt,
-min: -30000,
-max: 30000,
-step: 1000,
-onChange: set(“ozarksAmt”),
-color: C.accent,
-note: “Rental income minus carry costs. Can be negative if costs > revenue.”
-}))), /*#**PURE***/React.createElement(Card, {
-style: {
-background: `${C.greenBright}08`,
-border: `1px solid ${C.greenBright}25`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.greenBright,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Income Summary”), [{
-label: “Total pre-65 income”,
-val: totalPreIncome,
-color: C.accent
-}, {
-label: “Spending target (inflated)”,
-val: inflatedTarget,
-color: C.gold
-}, {
-label: “Portfolio gap”,
-val: preGap,
-color: preGap < 20000 ? C.greenBright : preGap < 50000 ? C.gold : C.red
-}, {
-label: “Withdrawal rate”,
-val: pct(wr),
-color: wr < 0.035 ? C.greenBright : wr < 0.045 ? C.gold : C.red,
-isStr: true
-}].map(({
-label,
-val,
-color,
-isStr
-}) => /*#**PURE***/React.createElement(“div”, {
-key: label,
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 8
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 12,
-color: C.muted
-}
-}, label), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 13,
-fontWeight: 700,
-color,
-fontFamily: “monospace”
-}
-}, isStr ? val : fmt(val, true), isStr ? “” : “/yr”)))));
-
-// ── SCENARIOS TAB ──────────────────────────────────────────────────────────
-const ScenariosTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Retirement Date”), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “grid”,
-gridTemplateColumns: “1fr 1fr 1fr 1fr 1fr”,
-gap: 4
-}
-}, SCENARIOS.map(sc => /*#**PURE***/React.createElement(“button”, {
-key: sc.id,
-onClick: () => set(“selectedScenario”)(sc.id),
-style: {
-background: s.selectedScenario === sc.id ? `${sc.color}30` : “transparent”,
-border: `1px solid ${s.selectedScenario === sc.id ? sc.color : C.dim}`,
-borderRadius: 8,
-padding: “7px 3px”,
-cursor: “pointer”,
-textAlign: “center”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-fontWeight: 700,
-color: s.selectedScenario === sc.id ? sc.color : C.muted
-}
-}, sc.label), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 8,
-color: C.dim
-}
-}, sc.trs, “yr TRS”))))), /*#**PURE***/React.createElement(Card, {
-style: {
-background: `${C.gold}10`,
-border: `1px solid ${C.gold}30`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.gold,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “All Scenarios at $”, s.target.toLocaleString(), “/mo”), /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “grid”,
-gridTemplateColumns: “60px 1fr 1fr 56px 48px”,
-gap: 4,
-fontSize: 9,
-color: C.dim,
-textTransform: “uppercase”,
-letterSpacing: 0.5,
-marginBottom: 6,
-paddingBottom: 4,
-borderBottom: `1px solid ${C.border}`
-}
-}, /*#**PURE***/React.createElement(“span”, null, “Date”), /*#**PURE***/React.createElement(“span”, null, “Portfolio”), /*#**PURE***/React.createElement(“span”, null, “Gap/yr”), /*#**PURE***/React.createElement(“span”, null, “WR”), /*#**PURE***/React.createElement(“span”, null, “20yr”)), allScenarios.map(sc => /*#**PURE***/React.createElement(“div”, {
-key: sc.id,
-onClick: () => set(“selectedScenario”)(sc.id),
-style: {
-display: “grid”,
-gridTemplateColumns: “60px 1fr 1fr 56px 48px”,
-gap: 4,
-padding: “8px 0”,
-cursor: “pointer”,
-alignItems: “center”,
-borderBottom: `1px solid ${C.border}30`,
-background: s.selectedScenario === sc.id ? `${sc.color}08` : “transparent”,
-borderLeft: s.selectedScenario === sc.id ? `3px solid ${sc.color}` : “3px solid transparent”,
-paddingLeft: 6
-}
-}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-fontWeight: 700,
-color: sc.color
-}
-}, sc.label), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 8,
-color: C.dim
-}
-}, sc.trsAmt && fmt(sc.trsAmt, true), “/yr”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color: C.accent
-}
-}, fmt(sc.projPort, true)), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color: sc.gap < 20000 ? C.greenBright : sc.gap < 50000 ? C.gold : C.red
-}
-}, fmt(sc.gap, true)), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color: sc.wr < 0.035 ? C.greenBright : sc.wr < 0.045 ? C.gold : C.red
-}
-}, pct(sc.wr)), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 11,
-fontFamily: “monospace”,
-color: sc.mc20 >= 0.95 ? C.greenBright : sc.mc20 >= 0.85 ? C.gold : C.red
-}
-}, Math.round(sc.mc20 * 100), “%”)))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.teal,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “TRS Pension Value by Scenario”), allScenarios.map(sc => /*#**PURE***/React.createElement(“div”, {
-key: sc.id,
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-marginBottom: 8,
-alignItems: “center”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-alignItems: “center”,
-gap: 8
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-width: 8,
-height: 8,
-borderRadius: 2,
-background: sc.color
-}
-}), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 12,
-color: C.muted
-}
-}, sc.label, “ \u2014 “, sc.trs, “ yrs service”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-textAlign: “right”
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 13,
-fontWeight: 700,
-fontFamily: “monospace”,
-color: C.teal
-}
-}, fmt(sc.trsAmt, true), “/yr”), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: C.dim
-}
-}, fmt(sc.trsAmt / 12), “/mo”)))), /*#**PURE***/React.createElement(“div”, {
-style: {
-padding: “8px 10px”,
-borderRadius: 8,
-background: `${C.teal}12`,
-border: `1px solid ${C.teal}30`,
-fontSize: 11,
-color: C.muted,
-lineHeight: 1.7,
-marginTop: 4
-}
-}, “Each extra year adds “, /*#**PURE***/React.createElement(“strong”, {
-style: {
-color: C.teal
-}
-}, fmt(calcTRS(1), true), “/yr”), “ at 65. Jun 2027\u21922028 is worth “, /*#**PURE***/React.createElement(“strong”, {
-style: {
-color: C.teal
-}
-}, fmt(calcTRS(12) - calcTRS(11), true), “/yr”), “ in guaranteed lifetime income \u2014 forever.”)));
-
-// ── INPUTS TAB ─────────────────────────────────────────────────────────────
-const InputsTab = () => /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Portfolio”), /*#**PURE***/React.createElement(Slider, {
-label: “Current Portfolio”,
-value: s.currentPort,
-min: 800000,
-max: 2500000,
-step: 5000,
-onChange: set(“currentPort”)
-}), /*#**PURE***/React.createElement(Slider, {
-label: “Monthly Contributions”,
-value: s.monthlyContrib,
-min: 0,
-max: 15000,
-step: 250,
-onChange: set(“monthlyContrib”)
-})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Retirement Income @65”), /*#**PURE***/React.createElement(Slider, {
-label: “Social Security Annual”,
-value: s.ssAmt,
-min: 12000,
-max: 48000,
-step: 500,
-onChange: set(“ssAmt”)
-}), /*#**PURE***/React.createElement(Slider, {
-label: “SS Start Age”,
-value: s.ssAge,
-min: 62,
-max: 70,
-step: 1,
-onChange: set(“ssAge”),
-display: v => `${v}`
-}), /*#**PURE***/React.createElement(Slider, {
-label: “TRS Start Age”,
-value: s.trsAge,
-min: 55,
-max: 70,
-step: 1,
-onChange: set(“trsAge”),
-display: v => `${v}`
-})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: C.muted,
-textTransform: “uppercase”,
-letterSpacing: 1,
-fontWeight: 700,
-marginBottom: 8
-}
-}, “Planning Assumptions”), /*#**PURE***/React.createElement(Slider, {
-label: “Inflation Rate”,
-value: s.inflation,
-min: 0.01,
-max: 0.06,
-step: 0.005,
-onChange: set(“inflation”),
-display: v => `${(v * 100).toFixed(1)}%`,
-color: C.orange
-}), /*#**PURE***/React.createElement(Slider, {
-label: “Current Age”,
-value: s.currentAge,
-min: 40,
-max: 60,
-step: 1,
-onChange: set(“currentAge”),
-display: v => `${v}`
-})));
-const TABS = [{
-id: “dream”,
-icon: “🌊”,
-label: “Dream”
-}, {
-id: “income”,
-icon: “💰”,
-label: “Income”
-}, {
-id: “scenarios”,
-icon: “📈”,
-label: “Paths”
-}, {
-id: “inputs”,
-icon: “⚙️”,
-label: “Inputs”
-}];
-return /*#**PURE***/React.createElement(“div”, {
-style: {
-background: C.bg,
-minHeight: “100vh”,
-color: C.text,
-fontFamily: “‘Georgia’, ‘Times New Roman’, serif”,
-maxWidth: 480,
-margin: “0 auto”,
-paddingBottom: 90
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-background: “linear-gradient(160deg, #06111f 0%, #13063d 50%, #071828 100%)”,
-padding: “16px 16px 12px”,
-position: “sticky”,
-top: 0,
-zIndex: 100,
-boxShadow: “0 4px 24px rgba(0,0,0,0.8)”,
-borderBottom: `1px solid ${C.border}`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-alignItems: “flex-start”
-}
-}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 21,
-fontWeight: 900,
-color: “white”,
-fontStyle: “italic”
-}
-}, “\uD83C\uDF0A Flory Freedom”), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: “rgba(255,255,255,0.4)”,
-letterSpacing: 2,
-textTransform: “uppercase”
-}
-}, “$10k/Month Dream \xB7 Edmond, OK”)), /*#**PURE***/React.createElement(“div”, {
-style: {
-textAlign: “right”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: “rgba(255,255,255,0.4)”,
-textTransform: “uppercase”,
-letterSpacing: 1
-}
-}, sc.label, “ \xB7 “, sc.trs, “yr TRS”), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 15,
-fontWeight: 800,
-color: sc.color,
-fontFamily: “monospace”
-}
-}, fmt(projPort, true)))), /*#**PURE***/React.createElement(“div”, {
-style: {
-marginTop: 10,
-padding: “8px 12px”,
-borderRadius: 9,
-background: `${headline.color}18`,
-border: `1px solid ${headline.color}45`
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-display: “flex”,
-justifyContent: “space-between”,
-alignItems: “center”
-}
-}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 14,
-fontWeight: 800,
-color: headline.color
-}
-}, headline.emoji, “ “, headline.text), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 10,
-color: “rgba(255,255,255,0.4)”
-}
-}, headline.sub)), /*#**PURE***/React.createElement(“div”, {
-style: {
-textAlign: “right”
-}
-}, /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 9,
-color: “rgba(255,255,255,0.4)”
-}
-}, “WR \xB7 “, pct(wr)), /*#**PURE***/React.createElement(“div”, {
-style: {
-fontSize: 18,
-fontWeight: 900,
-fontFamily: “monospace”,
-color: readinessScore >= 100 ? C.dreamBright : readinessScore >= 85 ? C.greenBright : readinessScore >= 70 ? C.gold : C.orange
-}
-}, readinessScore, “% ready”))))), /*#**PURE***/React.createElement(“div”, {
-style: {
-padding: “14px 12px 0”
-}
-}, tab === “dream” && /*#**PURE***/React.createElement(DreamTab, null), tab === “income” && /*#**PURE***/React.createElement(IncomeTab, null), tab === “scenarios” && /*#**PURE***/React.createElement(ScenariosTab, null), tab === “inputs” && /*#**PURE***/React.createElement(InputsTab, null)), /*#**PURE***/React.createElement(“div”, {
-style: {
-position: “fixed”,
-bottom: 0,
-left: “50%”,
-transform: “translateX(-50%)”,
-width: “100%”,
-maxWidth: 480,
-background: “rgba(6,9,20,0.97)”,
-backdropFilter: “blur(14px)”,
-borderTop: `1px solid ${C.border}`,
-display: “flex”,
-justifyContent: “space-around”,
-padding: “8px 0 14px”,
-zIndex: 200
-}
-}, TABS.map(({
-id,
-icon,
-label
-}) => /*#**PURE***/React.createElement(“button”, {
-key: id,
-onClick: () => setTab(id),
-style: {
-background: “none”,
-border: “none”,
-cursor: “pointer”,
-display: “flex”,
-flexDirection: “column”,
-alignItems: “center”,
-gap: 2
-}
-}, /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 20,
-filter: tab === id ? “none” : “grayscale(80%) opacity(0.4)”
-}
-}, icon), /*#**PURE***/React.createElement(“span”, {
-style: {
-fontSize: 8,
-color: tab === id ? C.dreamBright : C.dim,
-fontWeight: tab === id ? 700 : 400,
-letterSpacing: 0.5,
-textTransform: “uppercase”
-}
-}, label), tab === id && /*#**PURE***/React.createElement(“div”, {
-style: {
-width: 4,
-height: 3,
-borderRadius: 2,
-background: C.dreamBright
-}
-})))));
-}
-const root = ReactDOM.createRoot(document.getElementById(‘root’));
-root.render(React.createElement(FloryDream));
 </script>
-
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function (err) {
+      console.warn("Service worker registration failed:", err);
+    });
+  });
+}
+</script>
 </body>
 </html>
