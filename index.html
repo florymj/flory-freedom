@@ -170,6 +170,36 @@ button { color: inherit; }
 }
 .hero-stat label { display: block; color: var(--dim); font-size: 9px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0; font-weight: 850; }
 .hero-stat strong { display: block; margin-top: 5px; font-size: 16px; line-height: 1.05; font-weight: 900; color: var(--text); font-variant-numeric: tabular-nums; }
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.scenario-btn {
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 11px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  min-height: 78px;
+}
+.scenario-btn strong { font-size: 13px; line-height: 1.2; }
+.scenario-btn span { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.scenario-btn:hover,
+.scenario-btn:focus-visible,
+.scenario-btn.active {
+  border-color: rgba(155,227,127,0.44);
+  background: rgba(155,227,127,0.09);
+  outline: none;
+}
+.control-deck { display: grid; gap: 10px; }
+.control-deck .control {
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.025);
+}
+.impact-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .confidence-row { display: grid; gap: 8px; margin-bottom: 10px; }
 .confidence-item {
   display: grid;
@@ -1115,8 +1145,47 @@ function CommandTab(props) {
   var s = props.s;
   var e = props.e;
   var c = props.c;
+  var set = props.set;
+  var update = props.update;
   var scoreColor = e.readinessScore >= 100 ? COLORS.green2 : e.readinessScore >= 90 ? COLORS.green : COLORS.gold;
   var wrColor = e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
+  var projectedMonthly = e.spendAtRetire / 12;
+  var drawMonthly = e.bridgeDraw / 12;
+  var presets = [
+    {
+      title: "Base case",
+      detail: "June 2027, current spend, current allocation",
+      active: s.monthsToRetire === 12 && s.spendMonthly === 10000 && s.monthlyContrib === 9000 && s.equityPct === 83 && s.bondPct === 12 && s.includePto && !s.includeAduRent,
+      patch: {
+        monthsToRetire: 12,
+        spendMonthly: 10000,
+        monthlyContrib: 9000,
+        equityPct: 83,
+        bondPct: 12,
+        includePto: true,
+        includeAduRent: false,
+        aduRentMonthly: 0
+      }
+    },
+    {
+      title: "Lean spend",
+      detail: "Drop monthly target and watch draw pressure fall",
+      active: s.spendMonthly <= 8500,
+      patch: { spendMonthly: 8500 }
+    },
+    {
+      title: "Earlier exit",
+      detail: "Cut the runway to 6 months",
+      active: s.monthsToRetire <= 6,
+      patch: { monthsToRetire: 6 }
+    },
+    {
+      title: "Income upside",
+      detail: "Toggle ADU rent into the plan",
+      active: s.includeAduRent && s.aduRentMonthly > 0,
+      patch: { includeAduRent: true, aduRentMonthly: 1500 }
+    }
+  ];
   var actions = [
     { icon: "list", title: "On time, not early", copy: "Stay the course to " + s.retireDateLabel + ".", status: "Ongoing", color: COLORS.green },
     { icon: "bridge", title: "Bridge to 65", copy: "Keep the family's first-year draw near " + pct(e.withdrawalRate, 1) + ".", status: "Review Apr 2027", color: COLORS.gold },
@@ -1140,6 +1209,30 @@ function CommandTab(props) {
         h("div", { className: "hero-stat" }, h("label", null, "Family draw"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
         h("div", { className: "hero-stat" }, h("label", null, "Plan MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
         h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
+      )
+    ),
+    h(Panel, { title: "Scenario Cockpit", meta: "Tap + adjust" },
+      h("div", { className: "scenario-grid" },
+        presets.map(function (preset) {
+          return h("button", { key: preset.title, type: "button", className: "scenario-btn" + (preset.active ? " active" : ""), onClick: function () { update(preset.patch); } },
+            h("strong", null, preset.title),
+            h("span", null, preset.detail)
+          );
+        })
+      ),
+      h("div", { className: "control-deck" },
+        h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 100, onChange: set("spendMonthly"), display: function (v) { return fmt(v) + "/mo"; } }),
+        h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
+        h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
+        h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
+        h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
+        h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 30000, max: 90000, step: 500, onChange: set("wifeIncome") })
+      ),
+      h("div", { className: "impact-strip" },
+        h(Stat, { label: "Budget at exit", value: fmt(projectedMonthly, true) + "/mo", note: "Inflation adjusted", color: COLORS.cyan }),
+        h(Stat, { label: "Portfolio draw", value: fmt(drawMonthly, true) + "/mo", note: pct(e.withdrawalRate, 1) + " of assets", color: wrColor }),
+        h(Stat, { label: "Plan success", value: Math.round(e.mc.successRate * 100) + "%", note: "800 simulations", color: COLORS.green2 }),
+        h(Stat, { label: "Income coverage", value: pct(e.floorCoverage, 0), note: "At Social Security age", color: COLORS.gold })
       )
     ),
     h(Panel, { title: "Confidence Check", meta: "Today" },
@@ -1571,6 +1664,11 @@ function App() {
       });
     };
   }
+  function update(patch) {
+    setS(function (prev) {
+      return normalizeState(Object.assign({}, prev, patch || {}));
+    });
+  }
   function reset() {
     if (!window.confirm("Reset Flory Freedom to the June 2027 plan defaults?")) return;
     setS(Object.assign({}, DEF));
@@ -1608,7 +1706,7 @@ function App() {
       h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
     ),
     h("main", { className: "content" },
-      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set }),
+      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set, update: update }),
       tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
       tab === "budget" && h(BudgetTab, { s: s, e: e, set: set }),
       tab === "inputs" && h(InputsTab, { s: s, c: c, set: set }),
