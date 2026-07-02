@@ -1091,7 +1091,7 @@ function TimelineRail(props) {
   var items = [
     { when: "Today", title: "Plan locked", detail: "Use real portfolio data", color: COLORS.green },
     { when: "6/30/2027", title: "Retirement", detail: "Day 0", color: COLORS.green2 },
-    { when: "2027-2045", title: "Bridge to 65", detail: pct(e.withdrawalRate, 1) + " WR", color: COLORS.gold },
+    { when: "2027-2045", title: "Bridge to 65", detail: pct(e.withdrawalRate, 1) + " shared draw", color: COLORS.gold },
     { when: "Age 65", title: "TRS starts", detail: fmt(e.trsAnnual, true) + "/yr", color: COLORS.cyan },
     { when: "67+", title: "Legacy vehicle", detail: "Income floor", color: COLORS.cyan }
   ];
@@ -1112,7 +1112,7 @@ function CommandTab(props) {
   var wrColor = e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
   var actions = [
     { icon: "list", title: "On time, not early", copy: "Stay the course to " + s.retireDateLabel + ".", status: "Ongoing", color: COLORS.green },
-    { icon: "bridge", title: "Bridge to 65", copy: "Keep first-year draw near " + pct(e.withdrawalRate, 1) + ".", status: "Review Apr 2027", color: COLORS.gold },
+    { icon: "bridge", title: "Bridge to 65", copy: "Keep the family's first-year draw near " + pct(e.withdrawalRate, 1) + ".", status: "Review Apr 2027", color: COLORS.gold },
     { icon: "shield", title: "Income floor", copy: "Coverage at SS age: " + pct(e.floorCoverage, 0) + ".", status: "Review yearly", color: COLORS.green2 },
     { icon: "adu", title: "Legacy vehicle", copy: "Max fund ADU, optimize taxes, plan gifting.", status: "Review 2026", color: COLORS.cyan }
   ];
@@ -1130,8 +1130,8 @@ function CommandTab(props) {
         h("strong", null, fmt(e.startBalance, true))
       ),
       h("div", { className: "hero-grid" },
-        h("div", { className: "hero-stat" }, h("label", null, "Michael WR"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
-        h("div", { className: "hero-stat" }, h("label", null, "Michael MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
+        h("div", { className: "hero-stat" }, h("label", null, "Family draw"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
+        h("div", { className: "hero-stat" }, h("label", null, "Plan MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
         h("div", { className: "hero-stat" }, h("label", null, "Colleen gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
       )
     ),
@@ -1139,7 +1139,7 @@ function CommandTab(props) {
       h("div", { className: "confidence-row" },
         h("div", { className: "confidence-item" },
           h("div", { className: "confidence-icon" }, h(Icon, { name: "bridge", size: 26 })),
-          h("div", null, h("strong", null, "Michael bridge stays controlled"), h("span", null, "First-year withdrawal rate remains near the conservative line.")),
+          h("div", null, h("strong", null, "Family bridge stays controlled"), h("span", null, "First-year shared portfolio draw remains near the conservative line.")),
           h("div", { className: "confidence-value", style: { color: wrColor } }, pct(e.withdrawalRate, 1))
         ),
         h("div", { className: "confidence-item" },
@@ -1149,7 +1149,7 @@ function CommandTab(props) {
         ),
         h("div", { className: "confidence-item" },
           h("div", { className: "confidence-icon", style: { color: COLORS.gold } }, h(Icon, { name: "income", size: 26 })),
-          h("div", null, h("strong", null, "Michael's pension is in the math"), h("span", null, "YOS x high-5 x 2.0%, using the salary history table.")),
+          h("div", null, h("strong", null, "TRS pension is in the math"), h("span", null, "YOS x high-5 x 2.0%, using the salary history table.")),
           h("div", { className: "confidence-value", style: { color: COLORS.gold } }, fmt(e.trsAnnual, true))
         )
       )
@@ -1157,7 +1157,7 @@ function CommandTab(props) {
     h(Panel, { title: "Colleen Conversation Brief", meta: "Big picture" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "This is a bridge plan, not a market bet"), h("span", null, "The portfolio mainly has to bridge the years before pensions and Social Security fully show up.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Michael's pension is counted conservatively"), h("span", null, "Current estimate: " + fmt(e.trsAnnual, true) + "/yr from " + s.trsYears.toFixed(1) + " years x " + fmt(e.highFive.average, true) + " high-5 x 2.0%.")),
+        h("div", { className: "guide-item" }, h("strong", null, "TRS pension is counted conservatively"), h("span", null, "Current estimate: " + fmt(e.trsAnnual, true) + "/yr from " + s.trsYears.toFixed(1) + " years x " + fmt(e.highFive.average, true) + " high-5 x 2.0%.")),
         h("div", { className: "guide-item" }, h("strong", null, "The portfolio's job changes after 65"), h("span", null, "Before 65 it supplies flexibility. After guaranteed income rises, it becomes more about safety, options, and legacy.")),
         h("div", { className: "guide-item" }, h("strong", null, "There are levers if markets disappoint"), h("span", null, "Spending can flex, cash can be used first, consulting can be temporary, and ADU income remains upside rather than the base case."))
       )
@@ -1443,8 +1443,8 @@ function GuideTab(props) {
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Equity mean 9.5%, bond mean 4.5%, cash mean 2.0%; volatility is allocation-weighted.")),
         h("div", { className: "guide-item" }, h("strong", null, "Colleen Monte Carlo"), h("span", null, "Colleen's tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
-        h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "Michael's TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% withdrawal rate.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Bridge withdrawal"), h("span", null, "First-year spending minus active income layers divided by projected portfolio plus any included PTO buffer.")),
+        h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% draw rate.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "Family first-year spending minus active income layers divided by projected portfolio plus any included PTO buffer.")),
         h("div", { className: "guide-item" }, h("strong", null, "Base case discipline"), h("span", null, "Guaranteed household income is base. Rent, side income, consulting, and ADU upside stay out unless toggled on.")),
         h("div", { className: "guide-item" }, h("strong", null, "Withdrawal order"), h("span", null, "The planning guide favors cash/bonds first in downturns, then taxable accounts, then tax-deferred accounts, with Roth assets preserved when possible. This is guidance text, not full tax software.")),
         h("div", { className: "guide-item" }, h("strong", null, "Not included yet"), h("span", null, "Detailed taxes, Roth conversion optimization, RMDs, real ACA plan quotes, exact TRS rule validation, and brokerage import automation."))
@@ -1465,7 +1465,7 @@ function GuideTab(props) {
 }
 var TABS = [
   { id: "command", label: "Home", icon: "command" },
-  { id: "income", label: "Michael", icon: "income" },
+  { id: "income", label: "Income", icon: "income" },
   { id: "colleen", label: "Colleen", icon: "shield" },
   { id: "adu", label: "ADU", icon: "adu" },
   { id: "guide", label: "Guide", icon: "guide" }
@@ -1504,7 +1504,7 @@ function App() {
       "Target: " + s.retireDateLabel,
       "Projected portfolio: " + fmt(e.startBalance),
       "Monte Carlo survival: " + Math.round(e.mc.successRate * 100) + "%",
-      "Bridge withdrawal rate: " + pct(e.withdrawalRate, 1),
+      "Family bridge draw rate: " + pct(e.withdrawalRate, 1),
       "TRS annual at 65: " + fmt(e.trsAnnual),
       "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
       "Colleen target: " + c.targetLabel,
