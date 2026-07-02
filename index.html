@@ -15,11 +15,11 @@
 <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 <style>
 :root {
-  --bg: #08100f;
-  --bg-2: #0b1518;
-  --panel: #0e1b1f;
-  --panel-2: #122429;
-  --line: #22343a;
+  --bg: #07110f;
+  --bg-2: #0d1716;
+  --panel: #101d1b;
+  --panel-2: #152622;
+  --line: #263935;
   --line-soft: rgba(255,255,255,0.08);
   --text: #eef7f2;
   --muted: #95a6a3;
@@ -30,7 +30,7 @@
   --gold: #ffd15f;
   --red: #ff6b6b;
   --orange: #ffad5c;
-  --shadow: 0 18px 44px rgba(0,0,0,0.36);
+  --shadow: 0 14px 34px rgba(0,0,0,0.28);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { min-height: 100%; background: var(--bg); color: var(--text); }
@@ -48,23 +48,23 @@ button { color: inherit; }
   margin: 0 auto;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(7,16,17,0.96) 0%, rgba(8,16,15,1) 240px),
-    radial-gradient(circle at 16% 0%, rgba(99,212,238,0.12), transparent 280px);
+    linear-gradient(180deg, rgba(6,18,15,0.98) 0%, rgba(7,17,15,1) 310px),
+    radial-gradient(circle at 78% -20px, rgba(155,227,127,0.14), transparent 310px);
   padding-bottom: calc(86px + env(safe-area-inset-bottom));
 }
 .topbar {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(8,16,15,0.94);
+  background: rgba(7,17,15,0.92);
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--line);
-  padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: calc(16px + env(safe-area-inset-top)) 18px 14px;
 }
 .toprow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { min-width: 0; }
 .brand h1 { font-size: 24px; line-height: 1.05; letter-spacing: 0; font-weight: 850; }
-.brand p { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.3; }
+.brand p { margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.3; }
 .date-chip {
   display: inline-flex;
   align-items: center;
@@ -74,7 +74,7 @@ button { color: inherit; }
   white-space: nowrap;
 }
 .header-metric {
-  margin-top: 14px;
+  margin-top: 12px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -86,14 +86,14 @@ button { color: inherit; }
 .header-metric strong { color: var(--green-2); font-size: 22px; font-weight: 850; font-variant-numeric: tabular-nums; }
 .content { padding: 14px 12px 0; }
 .panel {
-  background: linear-gradient(180deg, rgba(18,36,41,0.92), rgba(12,24,27,0.98));
-  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(18,32,30,0.96), rgba(12,23,21,0.98));
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   overflow: hidden;
 }
-.panel-body { padding: 14px; }
+.panel-body { padding: 15px; }
 .section-head {
   display: flex;
   align-items: baseline;
@@ -109,22 +109,16 @@ button { color: inherit; }
   font-weight: 850;
 }
 .section-head span { color: var(--muted); font-size: 11px; white-space: nowrap; }
-.metric-strip {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(132px, 1fr);
-  overflow-x: auto;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: rgba(0,0,0,0.12);
-}
+.metric-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; background: rgba(0,0,0,0.08); }
 .metric {
-  min-height: 152px;
+  min-height: 136px;
   padding: 12px 10px;
-  border-right: 1px solid var(--line);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.035);
   text-align: center;
 }
-.metric:last-child { border-right: 0; }
+.metric:last-child { border-right: 1px solid rgba(255,255,255,0.07); }
 .metric-title {
   color: var(--text);
   font-size: 11px;
@@ -138,6 +132,58 @@ button { color: inherit; }
 .metric-note { margin-top: 2px; color: var(--dim); font-size: 10px; line-height: 1.3; }
 .donut-wrap { margin-top: 8px; display: flex; justify-content: center; }
 .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero-card {
+  background:
+    linear-gradient(145deg, rgba(27,48,42,0.98), rgba(9,21,19,0.98)),
+    radial-gradient(circle at 88% 12%, rgba(155,227,127,0.18), transparent 260px);
+  border: 1px solid rgba(155,227,127,0.2);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 10px;
+  box-shadow: 0 24px 54px rgba(0,0,0,0.34);
+}
+.hero-top { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+.hero-title { max-width: 250px; }
+.hero-title h2 { font-size: 30px; line-height: 1.04; letter-spacing: 0; font-weight: 900; }
+.hero-title p { color: var(--muted); font-size: 13px; line-height: 1.45; margin-top: 8px; }
+.verdict-pill {
+  flex: 0 0 auto;
+  border: 1px solid rgba(155,227,127,0.28);
+  color: var(--green-2);
+  background: rgba(155,227,127,0.08);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.hero-number { margin-top: 18px; }
+.hero-number span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
+.hero-number strong { display: block; color: white; font-size: 42px; line-height: 1; margin-top: 4px; letter-spacing: 0; font-weight: 900; font-variant-numeric: tabular-nums; }
+.hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.hero-stat {
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 8px;
+}
+.hero-stat label { display: block; color: var(--dim); font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 850; }
+.hero-stat strong { display: block; margin-top: 5px; font-size: 16px; line-height: 1.05; font-weight: 900; color: var(--text); font-variant-numeric: tabular-nums; }
+.confidence-row { display: grid; gap: 8px; margin-bottom: 10px; }
+.confidence-item {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.confidence-icon { width: 34px; height: 34px; display: grid; place-items: center; color: var(--green-2); }
+.confidence-item strong { display: block; font-size: 14px; }
+.confidence-item span { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; margin-top: 3px; }
+.confidence-value { color: var(--green-2); font-weight: 900; font-size: 14px; white-space: nowrap; }
 .stat {
   background: rgba(255,255,255,0.035);
   border: 1px solid var(--line-soft);
@@ -368,7 +414,7 @@ input[type=range]::-moz-range-thumb {
   max-width: 520px;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   background: rgba(8,16,15,0.97);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(18px);
@@ -386,7 +432,7 @@ input[type=range]::-moz-range-thumb {
   position: relative;
 }
 .tab svg { width: 24px; height: 24px; }
-.tab span { font-size: 9px; letter-spacing: 0; }
+.tab span { font-size: 10px; letter-spacing: 0; }
 .tab.active { color: var(--green-2); }
 .tab.active:after {
   content: "";
@@ -1070,21 +1116,41 @@ function CommandTab(props) {
     { icon: "adu", title: "Legacy vehicle", copy: "Max fund ADU, optimize taxes, plan gifting.", status: "Review 2026", color: COLORS.cyan }
   ];
   return h("div", null,
-    h(Panel, { flush: true },
-      h("div", { className: "metric-strip" },
-        h(Metric, { title: "Readiness Score", value: Math.min(1, e.readinessScore / 100), label: Math.round(e.readinessScore), color: scoreColor, sub: "On time, not early", note: "/100 target" }),
-        h(Metric, { title: "Monte Carlo Survival", value: e.mc.successRate, label: Math.round(e.mc.successRate * 100) + "%", color: COLORS.cyan, sub: "800 trials", note: "Success to age " + (s.retireAge + s.horizonYears) }),
-        h(Metric, { title: "Bridge to 65 Withdrawal Rate", value: Math.min(1, e.withdrawalRate / 0.05), label: pct(e.withdrawalRate, 1), color: wrColor, sub: e.withdrawalRate <= 0.04 ? "Sustainable" : "Watch", note: "Target <= 4.0%" }),
-        h(Metric, { title: "Income Floor Coverage", value: Math.min(1, e.floorCoverage), label: pct(e.floorCoverage, 0), color: e.floorCoverage >= 1 ? COLORS.green2 : COLORS.gold, sub: "Legacy vehicle", note: fmt(e.incomeAtSs, true) + " / " + fmt(e.spendAtSs, true) }),
-        h(Metric, { title: "Age-65 Inflection", value: Math.min(1, e.yearsToTrs / 20), label: e.yearsToTrs + "y", color: COLORS.cyan, sub: "TRS starts", note: "From retirement" })
+    h("section", { className: "hero-card" },
+      h("div", { className: "hero-top" },
+        h("div", { className: "hero-title" },
+          h("h2", null, "The bridge is the plan."),
+          h("p", null, "Retire on schedule, protect the early years, then let guaranteed income carry more of the load.")
+        ),
+        h("div", { className: "verdict-pill" }, "On time")
+      ),
+      h("div", { className: "hero-number" },
+        h("span", null, "Projected retirement portfolio"),
+        h("strong", null, fmt(e.startBalance, true))
+      ),
+      h("div", { className: "hero-grid" },
+        h("div", { className: "hero-stat" }, h("label", null, "Michael WR"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
+        h("div", { className: "hero-stat" }, h("label", null, "Michael MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
+        h("div", { className: "hero-stat" }, h("label", null, "Colleen gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
       )
     ),
-    h(Panel, { title: "Household Command Brief", meta: "Michael + Colleen" },
-      h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Michael target", value: s.retireDateLabel, note: "Projected " + fmt(e.startBalance, true), color: COLORS.green2 }),
-        h(Stat, { label: "Michael bridge WR", value: pct(e.withdrawalRate, 1), note: "Before TRS and SS", color: e.withdrawalRate <= 0.04 ? COLORS.green2 : COLORS.gold }),
-        h(Stat, { label: "Colleen target", value: c.targetLabel, note: "Gap " + fmt(c.baseGap, true) + "/yr", color: COLORS.cyan }),
-        h(Stat, { label: "Colleen success", value: Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%", note: "30yr / " + s.colleenHorizon + "yr", color: c.mc.successRate >= 0.9 ? COLORS.green2 : COLORS.gold })
+    h(Panel, { title: "Confidence Check", meta: "Today" },
+      h("div", { className: "confidence-row" },
+        h("div", { className: "confidence-item" },
+          h("div", { className: "confidence-icon" }, h(Icon, { name: "bridge", size: 26 })),
+          h("div", null, h("strong", null, "Michael bridge stays controlled"), h("span", null, "First-year withdrawal rate remains near the conservative line.")),
+          h("div", { className: "confidence-value", style: { color: wrColor } }, pct(e.withdrawalRate, 1))
+        ),
+        h("div", { className: "confidence-item" },
+          h("div", { className: "confidence-icon" }, h(Icon, { name: "shield", size: 26 })),
+          h("div", null, h("strong", null, "Colleen's gap is small"), h("span", null, "Cash can carry the pre-65 shortfall for years.")),
+          h("div", { className: "confidence-value" }, c.cashRunway >= 50 ? "50+ yr" : c.cashRunway.toFixed(1) + " yr")
+        ),
+        h("div", { className: "confidence-item" },
+          h("div", { className: "confidence-icon", style: { color: COLORS.gold } }, h(Icon, { name: "income", size: 26 })),
+          h("div", null, h("strong", null, "Michael's pension is in the math"), h("span", null, "YOS x high-5 x 2.0%, using the salary history table.")),
+          h("div", { className: "confidence-value", style: { color: COLORS.gold } }, fmt(e.trsAnnual, true))
+        )
       )
     ),
     h(Panel, { title: "Colleen Conversation Brief", meta: "Big picture" },
@@ -1219,6 +1285,12 @@ function IncomeTab(props) {
         h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") })
       )
     )
+  );
+}
+function MichaelTab(props) {
+  return h("div", null,
+    h(IncomeTab, { s: props.s, e: props.e, set: props.set }),
+    h(PortfolioTab, { s: props.s, e: props.e, set: props.set })
   );
 }
 function ColleenTab(props) {
@@ -1391,8 +1463,7 @@ function GuideTab(props) {
   );
 }
 var TABS = [
-  { id: "command", label: "Command", icon: "command" },
-  { id: "portfolio", label: "Portfolio", icon: "portfolio" },
+  { id: "command", label: "Home", icon: "command" },
   { id: "income", label: "Michael", icon: "income" },
   { id: "colleen", label: "Colleen", icon: "shield" },
   { id: "adu", label: "ADU", icon: "adu" },
@@ -1451,14 +1522,13 @@ function App() {
     h("header", { className: "topbar" },
       h("div", { className: "toprow" },
         h("div", { className: "brand" }, h("h1", null, "Flory Freedom"), h("p", null, "On time, not early")),
-        h("div", { className: "date-chip" }, h(Icon, { name: "calendar", size: 18 }), h("span", null, s.retireDateLabel), h(Icon, { name: "menu", size: 23 }))
+        h("div", { className: "date-chip" }, h(Icon, { name: "calendar", size: 18 }), h("span", null, s.retireDateLabel))
       ),
       h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
     ),
     h("main", { className: "content" },
       tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set }),
-      tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set }),
-      tab === "income" && h(IncomeTab, { s: s, e: e, set: set }),
+      tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
       tab === "colleen" && h(ColleenTab, { s: s, c: c, set: set }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
       tab === "guide" && h(GuideTab, { s: s, e: e, set: set }),
