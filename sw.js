@@ -1,4 +1,4 @@
-var CACHE_NAME = "flory-freedom-v2";
+var CACHE_NAME = "flory-freedom-v2-mobile-20260702";
 var APP_SHELL = [
   "./",
   "./index.html",
