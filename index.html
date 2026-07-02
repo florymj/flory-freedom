@@ -307,6 +307,7 @@ button { color: inherit; }
 .bar-top strong { color: var(--text); font-weight: 750; }
 .bar-track { height: 9px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
 .bar-fill { height: 100%; border-radius: inherit; }
+.budget-note { color: var(--dim); font-size: 11px; line-height: 1.35; margin: -5px 0 9px; }
 .control { margin-bottom: 16px; }
 .control:last-child { margin-bottom: 0; }
 .control-label {
@@ -318,6 +319,25 @@ button { color: inherit; }
   color: var(--muted);
 }
 .control-label strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.range-line {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+}
+.step-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line-soft);
+  background: rgba(255,255,255,0.045);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 800;
+  cursor: pointer;
+}
+.step-btn:active { transform: translateY(1px); }
 input[type=range] {
   width: 100%;
   height: 6px;
@@ -530,13 +550,14 @@ var DEF = {
   retireAge: 47,
   retireDateLabel: "June 30, 2027",
   spendMonthly: 10000,
-  budgetHousing: 2800,
+  budgetHousing: 900,
   budgetFood: 1600,
   budgetHealthcare: 1200,
   budgetTransportation: 800,
   budgetTravel: 1600,
   budgetTaxesInsurance: 1200,
   budgetFamilyGiving: 800,
+  budgetFlex: 1900,
   horizonYears: 40,
   inflation: 0.03,
   incomeGrowth: 0.02,
@@ -597,6 +618,46 @@ var DEF = {
   colleenUseGlidepath: false,
   colleenInflationStress: false
 };
+var BUDGET_KEYS = [
+  "budgetHousing",
+  "budgetFood",
+  "budgetHealthcare",
+  "budgetTransportation",
+  "budgetTravel",
+  "budgetTaxesInsurance",
+  "budgetFamilyGiving",
+  "budgetFlex"
+];
+function budgetTotal(s) {
+  return BUDGET_KEYS.reduce(function (sum, key) {
+    return sum + Number(s[key] || 0);
+  }, 0);
+}
+function hasBudgetPatch(patch) {
+  return !!patch && BUDGET_KEYS.some(function (key) {
+    return Object.prototype.hasOwnProperty.call(patch, key);
+  });
+}
+function syncBudgetToSpend(next, target) {
+  target = Math.max(0, Number(target || 0));
+  var current = budgetTotal(next);
+  var delta = target - current;
+  if (Math.abs(delta) < 1) return next;
+  var flex = Number(next.budgetFlex || 0) + delta;
+  if (flex >= 0) {
+    next.budgetFlex = Math.round(flex / 50) * 50;
+    return next;
+  }
+  var fixedKeys = BUDGET_KEYS.filter(function (key) { return key !== "budgetFlex"; });
+  var fixedTotal = fixedKeys.reduce(function (sum, key) { return sum + Number(next[key] || 0); }, 0);
+  var scale = fixedTotal > 0 ? target / fixedTotal : 0;
+  fixedKeys.forEach(function (key) {
+    next[key] = Math.max(0, Math.round(Number(next[key] || 0) * scale / 50) * 50);
+  });
+  var roundedFixedTotal = fixedKeys.reduce(function (sum, key) { return sum + Number(next[key] || 0); }, 0);
+  next.budgetFlex = Math.max(0, Math.round((target - roundedFixedTotal) / 50) * 50);
+  return next;
+}
 function fmt(n, compact) {
   n = Number(n || 0);
   var sign = n < 0 ? "-" : "";
@@ -989,6 +1050,15 @@ function normalizeState(parsed) {
   var s = Object.assign({}, DEF, parsed || {});
   if (parsed && parsed.currentPort && !parsed.currentPortfolio) s.currentPortfolio = parsed.currentPort;
   if (parsed && parsed.spendTarget && !parsed.spendMonthly) s.spendMonthly = parsed.spendTarget;
+  if (parsed && !Object.prototype.hasOwnProperty.call(parsed, "budgetFlex")) {
+    if (Number(parsed.budgetHousing) === 2800) {
+      s.budgetHousing = 900;
+      s.budgetFlex = 1900;
+    } else {
+      var legacyBudget = Number(s.budgetHousing || 0) + Number(s.budgetFood || 0) + Number(s.budgetHealthcare || 0) + Number(s.budgetTransportation || 0) + Number(s.budgetTravel || 0) + Number(s.budgetTaxesInsurance || 0) + Number(s.budgetFamilyGiving || 0);
+      s.budgetFlex = Math.max(0, Number(s.spendMonthly || 0) - legacyBudget);
+    }
+  }
   if (parsed && parsed.fidelity401k && !parsed.investmentValue) {
     s.investmentValue = (parsed.fidelity401k || 0) + (parsed.fidelityBrokerage || 0);
   }
@@ -1070,9 +1140,22 @@ function BarRow(props) {
   );
 }
 function RangeControl(props) {
+  var step = Number(props.step || 1);
+  var min = Number(props.min);
+  var max = Number(props.max);
+  function bump(delta) {
+    props.onChange(clamp(Number(props.value || 0) + delta, min, max));
+  }
+  function handleRange(ev) {
+    props.onChange(Number(ev.target.value));
+  }
   return h("div", { className: "control" },
     h("div", { className: "control-label" }, h("span", null, props.label), h("strong", null, props.display ? props.display(props.value) : fmt(props.value))),
-    h("input", { type: "range", min: props.min, max: props.max, step: props.step || 1, value: props.value, onChange: function (ev) { props.onChange(Number(ev.target.value)); } })
+    h("div", { className: "range-line" },
+      h("button", { type: "button", className: "step-btn", "aria-label": "Decrease " + props.label, onClick: function () { bump(-step); } }, "-"),
+      h("input", { key: (props.field || props.label) + ":" + props.value, type: "range", min: props.min, max: props.max, step: props.step || 1, value: props.value, "data-field": props.field || props.label, onInput: handleRange, onChange: handleRange }),
+      h("button", { type: "button", className: "step-btn", "aria-label": "Increase " + props.label, onClick: function () { bump(step); } }, "+")
+    )
   );
 }
 function SwitchLine(props) {
@@ -1146,6 +1229,7 @@ function CommandTab(props) {
   var e = props.e;
   var c = props.c;
   var set = props.set;
+  var setSpendMonthly = props.setSpendMonthly;
   var update = props.update;
   var scoreColor = e.readinessScore >= 100 ? COLORS.green2 : e.readinessScore >= 90 ? COLORS.green : COLORS.gold;
   var wrColor = e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
@@ -1211,7 +1295,7 @@ function CommandTab(props) {
         h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
       )
     ),
-    h(Panel, { title: "Scenario Cockpit", meta: "Tap + adjust" },
+    h(Panel, { title: "Scenario Cockpit", meta: "Budget linked" },
       h("div", { className: "scenario-grid" },
         presets.map(function (preset) {
           return h("button", { key: preset.title, type: "button", className: "scenario-btn" + (preset.active ? " active" : ""), onClick: function () { update(preset.patch); } },
@@ -1221,7 +1305,7 @@ function CommandTab(props) {
         })
       ),
       h("div", { className: "control-deck" },
-        h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 100, onChange: set("spendMonthly"), display: function (v) { return fmt(v) + "/mo"; } }),
+        h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
         h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
         h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
         h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
@@ -1396,19 +1480,21 @@ function MichaelTab(props) {
 }
 function budgetCategories(s) {
   return [
-    { key: "budgetHousing", label: "Housing + utilities", value: s.budgetHousing, color: COLORS.green2 },
+    { key: "budgetHousing", label: "Home costs, no mortgage", value: s.budgetHousing, color: COLORS.green2, note: "Debt-free carrying costs only: utilities, upkeep, HOA, and home repairs." },
     { key: "budgetFood", label: "Groceries + dining", value: s.budgetFood, color: COLORS.green },
     { key: "budgetHealthcare", label: "Healthcare", value: s.budgetHealthcare, color: COLORS.cyan },
     { key: "budgetTransportation", label: "Transportation", value: s.budgetTransportation, color: COLORS.gold },
     { key: "budgetTravel", label: "Travel + experiences", value: s.budgetTravel, color: COLORS.orange },
     { key: "budgetTaxesInsurance", label: "Taxes + insurance", value: s.budgetTaxesInsurance, color: COLORS.cyan },
-    { key: "budgetFamilyGiving", label: "Family + giving", value: s.budgetFamilyGiving, color: COLORS.green }
+    { key: "budgetFamilyGiving", label: "Family + giving", value: s.budgetFamilyGiving, color: COLORS.green },
+    { key: "budgetFlex", label: "Flex + sinking funds", value: s.budgetFlex, color: COLORS.gold, note: "This is where the old mortgage-like placeholder belongs: cushion, repairs, gifts, one-time buys, and fun money." }
   ];
 }
 function BudgetTab(props) {
   var s = props.s;
   var e = props.e;
   var set = props.set;
+  var setSpendMonthly = props.setSpendMonthly;
   var categories = budgetCategories(s);
   var categoryTotal = categories.reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0);
   var annualBudget = categoryTotal * 12;
@@ -1420,10 +1506,10 @@ function BudgetTab(props) {
   var age67Income = incomeForYear(Math.max(0, s.ssAge - s.retireAge), s, e) / 12;
   var largest = Math.max.apply(null, categories.map(function (row) { return row.value; }).concat([1]));
   var varianceText = Math.abs(variance) < 50
-    ? "Category budget matches the projection target."
+    ? "Budget categories are linked to Home and Monte Carlo."
     : (variance > 0 ? "Category budget is above" : "Category budget is below") + " the projection target by " + fmt(Math.abs(variance)) + "/mo.";
   return h("div", null,
-    h(Panel, { title: "Family Budget", meta: "Monthly" },
+    h(Panel, { title: "Family Budget", meta: "Live with Home" },
       h("div", { className: "kpi-grid" },
         h(Stat, { label: "Category total", value: fmt(categoryTotal, true), note: fmt(annualBudget, true) + "/yr", color: COLORS.green2 }),
         h(Stat, { label: "Projection target", value: fmt(s.spendMonthly, true), note: "Used in Monte Carlo", color: COLORS.cyan }),
@@ -1431,8 +1517,9 @@ function BudgetTab(props) {
         h(Stat, { label: "Retirement month", value: fmt(projectedMonthly, true), note: "Inflation-adjusted day 0", color: COLORS.gold })
       ),
       h("div", { className: "callout", style: { marginTop: 12 } }, varianceText),
+      h("div", { className: "callout", style: { marginTop: 10 } }, "No mortgage, car payment, credit card debt, or other debt payment is modeled. Home costs are only debt-free carrying costs, and extra room is kept as flex/sinking funds."),
       h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Projection monthly spending", value: s.spendMonthly, min: 5000, max: 18000, step: 100, onChange: set("spendMonthly") })
+        h(RangeControl, { label: "Projection monthly spending", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly })
       )
     ),
     h(Panel, { title: "Pre-65 Bridge Budget", meta: "Family draw" },
@@ -1451,7 +1538,8 @@ function BudgetTab(props) {
       categories.map(function (row) {
         return h("div", { key: row.key, style: { marginBottom: 12 } },
           h(BarRow, { label: row.label, value: fmt(row.value) + "/mo", pct: row.value / largest * 100, color: row.color }),
-          h(RangeControl, { label: row.label, value: row.value, min: 0, max: 5000, step: 50, onChange: set(row.key) })
+          row.note && h("div", { className: "budget-note" }, row.note),
+          h(RangeControl, { label: row.label, value: row.value, min: 0, max: 5000, step: 50, field: row.key, onChange: set(row.key) })
         );
       })
     ),
@@ -1595,10 +1683,11 @@ function GuideTab(props) {
   var s = props.s;
   var e = props.e;
   var set = props.set;
+  var setSpendMonthly = props.setSpendMonthly;
   return h("div", null,
     h(Panel, { title: "Plan Controls", meta: "Core assumptions" },
       h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
-      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 250, onChange: set("spendMonthly"), display: function (v) { return fmt(v) + "/mo"; } }),
+      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
       h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
       h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
       h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") }),
@@ -1615,7 +1704,8 @@ function GuideTab(props) {
         h("div", { className: "guide-item" }, h("strong", null, "Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Equity mean 9.5%, bond mean 4.5%, cash mean 2.0%; volatility is allocation-weighted.")),
         h("div", { className: "guide-item" }, h("strong", null, "Scenario Monte Carlo"), h("span", null, "The Inputs tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
         h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% draw rate.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "Family first-year spending minus active income layers divided by projected portfolio plus any included PTO buffer.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "The Budget tab category total is the monthly spending target used by Home, Monte Carlo, and bridge-draw math.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Debt-free home"), h("span", null, "No mortgage, vehicle debt, credit-card debt, or other required debt service is modeled. The home line is only carrying costs; extra room stays in flex and sinking funds.")),
         h("div", { className: "guide-item" }, h("strong", null, "Base case discipline"), h("span", null, "Guaranteed household income is base. Rent, side income, consulting, and ADU upside stay out unless toggled on.")),
         h("div", { className: "guide-item" }, h("strong", null, "Withdrawal order"), h("span", null, "The planning guide favors cash/bonds first in downturns, then taxable accounts, then tax-deferred accounts, with Roth assets preserved when possible. This is guidance text, not full tax software.")),
         h("div", { className: "guide-item" }, h("strong", null, "Not included yet"), h("span", null, "Detailed taxes, Roth conversion optimization, RMDs, real ACA plan quotes, exact TRS rule validation, and brokerage import automation."))
@@ -1660,13 +1750,27 @@ function App() {
       setS(function (prev) {
         var next = Object.assign({}, prev);
         next[key] = value;
+        if (BUDGET_KEYS.indexOf(key) >= 0) next.spendMonthly = budgetTotal(next);
         return normalizeState(next);
       });
     };
   }
+  function setSpendMonthly(value) {
+    setS(function (prev) {
+      var next = Object.assign({}, prev, { spendMonthly: Number(value || 0) });
+      syncBudgetToSpend(next, next.spendMonthly);
+      return normalizeState(next);
+    });
+  }
   function update(patch) {
     setS(function (prev) {
-      return normalizeState(Object.assign({}, prev, patch || {}));
+      var next = Object.assign({}, prev, patch || {});
+      if (hasBudgetPatch(patch)) {
+        next.spendMonthly = budgetTotal(next);
+      } else if (patch && Object.prototype.hasOwnProperty.call(patch, "spendMonthly")) {
+        syncBudgetToSpend(next, next.spendMonthly);
+      }
+      return normalizeState(next);
     });
   }
   function reset() {
@@ -1706,12 +1810,12 @@ function App() {
       h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
     ),
     h("main", { className: "content" },
-      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set, update: update }),
+      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set, setSpendMonthly: setSpendMonthly, update: update }),
       tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
-      tab === "budget" && h(BudgetTab, { s: s, e: e, set: set }),
+      tab === "budget" && h(BudgetTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "inputs" && h(InputsTab, { s: s, c: c, set: set }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
-      tab === "guide" && h(GuideTab, { s: s, e: e, set: set }),
+      tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       h(Panel, { title: "Quick Tools" },
         h("div", { className: "button-row" },
           h("button", { className: "ghost-btn", onClick: copySnapshot }, h(Icon, { name: "list", size: 17 }), copied ? "Copied" : "Copy snapshot"),
