@@ -102,13 +102,22 @@ button { color: inherit; }
   padding: 14px 14px 0;
 }
 .section-head h2 {
+  min-width: 0;
   font-size: 13px;
   line-height: 1.2;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 850;
 }
-.section-head span { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.section-head span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .metric-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; background: rgba(0,0,0,0.08); }
 .metric {
   min-height: 136px;
@@ -131,7 +140,7 @@ button { color: inherit; }
 .metric-sub { margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.35; min-height: 30px; }
 .metric-note { margin-top: 2px; color: var(--dim); font-size: 10px; line-height: 1.3; }
 .donut-wrap { margin-top: 8px; display: flex; justify-content: center; }
-.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 8px; }
 .hero-card {
   background:
     linear-gradient(145deg, rgba(27,48,42,0.98), rgba(9,21,19,0.98)),
@@ -465,7 +474,7 @@ input[type=range]::-moz-range-thumb {
   max-width: 520px;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   background: rgba(8,16,15,0.97);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(18px);
@@ -483,7 +492,7 @@ input[type=range]::-moz-range-thumb {
   position: relative;
 }
 .tab svg { width: 24px; height: 24px; }
-.tab span { font-size: 10px; letter-spacing: 0; }
+.tab span { font-size: 9px; letter-spacing: 0; }
 .tab.active { color: var(--green-2); }
 .tab.active:after {
   content: "";
@@ -500,6 +509,44 @@ input[type=range]::-moz-range-thumb {
 .mini-table th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
 .mini-table td:last-child, .mini-table th:last-child { text-align: right; }
 .mini-table tr:last-child td { border-bottom: 0; }
+.mini-table small { display: block; color: var(--muted); line-height: 1.35; margin-top: 3px; }
+.upload-box {
+  display: grid;
+  gap: 10px;
+  border: 1px dashed rgba(99,212,238,0.35);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(99,212,238,0.05);
+}
+.file-input {
+  width: 100%;
+  color: var(--muted);
+  font-size: 12px;
+}
+.file-input::file-selector-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  padding: 8px 10px;
+  margin-right: 10px;
+  font-weight: 800;
+}
+.status-line { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.risk-bars { display: grid; gap: 8px; margin-top: 12px; }
+.risk-window {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+  margin-top: 9px;
+}
+.risk-window:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+.risk-window strong { font-size: 13px; }
+.risk-window span { color: var(--muted); font-size: 12px; }
+.holding-symbol { font-weight: 850; }
 .salary-band {
   background: #1d7fb8;
   color: white;
@@ -544,6 +591,20 @@ var DEF = {
   investmentValue: 1172826,
   cashValue: 63136,
   otherValue: 12988,
+  portfolioSource: "Planning defaults",
+  portfolioUpdatedAt: "",
+  portfolioImportStatus: "",
+  portfolioHoldings: [
+    { symbol: "VTI", name: "Vanguard Total Stock Market ETF", account: "Fidelity", assetClass: "US Equity", value: 290000 },
+    { symbol: "VOO", name: "Vanguard S&P 500 ETF", account: "Fidelity", assetClass: "US Equity", value: 255000 },
+    { symbol: "ITOT", name: "iShares Core S&P Total US Stock Market ETF", account: "Fidelity", assetClass: "US Equity", value: 205000 },
+    { symbol: "SCHD", name: "Schwab US Dividend Equity ETF", account: "Fidelity", assetClass: "US Equity", value: 135000 },
+    { symbol: "WFSPX", name: "SoonerSave S&P 500 index", account: "SoonerSave", assetClass: "US Equity", value: 108000 },
+    { symbol: "VXUS", name: "Vanguard Total International Stock ETF", account: "Fidelity", assetClass: "International Equity", value: 43000 },
+    { symbol: "BND", name: "Vanguard Total Bond Market ETF", account: "Fidelity", assetClass: "Bond", value: 65000 },
+    { symbol: "VTEB", name: "Vanguard Tax-Exempt Bond ETF", account: "Fidelity", assetClass: "Bond", value: 84851 },
+    { symbol: "Cash", name: "Cash and core positions", account: "Fidelity", assetClass: "Cash", value: 62906 }
+  ],
   monthlyContrib: 9000,
   monthsToRetire: 12,
   currentAge: 46,
@@ -592,7 +653,7 @@ var DEF = {
   aduJeremiahReady: false,
   aduTenantReady: false,
   aduCashPlanReady: false,
-  alignColleenBriefed: false,
+  alignCoreReviewed: false,
   alignBridgeReviewed: false,
   alignAduReviewed: false,
   alignTravelVision: false,
@@ -657,6 +718,143 @@ function syncBudgetToSpend(next, target) {
   var roundedFixedTotal = fixedKeys.reduce(function (sum, key) { return sum + Number(next[key] || 0); }, 0);
   next.budgetFlex = Math.max(0, Math.round((target - roundedFixedTotal) / 50) * 50);
   return next;
+}
+function parseNumber(value) {
+  if (value === null || value === undefined) return 0;
+  var raw = String(value).trim();
+  if (!raw || raw === "--" || raw === "N/A") return 0;
+  var negative = raw.indexOf("(") >= 0 && raw.indexOf(")") >= 0;
+  raw = raw.replace(/[,$%"]/g, "").replace(/[()]/g, "").replace(/\s/g, "");
+  var n = Number(raw);
+  if (!isFinite(n)) return 0;
+  return negative ? -n : n;
+}
+function csvRows(text) {
+  var rows = [];
+  var row = [];
+  var cell = "";
+  var inQuotes = false;
+  text = String(text || "").replace(/^\uFEFF/, "");
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    var next = text[i + 1];
+    if (ch === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      row.push(cell.trim());
+      cell = "";
+    } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (ch === "\r" && next === "\n") i++;
+      row.push(cell.trim());
+      if (row.some(function (v) { return v !== ""; })) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += ch;
+    }
+  }
+  row.push(cell.trim());
+  if (row.some(function (v) { return v !== ""; })) rows.push(row);
+  return rows;
+}
+function headerKey(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function findHeaderIndex(rows) {
+  for (var i = 0; i < rows.length; i++) {
+    var keys = rows[i].map(headerKey);
+    var hasIdentity = keys.some(function (k) { return k === "symbol" || k === "ticker" || k === "description" || k === "securityname" || k === "name"; });
+    var hasValue = keys.some(function (k) { return k === "currentvalue" || k === "marketvalue" || k === "value" || k === "totalvalue"; });
+    if (hasIdentity && hasValue) return i;
+  }
+  return 0;
+}
+function pickField(row, headers, candidates) {
+  for (var i = 0; i < candidates.length; i++) {
+    var idx = headers.indexOf(candidates[i]);
+    if (idx >= 0 && row[idx] !== undefined && row[idx] !== "") return row[idx];
+  }
+  return "";
+}
+function classifyHolding(symbol, name, assetClass) {
+  var src = (String(symbol || "") + " " + String(name || "") + " " + String(assetClass || "")).toLowerCase();
+  if (/cash|core|money market|spaxx|fdlxx|sweep/.test(src)) return "Cash";
+  if (/bond|fixed|treasury|municipal|vteb|bnd|agg|vbitx|vbtlx/.test(src)) return "Bond";
+  if (/international|foreign|global ex|vxus|vea|vwo|ixus/.test(src)) return "International Equity";
+  if (/equity|stock|index|s&p|total market|vti|voo|itot|schd|wfspx|fxaix|fs kax|fskax/.test(src)) return "US Equity";
+  return assetClass || "Other";
+}
+function parseHoldingsCsv(text) {
+  var rows = csvRows(text);
+  if (!rows.length) return { holdings: [], message: "CSV was empty." };
+  var headerIndex = findHeaderIndex(rows);
+  var headers = rows[headerIndex].map(headerKey);
+  var dataRows = rows.slice(headerIndex + 1);
+  var holdings = dataRows.map(function (row) {
+    var symbol = pickField(row, headers, ["symbol", "ticker", "securitysymbol"]);
+    var name = pickField(row, headers, ["description", "securityname", "name", "holding", "investment"]);
+    var account = pickField(row, headers, ["account", "accountname", "accountnumber", "registration"]);
+    var rawClass = pickField(row, headers, ["assetclass", "assetcategory", "category", "type"]);
+    var value = parseNumber(pickField(row, headers, ["currentvalue", "marketvalue", "value", "totalvalue", "currentmarketvalue"]));
+    var quantity = parseNumber(pickField(row, headers, ["quantity", "shares", "sharequantity"]));
+    var price = parseNumber(pickField(row, headers, ["lastprice", "price", "currentprice"]));
+    if (!value && quantity && price) value = quantity * price;
+    symbol = symbol || name || "Holding";
+    return {
+      symbol: String(symbol || "").trim(),
+      name: String(name || symbol || "").trim(),
+      account: String(account || "Imported").trim(),
+      assetClass: classifyHolding(symbol, name, rawClass),
+      value: Math.max(0, Math.round(value))
+    };
+  }).filter(function (row) {
+    var symbol = String(row.symbol || "").trim().toLowerCase();
+    var name = String(row.name || "").trim().toLowerCase();
+    var isTotalRow = /^(total|account total|grand total|portfolio total)$/.test(symbol) || /^(total|account total|grand total|portfolio total)$/.test(name);
+    return row.value > 0 && row.symbol && !isTotalRow;
+  });
+  return { holdings: holdings, message: holdings.length ? holdings.length + " holdings imported." : "No holdings with market values found." };
+}
+function portfolioHoldings(s) {
+  return Array.isArray(s.portfolioHoldings) && s.portfolioHoldings.length ? s.portfolioHoldings : DEF.portfolioHoldings;
+}
+function holdingClass(row) {
+  return classifyHolding(row.symbol, row.name, row.assetClass);
+}
+function portfolioSummaryFromHoldings(holdings) {
+  var summary = { total: 0, equity: 0, usEquity: 0, international: 0, bond: 0, cash: 0, other: 0, top: [], topFive: 0 };
+  holdings.forEach(function (row) {
+    var value = Number(row.value || 0);
+    var klass = holdingClass(row);
+    summary.total += value;
+    if (/international/i.test(klass)) {
+      summary.equity += value;
+      summary.international += value;
+    } else if (/equity|stock/i.test(klass)) {
+      summary.equity += value;
+      summary.usEquity += value;
+    } else if (/bond|fixed/i.test(klass)) {
+      summary.bond += value;
+    } else if (/cash|money/i.test(klass)) {
+      summary.cash += value;
+    } else {
+      summary.other += value;
+    }
+  });
+  summary.top = holdings.slice().sort(function (a, b) { return Number(b.value || 0) - Number(a.value || 0); });
+  summary.topFive = summary.top.slice(0, 5).reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0);
+  return summary;
+}
+function portfolioSummary(s) {
+  return portfolioSummaryFromHoldings(portfolioHoldings(s));
+}
+function pctOf(value, total) {
+  return total > 0 ? value / total : 0;
 }
 function fmt(n, compact) {
   n = Number(n || 0);
@@ -772,9 +970,14 @@ function requiredDraw(y, s, e) {
 function runMonteCarlo(s, e, startBalance, sims) {
   var rand = rng(hashState(s));
   var buckets = [];
+  var failureCounts = [];
+  var failureYears = [];
   var successes = 0;
   sims = sims || 800;
-  for (var y = 0; y < s.horizonYears; y++) buckets.push([]);
+  for (var y = 0; y < s.horizonYears; y++) {
+    buckets.push([]);
+    failureCounts.push(0);
+  }
   for (var sim = 0; sim < sims; sim++) {
     var b = startBalance;
     var alive = true;
@@ -786,6 +989,8 @@ function runMonteCarlo(s, e, startBalance, sims) {
         if (b <= 0) {
           b = 0;
           alive = false;
+          failureCounts[year]++;
+          failureYears.push(year);
         }
       }
       buckets[year].push(b);
@@ -802,7 +1007,45 @@ function runMonteCarlo(s, e, startBalance, sims) {
       p90: sorted[Math.floor(sorted.length * 0.9)] || 0
     };
   });
-  return { successRate: successes / sims, percentiles: percentiles };
+  var failureHistogram = failureCounts.map(function (count, i) {
+    return { year: i, age: s.retireAge + i, count: count, pct: count / sims };
+  }).filter(function (row) { return row.count > 0; });
+  var sortedFailures = failureYears.slice().sort(function (a, b) { return a - b; });
+  var failCount = sortedFailures.length;
+  var medianFailure = failCount ? sortedFailures[Math.floor(failCount * 0.5)] : null;
+  var p25Failure = failCount ? sortedFailures[Math.floor(failCount * 0.25)] : null;
+  var p75Failure = failCount ? sortedFailures[Math.floor(failCount * 0.75)] : null;
+  var phases = [
+    { label: "Before TRS", minAge: s.retireAge, maxAge: s.trsAge - 1, count: 0 },
+    { label: "TRS before SS", minAge: s.trsAge, maxAge: s.ssAge - 1, count: 0 },
+    { label: "After SS", minAge: s.ssAge, maxAge: s.retireAge + s.horizonYears, count: 0 }
+  ];
+  failureHistogram.forEach(function (row) {
+    phases.forEach(function (phase) {
+      if (row.age >= phase.minAge && row.age <= phase.maxAge) phase.count += row.count;
+    });
+  });
+  phases = phases.map(function (phase) {
+    return Object.assign({}, phase, { pct: phase.count / sims });
+  });
+  return {
+    successRate: successes / sims,
+    failureRate: failCount / sims,
+    failures: failCount,
+    sims: sims,
+    percentiles: percentiles,
+    failureHistogram: failureHistogram,
+    failureTopYears: failureHistogram.slice().sort(function (a, b) { return b.count - a.count; }).slice(0, 5),
+    failurePhases: phases,
+    failureStats: {
+      earliestYear: failCount ? sortedFailures[0] : null,
+      earliestAge: failCount ? s.retireAge + sortedFailures[0] : null,
+      medianYear: medianFailure,
+      medianAge: medianFailure === null ? null : s.retireAge + medianFailure,
+      p25Year: p25Failure,
+      p75Year: p75Failure
+    }
+  };
 }
 function hashAny(obj) {
   var src = JSON.stringify(obj || {});
@@ -885,7 +1128,7 @@ function colleenRun(c, sims, shockFirstYear) {
     age65Median: percentiles[age65Index] ? percentiles[age65Index].p50 : 0
   };
 }
-function makeColleenConfig(s, overrides) {
+function makeRiskLabConfig(s, overrides) {
   var months = retireOptionMonths((overrides && overrides.option) || s.colleenRetireOption);
   var base = {
     option: s.colleenRetireOption,
@@ -912,8 +1155,8 @@ function makeColleenConfig(s, overrides) {
   };
   return Object.assign(base, overrides || {});
 }
-function buildColleenEngine(s) {
-  var c = makeColleenConfig(s);
+function buildRiskLabEngine(s) {
+  var c = makeRiskLabConfig(s);
   var baseGap = Math.max(0, c.spending - colleenIncomeForYear(0, c));
   var cashRunway = baseGap > 0 ? c.cashBuffer / baseGap : 99;
   var age65Income = colleenIncomeForYear(Math.max(0, c.pensionAge - c.retireAge), c);
@@ -923,11 +1166,11 @@ function buildColleenEngine(s) {
   var shock = colleenRun(c, 500, true);
   var scenarioConfigs = [
     { label: "Base: " + retireOptionLabel(c.option), cfg: c },
-    { label: "February 2026", cfg: makeColleenConfig(s, { option: "Feb" }) },
-    { label: "December 2026", cfg: makeColleenConfig(s, { option: "Dec" }) },
-    { label: "Rising glidepath", cfg: makeColleenConfig(s, { useGlidepath: true, equityStart: 50, equityEnd: 72 }) },
-    { label: "4% inflation stress", cfg: makeColleenConfig(s, { inflation: 0.04 }) },
-    { label: "$25k consulting", cfg: makeColleenConfig(s, { consulting: 25000 }) }
+    { label: "February 2026", cfg: makeRiskLabConfig(s, { option: "Feb" }) },
+    { label: "December 2026", cfg: makeRiskLabConfig(s, { option: "Dec" }) },
+    { label: "Rising glidepath", cfg: makeRiskLabConfig(s, { useGlidepath: true, equityStart: 50, equityEnd: 72 }) },
+    { label: "4% inflation stress", cfg: makeRiskLabConfig(s, { inflation: 0.04 }) },
+    { label: "$25k consulting", cfg: makeRiskLabConfig(s, { consulting: 25000 }) }
   ];
   var scenarios = scenarioConfigs.map(function (row) {
     var result = colleenRun(row.cfg, 360, false);
@@ -1063,6 +1306,14 @@ function normalizeState(parsed) {
     s.investmentValue = (parsed.fidelity401k || 0) + (parsed.fidelityBrokerage || 0);
   }
   if (parsed && parsed.outsideSavings && !parsed.cashValue) s.cashValue = parsed.outsideSavings;
+  if (parsed && Object.prototype.hasOwnProperty.call(parsed, "alignColleenBriefed") && !Object.prototype.hasOwnProperty.call(parsed, "alignCoreReviewed")) {
+    s.alignCoreReviewed = parsed.alignColleenBriefed;
+  }
+  if (!Array.isArray(s.portfolioHoldings) || !s.portfolioHoldings.length) {
+    s.portfolioHoldings = DEF.portfolioHoldings.slice();
+  }
+  if (!s.portfolioSource) s.portfolioSource = "Planning defaults";
+  if (!s.portfolioImportStatus) s.portfolioImportStatus = "";
   return s;
 }
 function loadState() {
@@ -1224,6 +1475,39 @@ function TimelineRail(props) {
     );
   }));
 }
+function MonteCarloRiskPanel(props) {
+  var s = props.s;
+  var e = props.e;
+  var mc = e.mc;
+  var stats = mc.failureStats || {};
+  var failedPct = pct(mc.failureRate || 0, 0);
+  var medianText = stats.medianAge === null || stats.medianAge === undefined ? "None" : "Age " + stats.medianAge;
+  var earliestText = stats.earliestAge === null || stats.earliestAge === undefined ? "None" : "Age " + stats.earliestAge;
+  var topYears = mc.failureTopYears || [];
+  return h(Panel, { title: "Monte Carlo Failure Years", meta: failedPct + " failed" },
+    h("div", { className: "kpi-grid" },
+      h(Stat, { label: "Successful paths", value: Math.round(mc.successRate * 100) + "%", note: (mc.sims - mc.failures) + " of " + mc.sims, color: COLORS.green2 }),
+      h(Stat, { label: "Failed paths", value: String(mc.failures), note: failedPct + " of simulations", color: mc.failures ? COLORS.gold : COLORS.green2 }),
+      h(Stat, { label: "Earliest failure", value: earliestText, note: stats.earliestYear === null || stats.earliestYear === undefined ? "No depleted paths" : (s.retireDateLabel + " +" + stats.earliestYear + " yr"), color: mc.failures ? COLORS.orange : COLORS.green2 }),
+      h(Stat, { label: "Median failed path", value: medianText, note: stats.medianYear === null || stats.medianYear === undefined ? "No failed paths" : "Year " + stats.medianYear + " of retirement", color: COLORS.cyan })
+    ),
+    h("div", { className: "callout", style: { marginTop: 12 } }, "A failed path means the simulated portfolio hit $0 before the " + s.horizonYears + "-year horizon after counting active income, TRS at " + s.trsAge + ", and Social Security at " + s.ssAge + "."),
+    h("div", { className: "risk-bars" },
+      (mc.failurePhases || []).map(function (phase) {
+        var label = phase.maxAge < phase.minAge ? phase.label : phase.label + " (ages " + phase.minAge + "-" + phase.maxAge + ")";
+        return h(BarRow, { key: phase.label, label: label, value: phase.count + " paths", pct: phase.pct * 100, color: phase.count ? COLORS.gold : COLORS.green2 });
+      })
+    ),
+    topYears.length ? h("div", { style: { marginTop: 12 } },
+      topYears.map(function (row) {
+        return h("div", { className: "risk-window", key: row.year },
+          h("div", null, h("strong", null, "Age " + row.age), h("span", null, "Retirement year " + row.year)),
+          h("strong", { style: { color: COLORS.gold } }, row.count + " paths")
+        );
+      })
+    ) : h("div", { className: "note", style: { marginTop: 12 } }, "No failed paths in this run.")
+  );
+}
 function CommandTab(props) {
   var s = props.s;
   var e = props.e;
@@ -1315,10 +1599,11 @@ function CommandTab(props) {
       h("div", { className: "impact-strip" },
         h(Stat, { label: "Budget at exit", value: fmt(projectedMonthly, true) + "/mo", note: "Inflation adjusted", color: COLORS.cyan }),
         h(Stat, { label: "Portfolio draw", value: fmt(drawMonthly, true) + "/mo", note: pct(e.withdrawalRate, 1) + " of assets", color: wrColor }),
-        h(Stat, { label: "Plan success", value: Math.round(e.mc.successRate * 100) + "%", note: "800 simulations", color: COLORS.green2 }),
+        h(Stat, { label: "Plan success", value: Math.round(e.mc.successRate * 100) + "%", note: e.mc.failures + " fail paths", color: COLORS.green2 }),
         h(Stat, { label: "Income coverage", value: pct(e.floorCoverage, 0), note: "At Social Security age", color: COLORS.gold })
       )
     ),
+    h(MonteCarloRiskPanel, { s: s, e: e }),
     h(Panel, { title: "Confidence Check", meta: "Today" },
       h("div", { className: "confidence-row" },
         h("div", { className: "confidence-item" },
@@ -1370,38 +1655,91 @@ function PortfolioTab(props) {
   var s = props.s;
   var e = props.e;
   var set = props.set;
-  var total = s.investmentValue + s.cashValue + s.otherValue;
+  var update = props.update;
+  var holdings = portfolioHoldings(s);
+  var summary = portfolioSummaryFromHoldings(holdings);
+  var total = summary.total || s.currentPortfolio;
   var portfolioGap = total - s.currentPortfolio;
+  var topHolding = summary.top[0];
+  var importMeta = s.portfolioSource === "Planning defaults" ? "Defaults" : (s.portfolioSource || "Manual");
+  function handleCsv(ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var parsed = parseHoldingsCsv(reader.result || "");
+      if (!parsed.holdings.length) {
+        update({ portfolioImportStatus: parsed.message });
+        return;
+      }
+      var nextSummary = portfolioSummaryFromHoldings(parsed.holdings);
+      var nextTotal = Math.round(nextSummary.total);
+      update({
+        portfolioHoldings: parsed.holdings,
+        portfolioSource: file.name,
+        portfolioUpdatedAt: new Date().toLocaleString(),
+        portfolioImportStatus: parsed.message,
+        currentPortfolio: nextTotal,
+        investmentValue: Math.round(nextSummary.equity + nextSummary.bond),
+        cashValue: Math.round(nextSummary.cash),
+        otherValue: Math.round(nextSummary.other),
+        equityPct: Math.round(pctOf(nextSummary.equity, nextSummary.total) * 100),
+        bondPct: Math.round(pctOf(nextSummary.bond, nextSummary.total) * 100),
+        internationalPct: Number((pctOf(nextSummary.international, nextSummary.total) * 100).toFixed(1))
+      });
+      ev.target.value = "";
+    };
+    reader.readAsText(file);
+  }
   return h("div", null,
-    h(Panel, { title: "Net Worth Reconciliation", meta: "Ground truth" },
+    h(Panel, { title: "Portfolio Import", meta: importMeta },
+      h("div", { className: "upload-box" },
+        h("input", { className: "file-input", type: "file", accept: ".csv,text/csv", onChange: handleCsv, "aria-label": "Upload portfolio CSV" }),
+        h("div", { className: "status-line" }, s.portfolioImportStatus || "CSV import reads symbol, description, account, asset class, quantity, price, and current value when present."),
+        s.portfolioUpdatedAt && h("div", { className: "status-line" }, "Last import: " + s.portfolioUpdatedAt)
+      )
+    ),
+    h(Panel, { title: "Portfolio Summary", meta: "Feeds Home" },
       h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Working portfolio", value: fmt(s.currentPortfolio, true), note: "Used in projections", color: COLORS.green2 }),
-        h(Stat, { label: "Account total", value: fmt(total, true), note: (portfolioGap >= 0 ? "+" : "") + fmt(portfolioGap, true) + " vs model", color: Math.abs(portfolioGap) > 5000 ? COLORS.gold : COLORS.cyan }),
-        h(Stat, { label: "Investments", value: fmt(s.investmentValue, true), note: "Fidelity and linked accounts" }),
-        h(Stat, { label: "Cash equivalents", value: fmt(s.cashValue, true), note: "ADU timing buffer" })
+        h(Stat, { label: "Holdings total", value: fmt(total, true), note: holdings.length + " rows", color: COLORS.green2 }),
+        h(Stat, { label: "Projection portfolio", value: fmt(s.currentPortfolio, true), note: (portfolioGap >= 0 ? "+" : "") + fmt(portfolioGap, true) + " vs holdings", color: Math.abs(portfolioGap) > 5000 ? COLORS.gold : COLORS.cyan }),
+        h(Stat, { label: "Top holding", value: topHolding ? topHolding.symbol : "None", note: topHolding ? pct(pctOf(topHolding.value, total), 1) + " of portfolio" : "Upload CSV", color: COLORS.gold }),
+        h(Stat, { label: "Top 5 concentration", value: pct(pctOf(summary.topFive, total), 0), note: "Largest holdings", color: pctOf(summary.topFive, total) > 0.65 ? COLORS.orange : COLORS.cyan })
       ),
       h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
+        h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
         h(RangeControl, { label: "Monthly additions before retirement", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } })
       )
     ),
-    h(Panel, { title: "Allocation", meta: "Return engine" },
-      h(BarRow, { label: "Equities", value: s.equityPct + "%", pct: s.equityPct, color: COLORS.green }),
-      h(BarRow, { label: "Bonds", value: e.bondPct + "%", pct: e.bondPct, color: COLORS.cyan }),
-      h(BarRow, { label: "Cash", value: e.cashPct + "%", pct: e.cashPct, color: COLORS.gold }),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
-        h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 40, step: 1, onChange: set("bondPct"), display: function (v) { return v + "%"; } })
-      ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "The equity-heavy stance is defensible only because guaranteed income and the deferred TRS pension act like fixed income outside the brokerage screen.")
+    h(Panel, { title: "Asset Allocation", meta: "Imported or manual" },
+      h(BarRow, { label: "US equity", value: fmt(summary.usEquity, true) + " / " + pct(pctOf(summary.usEquity, total), 1), pct: pctOf(summary.usEquity, total) * 100, color: COLORS.green }),
+      h(BarRow, { label: "International equity", value: fmt(summary.international, true) + " / " + pct(pctOf(summary.international, total), 1), pct: pctOf(summary.international, total) * 100, color: COLORS.green2 }),
+      h(BarRow, { label: "Bonds / fixed income", value: fmt(summary.bond, true) + " / " + pct(pctOf(summary.bond, total), 1), pct: pctOf(summary.bond, total) * 100, color: COLORS.cyan }),
+      h(BarRow, { label: "Cash / core", value: fmt(summary.cash, true) + " / " + pct(pctOf(summary.cash, total), 1), pct: pctOf(summary.cash, total) * 100, color: COLORS.gold }),
+      summary.other > 0 && h(BarRow, { label: "Other", value: fmt(summary.other, true) + " / " + pct(pctOf(summary.other, total), 1), pct: pctOf(summary.other, total) * 100, color: COLORS.orange }),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "The return engine uses " + e.equityPct + "% equity, " + e.bondPct + "% bonds, and " + e.cashPct + "% cash. CSV import updates those assumptions from holdings.")
+    ),
+    h(Panel, { title: "Holdings", meta: "Fidelity style" },
+      h("table", { className: "mini-table" },
+        h("thead", null, h("tr", null, h("th", null, "Holding"), h("th", null, "Class"), h("th", null, "Value"), h("th", null, "%"))),
+        h("tbody", null,
+          summary.top.slice(0, 24).map(function (row) {
+            return h("tr", { key: row.symbol + row.name + row.value },
+              h("td", null, h("span", { className: "holding-symbol" }, row.symbol), h("small", null, row.name), h("small", null, row.account)),
+              h("td", null, holdingClass(row)),
+              h("td", null, fmt(row.value, true)),
+              h("td", null, pct(pctOf(row.value, total), 1))
+            );
+          })
+        )
+      )
     ),
     h(Panel, { title: "Concentration Watch" },
       h(BarRow, { label: "VTI + VOO + ITOT overlap", value: s.overlapPct.toFixed(1) + "%", pct: s.overlapPct, color: s.overlapPct > 60 ? COLORS.orange : COLORS.green }),
-      h(BarRow, { label: "International exposure", value: s.internationalPct.toFixed(1) + "%", pct: s.internationalPct, color: s.internationalPct < 15 ? COLORS.gold : COLORS.green }),
-      h("div", { className: "note" }, "VTI, VOO, ITOT, SCHD, VXUS, BND, VTEB, and SoonerSave WFSPX are treated as planning markers here. The app does not import brokerage lots yet."),
+      h(BarRow, { label: "International exposure", value: pct(pctOf(summary.international, total), 1), pct: pctOf(summary.international, total) * 100, color: pctOf(summary.international, total) < 0.15 ? COLORS.gold : COLORS.green }),
+      h(BarRow, { label: "Cash + bond defense", value: fmt(summary.cash + summary.bond, true), pct: pctOf(summary.cash + summary.bond, total) * 100, color: COLORS.cyan }),
       h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "US broad-market overlap", value: s.overlapPct, min: 0, max: 100, step: 0.1, onChange: set("overlapPct"), display: function (v) { return v.toFixed(1) + "%"; } }),
-        h(RangeControl, { label: "International allocation", value: s.internationalPct, min: 0, max: 40, step: 0.1, onChange: set("internationalPct"), display: function (v) { return v.toFixed(1) + "%"; } })
+        h(RangeControl, { label: "US broad-market overlap", value: s.overlapPct, min: 0, max: 100, step: 0.1, onChange: set("overlapPct"), display: function (v) { return v.toFixed(1) + "%"; } })
       )
     )
   );
@@ -1425,7 +1763,7 @@ function IncomeTab(props) {
         h(BarRow, { label: "Age 67 income floor coverage", value: pct(e.floorCoverage, 0), pct: e.floorCoverage * 100, color: e.floorCoverage >= 1 ? COLORS.green2 : COLORS.orange })
       )
     ),
-    h(Panel, { title: "TRS Pension Formula", meta: "Michael" },
+    h(Panel, { title: "TRS Pension Formula", meta: "Family income plan" },
       h("div", { className: "salary-band" }, "Service Credit and Salary History"),
       h("div", { className: "kpi-grid" },
         h(Stat, { label: "Formula", value: "YOS x High-5 x 2.0%", note: "Highest consecutive 5-year average", color: COLORS.cyan }),
@@ -1472,10 +1810,9 @@ function IncomeTab(props) {
     )
   );
 }
-function MichaelTab(props) {
+function IncomeTab(props) {
   return h("div", null,
-    h(IncomeTab, { s: props.s, e: props.e, set: props.set }),
-    h(PortfolioTab, { s: props.s, e: props.e, set: props.set })
+    h(IncomeTab, { s: props.s, e: props.e, set: props.set })
   );
 }
 function budgetCategories(s) {
@@ -1555,11 +1892,21 @@ function BudgetTab(props) {
 }
 function InputsTab(props) {
   var s = props.s;
+  var e = props.e;
   var c = props.c;
   var set = props.set;
   var cfg = c.config;
   return h("div", null,
-    h(Panel, { title: "Scenario Inputs", meta: c.targetLabel },
+    h(Panel, { title: "Why The Percentages Differ", meta: "Home vs Risk" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Home Plan MC", value: Math.round(e.mc.successRate * 100) + "%", note: e.mc.sims + " simulations", color: COLORS.green2 }),
+        h(Stat, { label: "Risk Lab long-run", value: Math.round(c.mc.successRate * 100) + "%", note: c.config.horizon + "-year cash-first test", color: COLORS.cyan }),
+        h(Stat, { label: "Home start", value: fmt(e.startBalance, true), note: "Current plan after runway" }),
+        h(Stat, { label: "Risk lab start", value: fmt(cfg.portfolio + cfg.cashBuffer + cfg.preRetireSavings + cfg.ptoBonus, true), note: "Separate sandbox inputs" })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "Home is the family-plan model: Budget tab spending, current portfolio, TRS at " + s.trsAge + ", Social Security at " + s.ssAge + ", and a " + s.horizonYears + "-year horizon. Risk Lab is a separate cash-first sandbox with its own starting portfolio, cash buffer, timing, pension, and spending assumptions.")
+    ),
+    h(Panel, { title: "Risk Lab Inputs", meta: c.targetLabel },
       h(SegmentedControl, {
         label: "Retirement timing",
         value: s.colleenRetireOption,
@@ -1578,16 +1925,16 @@ function InputsTab(props) {
         h(Stat, { label: "Age-65 income", value: fmt(c.age65Income, true), note: "Pension + SS + income floor", color: COLORS.cyan }),
         h(Stat, { label: "Age-65 coverage", value: pct(c.age65Coverage, 0), note: "Guaranteed income vs spending", color: c.age65Coverage >= 1 ? COLORS.green2 : COLORS.orange })
       ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "This view is an input lab: change timing, cash, income, spending, and allocation assumptions to see how much margin the plan keeps.")
+      h("div", { className: "callout", style: { marginTop: 12 } }, "This lab is for stress testing. It does not replace the Home Plan MC number; it shows how a cash-first sequence-risk model behaves under separate assumptions.")
     ),
-    h(Panel, { title: "Scenario Wealth Fan", meta: "10th / median / 90th" },
+    h(Panel, { title: "Risk Lab Wealth Fan", meta: "10th / median / 90th" },
       h(FanChart, { data: c.mc.percentiles }),
       h("div", { className: "chart-legend" },
         h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
         h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.cyan, opacity: 0.55 } }), "Outcome band")
       )
     ),
-    h(Panel, { title: "Scenario Comparisons" },
+    h(Panel, { title: "Risk Comparisons" },
       h("table", { className: "mini-table" },
         h("thead", null, h("tr", null, h("th", null, "Scenario"), h("th", null, "Success"), h("th", null, "Age-65 median"))),
         h("tbody", null,
@@ -1610,7 +1957,7 @@ function InputsTab(props) {
       ),
       h("div", { className: "note", style: { marginTop: 12 } }, "The app models cash as the first spending bucket. Portfolio liquidation begins only after the cash buffer is exhausted.")
     ),
-    h(Panel, { title: "Scenario Controls" },
+    h(Panel, { title: "Risk Controls" },
       h(RangeControl, { label: "Retirement age", value: s.colleenRetireAge, min: 40, max: 65, step: 1, onChange: set("colleenRetireAge"), display: function (v) { return String(v); } }),
       h(RangeControl, { label: "Invested portfolio", value: s.colleenPortfolio, min: 500000, max: 2200000, step: 5000, onChange: set("colleenPortfolio") }),
       h(RangeControl, { label: "Cash/CD buffer", value: s.colleenCashBuffer, min: 0, max: 300000, step: 2500, onChange: set("colleenCashBuffer") }),
@@ -1620,7 +1967,7 @@ function InputsTab(props) {
       h(RangeControl, { label: "Guaranteed household income", value: s.colleenHouseholdIncome, min: 0, max: 90000, step: 1000, onChange: set("colleenHouseholdIncome") }),
       h(RangeControl, { label: "Annual dividends", value: s.colleenDividends, min: 0, max: 40000, step: 500, onChange: set("colleenDividends") }),
       h(RangeControl, { label: "TRS pension at 65", value: s.colleenPension, min: 0, max: 80000, step: 1000, onChange: set("colleenPension") }),
-      h(RangeControl, { label: "Social Security at 65", value: s.colleenSs, min: 0, max: 50000, step: 500, onChange: set("colleenSs") }),
+      h(RangeControl, { label: "Risk lab Social Security", value: s.colleenSs, min: 0, max: 50000, step: 500, onChange: set("colleenSs") }),
       h(RangeControl, { label: "Starting equity allocation", value: s.colleenEquityStart, min: 30, max: 95, step: 1, onChange: set("colleenEquityStart"), display: function (v) { return v + "%"; } }),
       h(SwitchLine, { title: "Use rising-equity glidepath", copy: "Start lower, then raise equity exposure over the first decade.", value: s.colleenUseGlidepath, onChange: set("colleenUseGlidepath") }),
       s.colleenUseGlidepath && h(RangeControl, { label: "Ending equity allocation", value: s.colleenEquityEnd, min: 40, max: 95, step: 1, onChange: set("colleenEquityEnd"), display: function (v) { return v + "%"; } }),
@@ -1694,21 +2041,22 @@ function GuideTab(props) {
       h(RangeControl, { label: "PTO days", value: s.ptoDays, min: 0, max: 60, step: 1, onChange: set("ptoDays"), display: function (v) { return v + " days"; } })
     ),
     h(Panel, { title: "Input Review" },
-      h(SwitchLine, { title: "Core assumptions reviewed", copy: "Portfolio, spending, income, and timing inputs have been checked.", value: s.alignColleenBriefed, onChange: set("alignColleenBriefed") }),
+      h(SwitchLine, { title: "Core assumptions reviewed", copy: "Portfolio, spending, income, and timing inputs have been checked.", value: s.alignCoreReviewed, onChange: set("alignCoreReviewed") }),
       h(SwitchLine, { title: "Bridge to 65 reviewed", copy: "Portfolio is responsible mainly for the pre-TRS bridge.", value: s.alignBridgeReviewed, onChange: set("alignBridgeReviewed") }),
       h(SwitchLine, { title: "ADU role reviewed", copy: "ADU is lifestyle infrastructure first, rent upside second.", value: s.alignAduReviewed, onChange: set("alignAduReviewed") }),
       h(SwitchLine, { title: "Lifestyle input reviewed", copy: "Decompression, slow travel, and optional consulting are concrete planning inputs.", value: s.alignTravelVision, onChange: set("alignTravelVision") })
     ),
     h(Panel, { title: "Data Guide" },
       h("div", { className: "guide-list" },
-        h("div", { className: "guide-item" }, h("strong", null, "Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Equity mean 9.5%, bond mean 4.5%, cash mean 2.0%; volatility is allocation-weighted.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Scenario Monte Carlo"), h("span", null, "The Inputs tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Home Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Failure means the portfolio hits $0 before the planning horizon after income layers are counted.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Risk Lab Monte Carlo"), h("span", null, "The Risk tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Portfolio CSV import"), h("span", null, "The Portfolio tab can import a holdings CSV and update current portfolio, equity percentage, bond percentage, cash, and the holdings table locally in this browser.")),
         h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% draw rate.")),
         h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "The Budget tab category total is the monthly spending target used by Home, Monte Carlo, and bridge-draw math.")),
         h("div", { className: "guide-item" }, h("strong", null, "Debt-free home"), h("span", null, "No mortgage, vehicle debt, credit-card debt, or other required debt service is modeled. The home line is only carrying costs; extra room stays in flex and sinking funds.")),
         h("div", { className: "guide-item" }, h("strong", null, "Base case discipline"), h("span", null, "Guaranteed household income is base. Rent, side income, consulting, and ADU upside stay out unless toggled on.")),
         h("div", { className: "guide-item" }, h("strong", null, "Withdrawal order"), h("span", null, "The planning guide favors cash/bonds first in downturns, then taxable accounts, then tax-deferred accounts, with Roth assets preserved when possible. This is guidance text, not full tax software.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Not included yet"), h("span", null, "Detailed taxes, Roth conversion optimization, RMDs, real ACA plan quotes, exact TRS rule validation, and brokerage import automation."))
+        h("div", { className: "guide-item" }, h("strong", null, "Not included yet"), h("span", null, "Detailed taxes, Roth conversion optimization, RMDs, real ACA plan quotes, exact TRS rule validation, and automatic brokerage sync."))
       )
     ),
     h(Panel, { title: "One More Year Check" },
@@ -1728,7 +2076,8 @@ var TABS = [
   { id: "command", label: "Home", icon: "command" },
   { id: "income", label: "Income", icon: "income" },
   { id: "budget", label: "Budget", icon: "list" },
-  { id: "inputs", label: "Inputs", icon: "shield" },
+  { id: "portfolio", label: "Portfolio", icon: "portfolio" },
+  { id: "risk", label: "Risk", icon: "shield" },
   { id: "adu", label: "ADU", icon: "adu" },
   { id: "guide", label: "Guide", icon: "guide" }
 ];
@@ -1778,7 +2127,7 @@ function App() {
     setS(Object.assign({}, DEF));
   }
   var e = React.useMemo(function () { return buildEngine(s); }, [s]);
-  var c = React.useMemo(function () { return buildColleenEngine(s); }, [s]);
+  var c = React.useMemo(function () { return buildRiskLabEngine(s); }, [s]);
   function copySnapshot() {
     var lines = [
       "Flory Freedom snapshot",
@@ -1789,9 +2138,9 @@ function App() {
       "Family monthly budget: " + fmt(budgetCategories(s).reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0)),
       "TRS annual at 65: " + fmt(e.trsAnnual),
       "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
-      "Scenario target: " + c.targetLabel,
-      "Scenario 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
-      "Scenario base gap: " + fmt(c.baseGap),
+      "Risk lab target: " + c.targetLabel,
+      "Risk lab 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
+      "Risk lab base gap: " + fmt(c.baseGap),
       "ADU cash after budget: " + fmt(e.cashAfterAdu)
     ];
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1811,9 +2160,10 @@ function App() {
     ),
     h("main", { className: "content" },
       tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set, setSpendMonthly: setSpendMonthly, update: update }),
-      tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
+      tab === "income" && h(IncomeTab, { s: s, e: e, set: set }),
       tab === "budget" && h(BudgetTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
-      tab === "inputs" && h(InputsTab, { s: s, c: c, set: set }),
+      tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set, update: update }),
+      tab === "risk" && h(InputsTab, { s: s, e: e, c: c, set: set }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
       tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       h(Panel, { title: "Quick Tools" },
