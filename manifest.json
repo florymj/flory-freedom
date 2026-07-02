@@ -2,12 +2,24 @@
   "name": "Flory Freedom",
   "short_name": "Flory Freedom",
   "description": "Michael Flory's mobile-first FIRE command center: Michael and Colleen retirement readiness, Monte Carlo, income floor, portfolio concentration, ADU planning, and data guide.",
-  "start_url": "./",
+  "id": "./",
+  "start_url": "./?source=pwa",
   "scope": "./",
+  "lang": "en-US",
+  "dir": "ltr",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#070d18",
   "theme_color": "#070d18",
+  "categories": [
+    "finance",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "./icon-192.png",
