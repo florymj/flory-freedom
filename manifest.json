@@ -1,7 +1,7 @@
 {
   "name": "Flory Freedom",
   "short_name": "Flory Freedom",
-  "description": "Mobile-first retirement readiness dashboard: Monte Carlo simulation, net worth reconciliation, income planning, and retirement-date scenarios.",
+  "description": "Michael Flory's mobile-first FIRE command center: Michael and Colleen retirement readiness, Monte Carlo, income floor, portfolio concentration, ADU planning, and data guide.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

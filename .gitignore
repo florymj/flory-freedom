@@ -1,0 +1,4 @@
+# Sensitive portfolio imports
+private/fidelity-imports/*
+!private/fidelity-imports/README.md
+

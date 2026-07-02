@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#070d18">
+<meta name="theme-color" content="#08100f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flory Freedom">
@@ -14,15 +14,416 @@
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#070d18;}
-body{font-family:Georgia,serif;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
-input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:#1b2c44;outline:none;cursor:pointer;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;cursor:pointer;background:#4fc3f7;box-shadow:0 2px 8px rgba(0,0,0,0.6);}
-input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;background:#4fc3f7;}
-::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#1b2c44;border-radius:2px;}
-button{font-family:inherit;-webkit-tap-highlight-color:transparent;}
-#root{min-height:100vh;}
+:root {
+  --bg: #08100f;
+  --bg-2: #0b1518;
+  --panel: #0e1b1f;
+  --panel-2: #122429;
+  --line: #22343a;
+  --line-soft: rgba(255,255,255,0.08);
+  --text: #eef7f2;
+  --muted: #95a6a3;
+  --dim: #647774;
+  --green: #78c56d;
+  --green-2: #9be37f;
+  --cyan: #63d4ee;
+  --gold: #ffd15f;
+  --red: #ff6b6b;
+  --orange: #ffad5c;
+  --shadow: 0 18px 44px rgba(0,0,0,0.36);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { min-height: 100%; background: var(--bg); color: var(--text); }
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+button, input { font: inherit; }
+button { color: inherit; }
+#root { min-height: 100vh; }
+.app {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(7,16,17,0.96) 0%, rgba(8,16,15,1) 240px),
+    radial-gradient(circle at 16% 0%, rgba(99,212,238,0.12), transparent 280px);
+  padding-bottom: calc(86px + env(safe-area-inset-bottom));
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(8,16,15,0.94);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+  padding: calc(14px + env(safe-area-inset-top)) 16px 12px;
+}
+.toprow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { min-width: 0; }
+.brand h1 { font-size: 24px; line-height: 1.05; letter-spacing: 0; font-weight: 850; }
+.brand p { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.3; }
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.header-metric {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+}
+.header-metric span { color: var(--muted); font-size: 12px; }
+.header-metric strong { color: var(--green-2); font-size: 22px; font-weight: 850; font-variant-numeric: tabular-nums; }
+.content { padding: 14px 12px 0; }
+.panel {
+  background: linear-gradient(180deg, rgba(18,36,41,0.92), rgba(12,24,27,0.98));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.panel-body { padding: 14px; }
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 0;
+}
+.section-head h2 {
+  font-size: 13px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 850;
+}
+.section-head span { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.metric-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(132px, 1fr);
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(0,0,0,0.12);
+}
+.metric {
+  min-height: 152px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--line);
+  text-align: center;
+}
+.metric:last-child { border-right: 0; }
+.metric-title {
+  color: var(--text);
+  font-size: 11px;
+  min-height: 27px;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+.metric-sub { margin-top: 8px; color: var(--muted); font-size: 11px; line-height: 1.35; min-height: 30px; }
+.metric-note { margin-top: 2px; color: var(--dim); font-size: 10px; line-height: 1.3; }
+.donut-wrap { margin-top: 8px; display: flex; justify-content: center; }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 0;
+}
+.stat label {
+  display: block;
+  color: var(--dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+}
+.stat strong {
+  display: block;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.1;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+.stat small { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; margin-top: 5px; }
+.chart-shell { padding: 0 14px 14px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+.legend-dot { display: inline-block; width: 16px; height: 3px; border-radius: 4px; margin-right: 6px; vertical-align: middle; }
+.timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(84px, 1fr));
+  gap: 0;
+  overflow-x: auto;
+  padding: 10px 6px 2px;
+}
+.timeline:before {
+  content: "";
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  top: 34px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green), var(--gold), var(--cyan));
+  opacity: 0.9;
+}
+.milestone {
+  position: relative;
+  text-align: center;
+  min-width: 84px;
+  padding-top: 2px;
+}
+.milestone-dot {
+  position: relative;
+  z-index: 1;
+  margin: 8px auto 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2);
+  border: 5px solid currentColor;
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.2);
+}
+.milestone time { display: block; color: currentColor; font-size: 13px; font-weight: 800; min-height: 19px; }
+.milestone strong { display: block; font-size: 12px; line-height: 1.25; }
+.milestone span { display: block; color: var(--muted); font-size: 11px; line-height: 1.25; margin-top: 3px; }
+.action-row {
+  display: grid;
+  grid-template-columns: 38px 1fr auto 22px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.action-row:last-child { border-bottom: 0; }
+.action-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--green);
+}
+.action-row strong { display: block; font-size: 14px; line-height: 1.2; }
+.action-row span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; line-height: 1.35; }
+.action-status { color: var(--green-2); font-size: 12px; white-space: nowrap; }
+.bar-row { margin-bottom: 12px; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-top { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+.bar-top strong { color: var(--text); font-weight: 750; }
+.bar-track { height: 9px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: inherit; }
+.control { margin-bottom: 16px; }
+.control:last-child { margin-bottom: 0; }
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.control-label strong { color: var(--text); font-variant-numeric: tabular-nums; }
+input[type=range] {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #203237;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cyan);
+  border: 3px solid #071011;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+}
+input[type=range]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cyan);
+  border: 3px solid #071011;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+}
+.switch-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.switch-line:last-child { border-bottom: 0; }
+.switch-copy strong { display: block; font-size: 13px; line-height: 1.2; }
+.switch-copy span { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; margin-top: 4px; }
+.switch {
+  width: 46px;
+  height: 26px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: #35464a;
+  position: relative;
+  cursor: pointer;
+}
+.switch:after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s ease;
+}
+.switch.on { background: var(--green); }
+.switch.on:after { transform: translateX(20px); }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.callout {
+  border-left: 3px solid var(--gold);
+  padding: 10px 11px;
+  background: rgba(255,209,95,0.08);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.guide-list { display: grid; gap: 10px; }
+.guide-item { border-top: 1px solid var(--line); padding-top: 10px; }
+.guide-item:first-child { border-top: 0; padding-top: 0; }
+.guide-item strong { display: block; font-size: 13px; line-height: 1.25; }
+.guide-item span { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 4px; }
+.button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.seg button {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  min-height: 36px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+.seg button.active {
+  background: rgba(155,227,127,0.16);
+  color: var(--green-2);
+  box-shadow: inset 0 0 0 1px rgba(155,227,127,0.24);
+}
+.ghost-btn {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 750;
+}
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 520px;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  background: rgba(8,16,15,0.97);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+  padding: 7px 4px calc(10px + env(safe-area-inset-bottom));
+}
+.tab {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  display: grid;
+  gap: 3px;
+  place-items: center;
+  cursor: pointer;
+  min-height: 54px;
+  position: relative;
+}
+.tab svg { width: 24px; height: 24px; }
+.tab span { font-size: 9px; letter-spacing: 0; }
+.tab.active { color: var(--green-2); }
+.tab.active:after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--green-2);
+}
+.mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.mini-table th, .mini-table td { padding: 9px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.mini-table th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; }
+.mini-table td:last-child, .mini-table th:last-child { text-align: right; }
+.mini-table tr:last-child td { border-bottom: 0; }
+.salary-band {
+  background: #1d7fb8;
+  color: white;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  padding: 12px 14px;
+  margin: -14px -14px 12px;
+}
+.salary-table th,
+.salary-table td { padding: 10px 0; }
+.salary-table td:nth-child(2),
+.salary-table th:nth-child(2) { text-align: center; }
+.salary-table td:nth-child(3),
+.salary-table th:nth-child(3),
+.salary-table td:nth-child(4),
+.salary-table th:nth-child(4) { text-align: right; }
+@media (min-width: 760px) {
+  body { background: #050908; }
+  .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+}
 </style>
 </head>
 <body>
@@ -31,1600 +432,1056 @@ button{font-family:inherit;-webkit-tap-highlight-color:transparent;}
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script>
 var STORAGE_KEY = "flory-freedom-v1";
-var C = {
-  bg: "#070d18",
-  card: "#0b1626",
-  cardHi: "#101f34",
-  border: "#1b2c44",
-  accent: "#4fc3f7",
-  gold: "#ffd54f",
-  green: "#52c97a",
-  greenBright: "#69f0ae",
-  red: "#ef5350",
-  orange: "#ffa726",
-  teal: "#26c6da",
-  purple: "#ab47bc",
-  text: "#dde8f5",
-  muted: "#7089a8",
-  dim: "#33465f"
+var h = React.createElement;
+var COLORS = {
+  green: "#78c56d",
+  green2: "#9be37f",
+  cyan: "#63d4ee",
+  gold: "#ffd15f",
+  red: "#ff6b6b",
+  orange: "#ffad5c",
+  muted: "#95a6a3"
 };
 var DEF = {
-  currentPort: 1200000,
+  currentPortfolio: 1248757,
+  investmentValue: 1172826,
+  cashValue: 63136,
+  otherValue: 12988,
   monthlyContrib: 9000,
+  monthsToRetire: 12,
   currentAge: 46,
-  retireAge: 48,
-  spendTarget: 10000,
-  horizonYears: 30,
-  yearsServiceSoFar: 10,
-  trsHigh5: 195000,
-  trsAge: 65,
-  equityPct: 70,
-  bondShareOfFixed: 80,
-  ssAmt: 24000,
-  ssAge: 67,
+  retireAge: 47,
+  retireDateLabel: "June 30, 2027",
+  spendMonthly: 10000,
+  horizonYears: 40,
   inflation: 0.03,
-  wifeOn: true,
-  wifeAmt: 53000,
-  divsOn: true,
-  divsAmt: 14000,
-  sideOn: false,
-  sideAmt: 0,
-  aduOn: false,
-  aduAmt: 0,
-  ozarksOn: false,
-  ozarksAmt: 0,
-  fidelity401k: 850000,
-  fidelityBrokerage: 250000,
-  outsideSavings: 60000,
-  hsa: 40000,
-  realEstateEquity: 0,
-  vtiPct: 35,
-  vooPct: 20,
-  itotPct: 15,
-  intlPct: 8,
+  incomeGrowth: 0.02,
+  equityPct: 83,
+  bondPct: 12,
+  wifeIncome: 53000,
+  dividends: 14000,
+  includeDividends: true,
+  trsHigh5: 201000,
+  trsYears: 11,
+  trsMultiplier: 0.02,
+  trsAge: 65,
+  michaelSalary2027: 215000,
+  michaelSalary2026: 205000,
+  michaelSalary2025: 191636.14,
+  michaelSalary2024: 183332.71,
+  michaelSalary2023: 180958.14,
+  michaelSalary2022: 177419.28,
+  ssAnnual: 24000,
+  ssAge: 67,
+  ptoDays: 30,
+  includePto: true,
   householdSize: 2,
-  benchmarkPremium: 14000
+  benchmarkPremium: 14000,
+  overlapPct: 70,
+  internationalPct: 3.4,
+  aduBudget: 85000,
+  aduSpent: 0,
+  aduRentMonthly: 0,
+  includeAduRent: false,
+  aduDesignLocked: true,
+  aduJeremiahReady: false,
+  aduTenantReady: false,
+  aduCashPlanReady: false,
+  alignColleenBriefed: false,
+  alignBridgeReviewed: false,
+  alignAduReviewed: false,
+  alignTravelVision: false,
+  colleenCurrentAge: 46,
+  colleenRetireAge: 46,
+  colleenRetireOption: "Jun",
+  colleenPortfolio: 1150000,
+  colleenCashBuffer: 100000,
+  colleenBonds: 160000,
+  colleenMonthlySavings: 10000,
+  colleenPtoBonus: 18000,
+  colleenHouseholdIncome: 53000,
+  colleenDividends: 14000,
+  colleenSpending: 78000,
+  colleenPension: 40000,
+  colleenPensionAge: 65,
+  colleenSs: 24000,
+  colleenSsAge: 65,
+  colleenEquityStart: 76,
+  colleenEquityEnd: 76,
+  colleenHorizon: 50,
+  colleenConsulting: 0,
+  colleenUseGlidepath: false,
+  colleenInflationStress: false
 };
 function fmt(n, compact) {
-  if (n === undefined || n === null || isNaN(n)) return "$0";
+  n = Number(n || 0);
+  var sign = n < 0 ? "-" : "";
   var abs = Math.abs(n);
-  if (compact && abs >= 1000000) return "$" + (n / 1000000).toFixed(2) + "M";
-  if (compact && abs >= 1000) return "$" + (n / 1000).toFixed(0) + "k";
-  return n.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0
-  });
+  if (compact && abs >= 1000000) return sign + "$" + (abs / 1000000).toFixed(abs >= 10000000 ? 1 : 2) + "M";
+  if (compact && abs >= 1000) return sign + "$" + Math.round(abs / 1000).toLocaleString("en-US") + "k";
+  return sign + abs.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }
-function pct(n, d) {
-  d = d === undefined ? 1 : d;
-  return ((n || 0) * 100).toFixed(d) + "%";
+function pct(n, digits) {
+  digits = digits === undefined ? 1 : digits;
+  return ((n || 0) * 100).toFixed(digits) + "%";
 }
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
 }
-function boxMuller() {
-  var u1 = Math.random();
-  var u2 = Math.random();
-  var u = Math.max(u1, 1e-10);
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * u2);
-}
-function computeReturnVol(equityPct, bondPct, cashPct) {
-  var eq = equityPct / 100;
-  var bo = bondPct / 100;
-  var ca = cashPct / 100;
-  var mean = eq * 0.095 + bo * 0.045 + ca * 0.02;
-  var vol = Math.sqrt(Math.pow(eq * 0.18, 2) + Math.pow(bo * 0.06, 2) + Math.pow(ca * 0.01, 2));
-  return {
-    mean: mean,
-    vol: vol
-  };
-}
-function calcTRS(years, high5) {
-  return Math.round(0.023 * years * high5);
-}
-function grow(start, monthly, months, annualRate) {
+function growMonthly(start, monthly, months, annualRate) {
   var r = annualRate / 12;
   var b = start;
-  for (var m = 0; m < months; m++) b = b * (1 + r) + monthly;
-  return Math.round(b);
+  for (var i = 0; i < months; i++) b = b * (1 + r) + monthly;
+  return b;
 }
-function requiredWithdrawal(y, params) {
-  var age = params.retireAge + y;
-  var infl = Math.pow(1 + params.inflation, y);
-  var spend = params.spendTarget * 12 * infl;
-  var income = 0;
-  if (params.wifeOn) income += params.wifeAmt * infl;
-  if (params.divsOn) income += params.divsAmt * infl;
-  if (params.sideOn) income += params.sideAmt * infl;
-  if (params.aduOn) income += params.aduAmt * infl;
-  if (params.ozarksOn) income += params.ozarksAmt * infl;
-  if (age >= params.trsAge) income += params.trsAnnual * infl;
-  if (age >= params.ssAge) income += params.ssAmt * infl;
-  return Math.max(0, spend - income);
+function michaelSalaryRows(s) {
+  return [
+    { tier: "Post-95: Uncapped", year: "2026 - 2027 Projected", service: 1, salary: s.michaelSalary2027 },
+    { tier: "Post-95: Uncapped", year: "2025 - 2026 Contract Year", service: 1, salary: s.michaelSalary2026 },
+    { tier: "Post-95: Uncapped", year: "2024 - 2025", service: 1, salary: s.michaelSalary2025 },
+    { tier: "Post-95: Uncapped", year: "2023 - 2024", service: 1, salary: s.michaelSalary2024 },
+    { tier: "Post-95: Uncapped", year: "2022 - 2023", service: 1, salary: s.michaelSalary2023 },
+    { tier: "Post-95: Uncapped", year: "2021 - 2022", service: 1, salary: s.michaelSalary2022 }
+  ];
 }
-function runMC(startBalance, years, meanReturn, vol, params, sims) {
+function michaelHighFive(s) {
+  var rows = michaelSalaryRows(s);
+  var best = { average: 0, rows: rows.slice(0, 5) };
+  for (var i = 0; i <= rows.length - 5; i++) {
+    var slice = rows.slice(i, i + 5);
+    var total = slice.reduce(function (sum, row) { return sum + Number(row.salary || 0); }, 0);
+    var average = total / 5;
+    if (average > best.average) best = { average: average, rows: slice };
+  }
+  return best;
+}
+function hashState(s) {
+  var src = [
+    s.currentPortfolio, s.monthlyContrib, s.monthsToRetire, s.spendMonthly,
+    s.equityPct, s.bondPct, s.wifeIncome, s.dividends,
+    s.trsYears, s.trsMultiplier, s.michaelSalary2027, s.michaelSalary2026,
+    s.michaelSalary2025, s.michaelSalary2024, s.michaelSalary2023,
+    s.michaelSalary2022, s.ssAnnual, s.inflation, s.aduRentMonthly, s.includeAduRent
+  ].join("|");
+  var hsh = 2166136261;
+  for (var i = 0; i < src.length; i++) {
+    hsh ^= src.charCodeAt(i);
+    hsh += (hsh << 1) + (hsh << 4) + (hsh << 7) + (hsh << 8) + (hsh << 24);
+  }
+  return hsh >>> 0;
+}
+function rng(seed) {
+  return function () {
+    seed |= 0;
+    seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function normal(rand) {
+  var u1 = Math.max(rand(), 1e-10);
+  var u2 = rand();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+function trsAnnual(s) {
+  return Math.round((s.trsMultiplier || 0.02) * s.trsYears * michaelHighFive(s).average);
+}
+function fpl(size) {
+  return 15060 + Math.max(0, size - 1) * 5380;
+}
+function applicablePct(fplPct) {
+  if (fplPct < 150) return 0;
+  if (fplPct < 200) return (fplPct - 150) / 50 * 0.02;
+  if (fplPct < 250) return 0.02 + (fplPct - 200) / 50 * 0.02;
+  if (fplPct < 300) return 0.04 + (fplPct - 250) / 50 * 0.02;
+  if (fplPct < 400) return 0.06 + (fplPct - 300) / 100 * 0.025;
+  return 0.085;
+}
+function calcAca(magi, householdSize, benchmarkPremium) {
+  var line = fpl(householdSize);
+  var fplPct = line > 0 ? magi / line * 100 : 0;
+  var ap = applicablePct(fplPct);
+  var premiumCap = magi * ap;
+  return {
+    fpl: line,
+    fplPct: fplPct,
+    applicablePct: ap,
+    subsidy: Math.max(0, benchmarkPremium - premiumCap),
+    netPremium: Math.max(0, premiumCap)
+  };
+}
+function incomeForYear(y, s, e) {
+  var age = s.retireAge + y;
+  var income = s.wifeIncome * Math.pow(1 + s.incomeGrowth, y);
+  if (s.includeDividends) income += s.dividends * Math.pow(1 + s.inflation, y);
+  if (s.includeAduRent) income += s.aduRentMonthly * 12 * Math.pow(1 + s.inflation, y);
+  if (age >= s.trsAge) income += e.trsAnnual;
+  if (age >= s.ssAge) income += s.ssAnnual * Math.pow(1 + s.inflation, Math.max(0, age - s.ssAge));
+  return income;
+}
+function requiredDraw(y, s, e) {
+  var spend = s.spendMonthly * 12 * Math.pow(1 + s.inflation, y + s.monthsToRetire / 12);
+  return Math.max(0, spend - incomeForYear(y, s, e));
+}
+function runMonteCarlo(s, e, startBalance, sims) {
+  var rand = rng(hashState(s));
+  var buckets = [];
+  var successes = 0;
   sims = sims || 800;
-  var successCount = 0;
-  var yearBuckets = [];
-  for (var y = 0; y < years; y++) yearBuckets.push([]);
+  for (var y = 0; y < s.horizonYears; y++) buckets.push([]);
   for (var sim = 0; sim < sims; sim++) {
     var b = startBalance;
     var alive = true;
-    for (var y2 = 0; y2 < years; y2++) {
-      var wd = requiredWithdrawal(y2, params);
+    for (var year = 0; year < s.horizonYears; year++) {
       if (alive) {
-        var z = boxMuller();
-        b = b * (1 + meanReturn + vol * z) - wd;
+        var ret = e.meanReturn + e.volatility * normal(rand);
+        ret = clamp(ret, -0.7, 0.65);
+        b = b * (1 + ret) - requiredDraw(year, s, e);
         if (b <= 0) {
           b = 0;
           alive = false;
         }
       }
-      yearBuckets[y2].push(b);
+      buckets[year].push(b);
     }
-    if (alive) successCount++;
+    if (alive) successes++;
   }
-  var percentiles = yearBuckets.map(function (arr, i) {
-    var sorted = arr.slice().sort(function (a, b2) {
-      return a - b2;
-    });
-    var p10 = sorted[Math.floor(sorted.length * 0.10)];
-    var p50 = sorted[Math.floor(sorted.length * 0.50)];
-    var p90 = sorted[Math.floor(sorted.length * 0.90)];
+  var percentiles = buckets.map(function (bucket, i) {
+    var sorted = bucket.slice().sort(function (a, b) { return a - b; });
     return {
       year: i,
-      age: params.retireAge + i,
-      p10: p10,
-      p50: p50,
-      p90: p90
+      age: s.retireAge + i,
+      p10: sorted[Math.floor(sorted.length * 0.1)] || 0,
+      p50: sorted[Math.floor(sorted.length * 0.5)] || 0,
+      p90: sorted[Math.floor(sorted.length * 0.9)] || 0
+    };
+  });
+  return { successRate: successes / sims, percentiles: percentiles };
+}
+function hashAny(obj) {
+  var src = JSON.stringify(obj || {});
+  var hsh = 2166136261;
+  for (var i = 0; i < src.length; i++) {
+    hsh ^= src.charCodeAt(i);
+    hsh += (hsh << 1) + (hsh << 4) + (hsh << 7) + (hsh << 8) + (hsh << 24);
+  }
+  return hsh >>> 0;
+}
+function retireOptionMonths(option) {
+  if (option === "Feb") return 2;
+  if (option === "Dec") return 12;
+  return 6;
+}
+function retireOptionLabel(option) {
+  if (option === "Feb") return "February 2026";
+  if (option === "Dec") return "December 2026";
+  return "June 2026";
+}
+function colleenIncomeForYear(y, c) {
+  var age = c.retireAge + y;
+  var income = c.householdIncome * Math.pow(1 + c.incomeGrowth, y);
+  income += c.dividends * Math.pow(1 + c.inflation, y);
+  income += c.consulting * Math.pow(1 + c.inflation, y);
+  if (age >= c.pensionAge) income += c.pension * Math.pow(1 + c.inflation, Math.max(0, age - c.pensionAge));
+  if (age >= c.ssAge) income += c.ss * Math.pow(1 + c.inflation, Math.max(0, age - c.ssAge));
+  return income;
+}
+function colleenRun(c, sims, shockFirstYear) {
+  sims = sims || 800;
+  var rand = rng(hashAny(c) + (shockFirstYear ? 911 : 0));
+  var buckets = [];
+  var failures = 0;
+  var age65Index = Math.max(0, c.pensionAge - c.retireAge);
+  for (var y = 0; y < c.horizon; y++) buckets.push([]);
+  for (var sim = 0; sim < sims; sim++) {
+    var portfolio = c.portfolio + c.preRetireSavings + c.ptoBonus;
+    var cash = c.cashBuffer;
+    var alive = true;
+    for (var year = 0; year < c.horizon; year++) {
+      var glideT = c.horizon > 1 ? Math.min(1, year / Math.max(1, c.glideYears)) : 0;
+      var equityPct = c.useGlidepath ? c.equityStart + (c.equityEnd - c.equityStart) * glideT : c.equityStart;
+      var bondPct = Math.max(0, 100 - equityPct);
+      var stockRet = 0.098 + 0.18 * normal(rand);
+      var bondRet = 0.05 + 0.06 * normal(rand);
+      if (shockFirstYear && year === 0) stockRet -= 0.25;
+      var ret = equityPct / 100 * stockRet + bondPct / 100 * bondRet;
+      ret = clamp(ret, -0.75, 0.7);
+      var spend = c.spending * Math.pow(1 + c.inflation, year);
+      var gap = Math.max(0, spend - colleenIncomeForYear(year, c));
+      var cashDraw = Math.min(cash, gap);
+      cash -= cashDraw;
+      var portfolioDraw = gap - cashDraw;
+      if (alive) {
+        portfolio = portfolio * (1 + ret) - portfolioDraw;
+        if (portfolio + cash <= 0) {
+          portfolio = 0;
+          cash = 0;
+          alive = false;
+          failures++;
+        }
+      }
+      buckets[year].push(Math.max(0, portfolio + cash));
+    }
+  }
+  var percentiles = buckets.map(function (bucket, i) {
+    var sorted = bucket.slice().sort(function (a, b) { return a - b; });
+    return {
+      year: i,
+      age: c.retireAge + i,
+      p10: sorted[Math.floor(sorted.length * 0.1)] || 0,
+      p50: sorted[Math.floor(sorted.length * 0.5)] || 0,
+      p90: sorted[Math.floor(sorted.length * 0.9)] || 0
     };
   });
   return {
-    successRate: successCount / sims,
-    percentiles: percentiles
+    successRate: 1 - failures / sims,
+    percentiles: percentiles,
+    age65Median: percentiles[age65Index] ? percentiles[age65Index].p50 : 0
   };
 }
-function deterministicPath(startBalance, years, meanReturn, params, shockFirstYear) {
-  var b = startBalance;
-  var path = [b];
-  var depleted = false;
-  for (var y = 0; y < years; y++) {
-    var r = shockFirstYear && y === 0 ? meanReturn - 0.25 : meanReturn;
-    var wd = requiredWithdrawal(y, params);
-    b = b * (1 + r) - wd;
-    if (b <= 0) {
-      b = 0;
-      depleted = true;
-    }
-    path.push(b);
-    if (depleted) break;
-  }
-  return {
-    path: path,
-    ending: b,
-    depleted: depleted
+function makeColleenConfig(s, overrides) {
+  var months = retireOptionMonths((overrides && overrides.option) || s.colleenRetireOption);
+  var base = {
+    option: s.colleenRetireOption,
+    retireAge: s.colleenRetireAge,
+    portfolio: s.colleenPortfolio,
+    cashBuffer: s.colleenCashBuffer,
+    preRetireSavings: s.colleenMonthlySavings * months,
+    ptoBonus: s.colleenPtoBonus,
+    householdIncome: s.colleenHouseholdIncome,
+    dividends: s.colleenDividends,
+    spending: s.colleenSpending,
+    pension: s.colleenPension,
+    pensionAge: s.colleenPensionAge,
+    ss: s.colleenSs,
+    ssAge: s.colleenSsAge,
+    equityStart: s.colleenEquityStart,
+    equityEnd: s.colleenUseGlidepath ? s.colleenEquityEnd : s.colleenEquityStart,
+    useGlidepath: s.colleenUseGlidepath,
+    glideYears: 10,
+    horizon: s.colleenHorizon,
+    consulting: s.colleenConsulting,
+    inflation: s.colleenInflationStress ? 0.04 : s.inflation,
+    incomeGrowth: s.incomeGrowth
   };
+  return Object.assign(base, overrides || {});
 }
-function fplForHousehold(size) {
-  return 15060 + Math.max(0, size - 1) * 5380;
-}
-function applicablePct(fplPctValue) {
-  if (fplPctValue < 150) return 0;
-  if (fplPctValue < 200) return (fplPctValue - 150) / 50 * 0.02;
-  if (fplPctValue < 250) return 0.02 + (fplPctValue - 200) / 50 * 0.02;
-  if (fplPctValue < 300) return 0.04 + (fplPctValue - 250) / 50 * 0.02;
-  if (fplPctValue < 400) return 0.06 + (fplPctValue - 300) / 100 * 0.025;
-  return 0.085;
-}
-function calcACA(magi, householdSize, benchmarkPremium) {
-  var fpl = fplForHousehold(householdSize);
-  var fplPctValue = fpl > 0 ? magi / fpl * 100 : 0;
-  var ap = applicablePct(fplPctValue);
-  var premiumCap = magi * ap;
-  var subsidy = Math.max(0, benchmarkPremium - premiumCap);
-  var netPremium = Math.max(0, benchmarkPremium - subsidy);
+function buildColleenEngine(s) {
+  var c = makeColleenConfig(s);
+  var baseGap = Math.max(0, c.spending - colleenIncomeForYear(0, c));
+  var cashRunway = baseGap > 0 ? c.cashBuffer / baseGap : 99;
+  var age65Income = colleenIncomeForYear(Math.max(0, c.pensionAge - c.retireAge), c);
+  var age65Spend = c.spending * Math.pow(1 + c.inflation, Math.max(0, c.pensionAge - c.retireAge));
+  var mc30 = colleenRun(Object.assign({}, c, { horizon: 30 }), 700, false);
+  var mc = colleenRun(c, 900, false);
+  var shock = colleenRun(c, 500, true);
+  var scenarioConfigs = [
+    { label: "Base: " + retireOptionLabel(c.option), cfg: c },
+    { label: "February 2026", cfg: makeColleenConfig(s, { option: "Feb" }) },
+    { label: "December 2026", cfg: makeColleenConfig(s, { option: "Dec" }) },
+    { label: "Rising glidepath", cfg: makeColleenConfig(s, { useGlidepath: true, equityStart: 50, equityEnd: 72 }) },
+    { label: "4% inflation stress", cfg: makeColleenConfig(s, { inflation: 0.04 }) },
+    { label: "$25k consulting", cfg: makeColleenConfig(s, { consulting: 25000 }) }
+  ];
+  var scenarios = scenarioConfigs.map(function (row) {
+    var result = colleenRun(row.cfg, 360, false);
+    var gap = Math.max(0, row.cfg.spending - colleenIncomeForYear(0, row.cfg));
+    return {
+      label: row.label,
+      success: result.successRate,
+      gap: gap,
+      age65Median: result.age65Median,
+      start: row.cfg.portfolio + row.cfg.cashBuffer + row.cfg.preRetireSavings + row.cfg.ptoBonus
+    };
+  });
   return {
-    fpl: fpl,
-    fplPct: fplPctValue,
-    applicablePct: ap,
-    premiumCap: premiumCap,
-    subsidy: subsidy,
-    netPremium: netPremium
+    config: c,
+    baseGap: baseGap,
+    cashRunway: cashRunway,
+    age65Income: age65Income,
+    age65Spend: age65Spend,
+    age65Coverage: age65Spend > 0 ? age65Income / age65Spend : 0,
+    mc30: mc30,
+    mc: mc,
+    shock: shock,
+    scenarios: scenarios,
+    targetLabel: retireOptionLabel(c.option)
   };
 }
 function buildEngine(s) {
-  var remainder = 100 - s.equityPct;
-  var bondPct = remainder * (s.bondShareOfFixed / 100);
-  var cashPct = remainder - bondPct;
-  var alloc = computeReturnVol(s.equityPct, bondPct, cashPct);
-  alloc.equityPct = s.equityPct;
-  alloc.bondPct = Math.round(bondPct * 10) / 10;
-  alloc.cashPct = Math.round(cashPct * 10) / 10;
-  var yearsService = s.yearsServiceSoFar + Math.max(0, s.retireAge - s.currentAge);
-  var trsAnnual = calcTRS(yearsService, s.trsHigh5);
-  var monthsToRetire = Math.max(0, Math.round((s.retireAge - s.currentAge) * 12));
-  var projPortAtRetire = grow(s.currentPort, s.monthlyContrib, monthsToRetire, alloc.mean);
-  var inflToRetire = Math.pow(1 + s.inflation, Math.max(0, s.retireAge - s.currentAge));
-  var inflatedSpendAtRetire = Math.round(s.spendTarget * 12 * inflToRetire);
-  var totalActiveIncome = (s.wifeOn ? s.wifeAmt : 0) + (s.divsOn ? s.divsAmt : 0) + (s.sideOn ? s.sideAmt : 0) + (s.aduOn ? s.aduAmt : 0) + (s.ozarksOn ? s.ozarksAmt : 0);
-  var preGap = Math.max(0, inflatedSpendAtRetire - totalActiveIncome);
-  var safePortNeeded = preGap > 0 ? preGap / 0.035 : 0;
-  var readinessScore = safePortNeeded > 0 ? clamp(Math.round(projPortAtRetire / safePortNeeded * 100), 0, 150) : 100;
-  var mcParams = {
-    retireAge: s.retireAge,
-    inflation: s.inflation,
-    spendTarget: s.spendTarget,
-    wifeOn: s.wifeOn,
-    wifeAmt: s.wifeAmt,
-    divsOn: s.divsOn,
-    divsAmt: s.divsAmt,
-    sideOn: s.sideOn,
-    sideAmt: s.sideAmt,
-    aduOn: s.aduOn,
-    aduAmt: s.aduAmt,
-    ozarksOn: s.ozarksOn,
-    ozarksAmt: s.ozarksAmt,
-    trsAge: s.trsAge,
-    trsAnnual: trsAnnual,
-    ssAge: s.ssAge,
-    ssAmt: s.ssAmt
+  var equity = clamp(s.equityPct, 0, 100);
+  var bond = clamp(s.bondPct, 0, Math.max(0, 100 - equity));
+  var cash = Math.max(0, 100 - equity - bond);
+  var eq = equity / 100;
+  var bo = bond / 100;
+  var ca = cash / 100;
+  var mean = eq * 0.095 + bo * 0.045 + ca * 0.02;
+  var vol = Math.sqrt(Math.pow(eq * 0.18, 2) + Math.pow(bo * 0.06, 2) + Math.pow(ca * 0.01, 2));
+  var projected = growMonthly(s.currentPortfolio, s.monthlyContrib, s.monthsToRetire, mean);
+  var highFive = michaelHighFive(s);
+  var ptoBuffer = s.includePto ? highFive.average / 260 * s.ptoDays : 0;
+  var startBalance = projected + ptoBuffer;
+  var base = {
+    meanReturn: mean,
+    volatility: vol,
+    equityPct: equity,
+    bondPct: bond,
+    cashPct: cash,
+    highFive: highFive,
+    trsAnnual: trsAnnual(s)
   };
-  var mc = runMC(projPortAtRetire, s.horizonYears, alloc.mean, alloc.vol, mcParams, 800);
-  var glidePath = [];
-  var gb = projPortAtRetire;
-  for (var y = 0; y < s.horizonYears; y++) {
-    var wd = requiredWithdrawal(y, mcParams);
-    var rate = gb > 0 ? wd / gb : 0;
-    glidePath.push({
-      year: y,
-      age: s.retireAge + y,
-      rate: rate
-    });
-    gb = gb * (1 + alloc.mean) - wd;
-    if (gb < 0) gb = 0;
-  }
-  var hiddenAssets = {
-    trsCapitalized: trsAnnual / 0.03,
-    spouseCapitalized: s.wifeAmt / 0.03
+  var spendAtRetire = s.spendMonthly * 12 * Math.pow(1 + s.inflation, s.monthsToRetire / 12);
+  var bridgeIncome = incomeForYear(0, s, base);
+  var bridgeDraw = Math.max(0, spendAtRetire - bridgeIncome);
+  var withdrawalRate = startBalance > 0 ? bridgeDraw / startBalance : 0;
+  var safeBridgeCapital = bridgeDraw > 0 ? bridgeDraw / 0.04 : 1;
+  var readinessScore = clamp(Math.round(startBalance / safeBridgeCapital * 100), 0, 140);
+  var yearsToTrs = Math.max(0, s.trsAge - s.retireAge);
+  var yearsToSs = Math.max(0, s.ssAge - s.retireAge);
+  var spendAtSs = s.spendMonthly * 12 * Math.pow(1 + s.inflation, yearsToSs);
+  var incomeAtSs = incomeForYear(yearsToSs, s, base);
+  var floorCoverage = spendAtSs > 0 ? incomeAtSs / spendAtSs : 0;
+  var magi = s.wifeIncome + (s.includeDividends ? s.dividends : 0) + (s.includeAduRent ? s.aduRentMonthly * 12 : 0);
+  var aca = calcAca(magi, s.householdSize, s.benchmarkPremium);
+  var mc = runMonteCarlo(s, base, startBalance, 800);
+  var aduRemaining = Math.max(0, s.aduBudget - s.aduSpent);
+  var cashAfterAdu = s.cashValue - aduRemaining;
+  var monthlyRebuild = Math.max(0, s.monthlyContrib);
+  var rebuildMonths = cashAfterAdu < 0 && monthlyRebuild > 0 ? Math.ceil(Math.abs(cashAfterAdu) / monthlyRebuild) : 0;
+  var onTime = {
+    retirementAge: s.retireAge,
+    startBalance: startBalance,
+    bridgeDraw: bridgeDraw,
+    success: mc.successRate
   };
-  var netWorth = {
-    fidelity: s.fidelity401k + s.fidelityBrokerage,
-    outside: s.outsideSavings + s.hsa,
-    realEstate: s.realEstateEquity,
-    total: s.fidelity401k + s.fidelityBrokerage + s.outsideSavings + s.hsa + s.realEstateEquity
-  };
-  var breakdown = [{
-    label: "Equity",
-    pct: alloc.equityPct,
-    value: netWorth.total * alloc.equityPct / 100,
-    color: C.accent
-  }, {
-    label: "Bonds",
-    pct: alloc.bondPct,
-    value: netWorth.total * alloc.bondPct / 100,
-    color: C.teal
-  }, {
-    label: "Cash",
-    pct: alloc.cashPct,
-    value: netWorth.total * alloc.cashPct / 100,
-    color: C.gold
-  }, {
-    label: "Real Estate",
-    pct: netWorth.total > 0 ? Math.round(s.realEstateEquity / netWorth.total * 100) : 0,
-    value: s.realEstateEquity,
-    color: C.purple
-  }];
-  var usOverlapPct = s.vtiPct + s.vooPct + s.itotPct;
-  var concentration = {
-    usOverlapPct: usOverlapPct,
-    intlPct: s.intlPct,
-    overlapWarning: usOverlapPct > 60,
-    intlWarning: s.intlPct < 15
-  };
-  var magi = totalActiveIncome;
-  var aca = calcACA(magi, s.householdSize, s.benchmarkPremium);
-  var baseline = deterministicPath(projPortAtRetire, s.horizonYears, alloc.mean, mcParams, false);
-  var shocked = deterministicPath(projPortAtRetire, s.horizonYears, alloc.mean, mcParams, true);
-  var stress = {
-    baselineEnding: baseline.ending,
-    baselineDepleted: baseline.depleted,
-    shockEnding: shocked.ending,
-    shockDepleted: shocked.depleted
-  };
-  var successByDate = [];
-  for (var age = s.currentAge + 1; age <= s.currentAge + 15; age++) {
-    var months = Math.max(0, Math.round((age - s.currentAge) * 12));
-    var pp = grow(s.currentPort, s.monthlyContrib, months, alloc.mean);
-    var yrsSvc = s.yearsServiceSoFar + Math.max(0, age - s.currentAge);
-    var trsAmt = calcTRS(yrsSvc, s.trsHigh5);
-    var p2 = {
-      retireAge: age,
-      inflation: s.inflation,
-      spendTarget: s.spendTarget,
-      wifeOn: s.wifeOn,
-      wifeAmt: s.wifeAmt,
-      divsOn: s.divsOn,
-      divsAmt: s.divsAmt,
-      sideOn: s.sideOn,
-      sideAmt: s.sideAmt,
-      aduOn: s.aduOn,
-      aduAmt: s.aduAmt,
-      ozarksOn: s.ozarksOn,
-      ozarksAmt: s.ozarksAmt,
-      trsAge: s.trsAge,
-      trsAnnual: trsAmt,
-      ssAge: s.ssAge,
-      ssAmt: s.ssAmt
-    };
-    var res = runMC(pp, s.horizonYears, alloc.mean, alloc.vol, p2, 200);
-    successByDate.push({
-      age: age,
-      projPort: pp,
-      success: res.successRate
-    });
-  }
-  return {
-    alloc: alloc,
-    trsAnnual: trsAnnual,
-    yearsService: yearsService,
-    projPortAtRetire: projPortAtRetire,
-    inflatedSpendAtRetire: inflatedSpendAtRetire,
-    totalActiveIncome: totalActiveIncome,
-    preGap: preGap,
-    safePortNeeded: safePortNeeded,
-    readinessScore: readinessScore,
-    mc: mc,
-    glidePath: glidePath,
-    hiddenAssets: hiddenAssets,
-    netWorth: netWorth,
-    breakdown: breakdown,
-    concentration: concentration,
-    aca: aca,
-    stress: stress,
-    successByDate: successByDate,
-    mcParams: mcParams
-  };
-}
-function Card({
-  children,
-  style
-}) {
-  return React.createElement("div", {
-    style: Object.assign({
-      background: C.card,
-      border: "1px solid " + C.border,
-      borderRadius: 14,
-      padding: 14,
-      marginBottom: 12
-    }, style || {})
-  }, children);
-}
-function SectionLabel({
-  children,
-  color
-}) {
-  return React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: color || C.muted,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, children);
-}
-function Slider({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-  display,
-  color,
-  note
-}) {
-  var col = color || C.accent;
-  return React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      marginBottom: 3
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.muted
-    }
-  }, label), React.createElement("span", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: col,
-      fontFamily: "monospace"
-    }
-  }, display ? display(value) : fmt(value))), note && React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: C.dim,
-      marginBottom: 3
-    }
-  }, note), React.createElement("input", {
-    type: "range",
-    min: min,
-    max: max,
-    step: step,
-    value: value,
-    onChange: function (e) {
-      onChange(Number(e.target.value));
-    },
-    style: {
-      width: "100%",
-      accentColor: col,
-      cursor: "pointer"
-    }
-  }), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 9,
-      color: C.dim
-    }
-  }, React.createElement("span", null, display ? display(min) : fmt(min, true)), React.createElement("span", null, display ? display(max) : fmt(max, true))));
-}
-function Toggle({
-  label,
-  value,
-  onChange,
-  color
-}) {
-  var col = color || C.green;
-  return React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 8
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.text
-    }
-  }, label), React.createElement("div", {
-    onClick: function () {
-      onChange(!value);
-    },
-    style: {
-      width: 44,
-      height: 24,
-      borderRadius: 12,
-      cursor: "pointer",
-      position: "relative",
-      background: value ? col : C.dim,
-      transition: "background 0.25s"
-    }
-  }, React.createElement("div", {
-    style: {
-      position: "absolute",
-      top: 3,
-      left: value ? 22 : 3,
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      background: "white",
-      transition: "left 0.25s",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.4)"
-    }
-  })));
-}
-function StatBox({
-  label,
-  value,
-  color
-}) {
-  return React.createElement("div", {
-    style: {
-      background: "rgba(0,0,0,0.2)",
-      borderRadius: 8,
-      padding: "7px 8px"
-    }
-  }, React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: C.dim
-    }
-  }, label), React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: color || C.text,
-      fontFamily: "monospace"
-    }
-  }, value));
-}
-function RadialGauge({
-  value,
-  size,
-  color
-}) {
-  var sz = size || 140;
-  var v = clamp(value, 0, 100);
-  var r = sz / 2 - 12;
-  var circumference = 2 * Math.PI * r;
-  var offset = circumference * (1 - v / 100);
-  var col = color || (v >= 100 ? C.greenBright : v >= 85 ? C.green : v >= 70 ? C.gold : v >= 50 ? C.orange : C.red);
-  return React.createElement("svg", {
-    width: sz,
-    height: sz,
-    viewBox: "0 0 " + sz + " " + sz
-  }, React.createElement("circle", {
-    cx: sz / 2,
-    cy: sz / 2,
-    r: r,
-    fill: "none",
-    stroke: C.border,
-    strokeWidth: "12"
-  }), React.createElement("circle", {
-    cx: sz / 2,
-    cy: sz / 2,
-    r: r,
-    fill: "none",
-    stroke: col,
-    strokeWidth: "12",
-    strokeDasharray: circumference,
-    strokeDashoffset: offset,
-    strokeLinecap: "round",
-    transform: "rotate(-90 " + sz / 2 + " " + sz / 2 + ")"
-  }), React.createElement("text", {
-    x: sz / 2,
-    y: sz / 2 - 4,
-    textAnchor: "middle",
-    fontSize: "26",
-    fontWeight: "900",
-    fill: col,
-    fontFamily: "monospace"
-  }, Math.round(v) + "%"), React.createElement("text", {
-    x: sz / 2,
-    y: sz / 2 + 16,
-    textAnchor: "middle",
-    fontSize: "9",
-    fill: C.muted
-  }, "READY"));
-}
-function FanChart({
-  data,
-  width,
-  height,
-  color
-}) {
-  var w = width || 300;
-  var h = height || 140;
-  if (!data || data.length === 0) return React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.dim
-    }
-  }, "No data");
-  var maxV = Math.max.apply(null, data.map(function (d) {
-    return d.p90 || 0;
-  }).concat([1]));
-  var pad = 6;
-  var n = data.length;
-  function X(i) {
-    return pad + i / Math.max(1, n - 1) * (w - pad * 2);
-  }
-  function Y(v) {
-    return h - pad - Math.max(0, v) / maxV * (h - pad * 2);
-  }
-  var topPts = data.map(function (d, i) {
-    return X(i) + "," + Y(d.p90);
-  }).join(" ");
-  var botPts = data.slice().reverse().map(function (d, i) {
-    return X(n - 1 - i) + "," + Y(d.p10);
-  }).join(" ");
-  var medPts = data.map(function (d, i) {
-    return X(i) + "," + Y(d.p50);
-  }).join(" ");
-  return React.createElement("svg", {
-    width: "100%",
-    height: h,
-    viewBox: "0 0 " + w + " " + h,
-    preserveAspectRatio: "none"
-  }, React.createElement("polygon", {
-    points: topPts + " " + botPts,
-    fill: color || C.accent,
-    opacity: "0.15"
-  }), React.createElement("polyline", {
-    points: medPts,
-    fill: "none",
-    stroke: color || C.accent,
-    strokeWidth: "2"
-  }));
-}
-function LineChartSimple({
-  data,
-  valueKey,
-  width,
-  height,
-  color
-}) {
-  var w = width || 300;
-  var h = height || 110;
-  if (!data || data.length === 0) return React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.dim
-    }
-  }, "No data");
-  var vals = data.map(function (d) {
-    return d[valueKey] || 0;
+  var delayedState = Object.assign({}, s, {
+    monthsToRetire: s.monthsToRetire + 12,
+    retireAge: s.retireAge + 1,
+    trsYears: s.trsYears + 1
   });
-  var maxV = Math.max.apply(null, vals.concat([0.0001]));
-  var pad = 6;
-  var n = data.length;
-  function X(i) {
-    return pad + i / Math.max(1, n - 1) * (w - pad * 2);
+  var delayedBase = {
+    meanReturn: mean,
+    volatility: vol,
+    equityPct: equity,
+    bondPct: bond,
+    cashPct: cash,
+    trsAnnual: trsAnnual(delayedState)
+  };
+  var delayedProjected = growMonthly(s.currentPortfolio, s.monthlyContrib, delayedState.monthsToRetire, mean) + ptoBuffer;
+  var delayedBridgeDraw = Math.max(0, delayedState.spendMonthly * 12 * Math.pow(1 + delayedState.inflation, delayedState.monthsToRetire / 12) - incomeForYear(0, delayedState, delayedBase));
+  return Object.assign(base, {
+    projectedPortfolio: projected,
+    ptoBuffer: ptoBuffer,
+    startBalance: startBalance,
+    spendAtRetire: spendAtRetire,
+    bridgeIncome: bridgeIncome,
+    bridgeDraw: bridgeDraw,
+    withdrawalRate: withdrawalRate,
+    readinessScore: readinessScore,
+    yearsToTrs: yearsToTrs,
+    yearsToSs: yearsToSs,
+    incomeAtSs: incomeAtSs,
+    spendAtSs: spendAtSs,
+    floorCoverage: floorCoverage,
+    pensionHiddenAsset: base.trsAnnual / 0.03,
+    colleenHiddenAsset: s.wifeIncome / 0.03,
+    mc: mc,
+    aca: aca,
+    magi: magi,
+    aduRemaining: aduRemaining,
+    cashAfterAdu: cashAfterAdu,
+    rebuildMonths: rebuildMonths,
+    onTime: onTime,
+    delayed: {
+      startBalance: delayedProjected,
+      bridgeDraw: delayedBridgeDraw,
+      addedPortfolio: delayedProjected - startBalance,
+      addedPension: trsAnnual(delayedState) - base.trsAnnual
+    }
+  });
+}
+function normalizeState(parsed) {
+  var s = Object.assign({}, DEF, parsed || {});
+  if (parsed && parsed.currentPort && !parsed.currentPortfolio) s.currentPortfolio = parsed.currentPort;
+  if (parsed && parsed.spendTarget && !parsed.spendMonthly) s.spendMonthly = parsed.spendTarget;
+  if (parsed && parsed.fidelity401k && !parsed.investmentValue) {
+    s.investmentValue = (parsed.fidelity401k || 0) + (parsed.fidelityBrokerage || 0);
   }
-  function Y(v) {
-    return h - pad - v / maxV * (h - pad * 2);
-  }
-  var pts = data.map(function (d, i) {
-    return X(i) + "," + Y(d[valueKey] || 0);
-  }).join(" ");
-  return React.createElement("svg", {
-    width: "100%",
-    height: h,
-    viewBox: "0 0 " + w + " " + h,
-    preserveAspectRatio: "none"
-  }, React.createElement("polyline", {
-    points: pts,
-    fill: "none",
-    stroke: color || C.orange,
-    strokeWidth: "2"
-  }));
+  if (parsed && parsed.outsideSavings && !parsed.cashValue) s.cashValue = parsed.outsideSavings;
+  return s;
 }
-function BarRow({
-  label,
-  valuePct,
-  displayValue,
-  color
-}) {
-  return React.createElement("div", {
-    style: {
-      marginBottom: 8
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      marginBottom: 2,
-      fontSize: 10
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, label), React.createElement("span", {
-    style: {
-      color: color,
-      fontFamily: "monospace"
-    }
-  }, displayValue)), React.createElement("div", {
-    style: {
-      height: 8,
-      background: C.border,
-      borderRadius: 4,
-      overflow: "hidden"
-    }
-  }, React.createElement("div", {
-    style: {
-      height: 8,
-      width: clamp(valuePct, 0, 100) + "%",
-      background: color
-    }
-  })));
-}
-function ReadyTab({
-  s,
-  engine
-}) {
-  var e = engine;
-  var col = e.readinessScore >= 100 ? C.greenBright : e.readinessScore >= 85 ? C.green : e.readinessScore >= 70 ? C.gold : C.orange;
-  return React.createElement("div", null, React.createElement(Card, {
-    style: {
-      textAlign: "center"
-    }
-  }, React.createElement(SectionLabel, null, "Readiness at Age ", s.retireAge), React.createElement(RadialGauge, {
-    value: e.readinessScore,
-    color: col
-  }), React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.muted,
-      marginTop: 6
-    }
-  }, "Portfolio at retirement: ", React.createElement("strong", {
-    style: {
-      color: C.accent
-    }
-  }, fmt(e.projPortAtRetire, true)))), React.createElement(Card, null, React.createElement(SectionLabel, null, "Monte Carlo Success (", s.horizonYears, "yr horizon, 800 sims)"), React.createElement("div", {
-    style: {
-      fontSize: 32,
-      fontWeight: 900,
-      color: col,
-      fontFamily: "monospace"
-    }
-  }, Math.round(e.mc.successRate * 100), "%"), React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.dim,
-      marginTop: 4
-    }
-  }, "Probability the portfolio survives to age ", s.retireAge + s.horizonYears, ", drawing down for spending net of income sources.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Percentile Wealth Fan (10th / 50th / 90th)"), React.createElement(FanChart, {
-    data: e.mc.percentiles
-  }), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 9,
-      color: C.dim,
-      marginTop: 4
-    }
-  }, React.createElement("span", null, "Age ", s.retireAge), React.createElement("span", null, "Age ", s.retireAge + s.horizonYears))), React.createElement(Card, null, React.createElement(SectionLabel, null, "Withdrawal Rate Glide Path"), React.createElement(LineChartSimple, {
-    data: e.glidePath,
-    valueKey: "rate",
-    color: C.orange
-  }), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 9,
-      color: C.dim,
-      marginTop: 4
-    }
-  }, React.createElement("span", null, "Age ", s.retireAge), React.createElement("span", null, "Age ", s.retireAge + s.horizonYears))), React.createElement(Card, {
-    style: {
-      background: C.teal + "12",
-      border: "1px solid " + C.teal + "30"
-    }
-  }, React.createElement(SectionLabel, {
-    color: C.teal
-  }, "Hidden Assets (valued at 3% withdrawal rate)"), React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 8
-    }
-  }, React.createElement(StatBox, {
-    label: "TRS Pension Value",
-    value: fmt(e.hiddenAssets.trsCapitalized, true),
-    color: C.teal
-  }), React.createElement(StatBox, {
-    label: "Spouse Income Floor",
-    value: fmt(e.hiddenAssets.spouseCapitalized, true),
-    color: C.accent
-  })), React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: C.dim,
-      marginTop: 8
-    }
-  }, "These guaranteed income streams are not counted in the investable portfolio above, but they function like a bond ladder worth this much capital at a conservative 3% withdrawal rate.")));
-}
-function PortfolioTab({
-  s,
-  set,
-  engine
-}) {
-  var e = engine;
-  var hasWarning = e.concentration.overlapWarning || e.concentration.intlWarning;
-  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Net Worth Reconciliation"), React.createElement("div", {
-    style: {
-      marginBottom: 6
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 12,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "Fidelity (401k + brokerage)"), React.createElement("span", {
-    style: {
-      color: C.accent,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.netWorth.fidelity, true))), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 12,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "Outside accounts (savings + HSA)"), React.createElement("span", {
-    style: {
-      color: C.teal,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.netWorth.outside, true))), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 12,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "Real estate equity"), React.createElement("span", {
-    style: {
-      color: C.purple,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.netWorth.realEstate, true)))), React.createElement("div", {
-    style: {
-      borderTop: "1px solid " + C.border,
-      paddingTop: 8
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between"
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: C.text
-    }
-  }, "Total net worth"), React.createElement("span", {
-    style: {
-      fontSize: 15,
-      fontWeight: 800,
-      color: C.greenBright,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.netWorth.total, true)))), React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: C.dim,
-      marginTop: 8
-    }
-  }, "The Inputs tab's ", fmt(s.currentPort, true), " portfolio figure drives all projections; the account sliders below track actual custodial balances for reconciliation.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Account Balances"), React.createElement(Slider, {
-    label: "Fidelity 401k",
-    value: s.fidelity401k,
-    min: 0,
-    max: 2000000,
-    step: 5000,
-    onChange: set("fidelity401k"),
-    color: C.accent
-  }), React.createElement(Slider, {
-    label: "Fidelity Brokerage",
-    value: s.fidelityBrokerage,
-    min: 0,
-    max: 1000000,
-    step: 5000,
-    onChange: set("fidelityBrokerage"),
-    color: C.accent
-  }), React.createElement(Slider, {
-    label: "Outside Savings",
-    value: s.outsideSavings,
-    min: 0,
-    max: 300000,
-    step: 2500,
-    onChange: set("outsideSavings"),
-    color: C.teal
-  }), React.createElement(Slider, {
-    label: "HSA",
-    value: s.hsa,
-    min: 0,
-    max: 150000,
-    step: 1000,
-    onChange: set("hsa"),
-    color: C.teal
-  }), React.createElement(Slider, {
-    label: "Real Estate Equity (ADU / Lake Ozarks)",
-    value: s.realEstateEquity,
-    min: 0,
-    max: 500000,
-    step: 5000,
-    onChange: set("realEstateEquity"),
-    color: C.purple
-  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Real Asset-Class Breakdown"), e.breakdown.map(function (b) {
-    return React.createElement(BarRow, {
-      key: b.label,
-      label: b.label,
-      valuePct: b.pct,
-      displayValue: fmt(b.value, true) + " (" + b.pct + "%)",
-      color: b.color
-    });
-  })), React.createElement(Card, {
-    style: {
-      background: hasWarning ? C.orange + "12" : C.greenBright + "10",
-      border: "1px solid " + (hasWarning ? C.orange + "40" : C.greenBright + "30")
-    }
-  }, React.createElement(SectionLabel, {
-    color: hasWarning ? C.orange : C.greenBright
-  }, "Concentration Check"), React.createElement(Slider, {
-    label: "VTI (Total US)",
-    value: s.vtiPct,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("vtiPct"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.accent
-  }), React.createElement(Slider, {
-    label: "VOO (S&P 500)",
-    value: s.vooPct,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("vooPct"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.gold
-  }), React.createElement(Slider, {
-    label: "ITOT (Total US)",
-    value: s.itotPct,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("itotPct"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.teal
-  }), React.createElement(Slider, {
-    label: "International",
-    value: s.intlPct,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("intlPct"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.purple
-  }), e.concentration.overlapWarning && React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.orange,
-      marginTop: 4,
-      lineHeight: 1.6
-    }
-  }, "VTI + VOO + ITOT are ", e.concentration.usOverlapPct, "% of the equity sleeve - these three funds overlap heavily since they all hold the same US large caps. Consider consolidating into one."), e.concentration.intlWarning && React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.orange,
-      marginTop: 4,
-      lineHeight: 1.6
-    }
-  }, "International exposure is only ", s.intlPct, "% - below the 15-20% typically recommended for diversification."), !hasWarning && React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.greenBright,
-      marginTop: 4
-    }
-  }, "No major concentration issues detected.")));
-}
-function IncomeTab({
-  s,
-  set,
-  engine
-}) {
-  var e = engine;
-  return React.createElement("div", null, React.createElement(Card, null, React.createElement(Toggle, {
-    label: "Spouse SSDI + OPERS",
-    value: s.wifeOn,
-    onChange: set("wifeOn"),
-    color: C.teal
-  }), s.wifeOn && React.createElement(Slider, {
-    label: "Annual Amount",
-    value: s.wifeAmt,
-    min: 0,
-    max: 80000,
-    step: 1000,
-    onChange: set("wifeAmt"),
-    color: C.teal
-  })), React.createElement(Card, null, React.createElement(Toggle, {
-    label: "Portfolio Dividends",
-    value: s.divsOn,
-    onChange: set("divsOn"),
-    color: C.purple
-  }), s.divsOn && React.createElement(Slider, {
-    label: "Annual Dividend Income",
-    value: s.divsAmt,
-    min: 0,
-    max: 30000,
-    step: 500,
-    onChange: set("divsAmt"),
-    color: C.purple
-  })), React.createElement(Card, null, React.createElement(Toggle, {
-    label: "Consulting / Side Income",
-    value: s.sideOn,
-    onChange: set("sideOn"),
-    color: C.gold
-  }), s.sideOn && React.createElement(Slider, {
-    label: "Annual Side Income",
-    value: s.sideAmt,
-    min: 0,
-    max: 60000,
-    step: 1000,
-    onChange: set("sideAmt"),
-    color: C.gold
-  })), React.createElement(Card, null, React.createElement(Toggle, {
-    label: "ADU Rent",
-    value: s.aduOn,
-    onChange: set("aduOn"),
-    color: C.green
-  }), s.aduOn && React.createElement(Slider, {
-    label: "Annual Net Rent",
-    value: s.aduAmt,
-    min: 0,
-    max: 24000,
-    step: 600,
-    onChange: set("aduAmt"),
-    color: C.green
-  })), React.createElement(Card, null, React.createElement(Toggle, {
-    label: "Lake Ozarks Net Cash Flow",
-    value: s.ozarksOn,
-    onChange: set("ozarksOn"),
-    color: C.accent
-  }), s.ozarksOn && React.createElement(Slider, {
-    label: "Annual Net Cash Flow",
-    value: s.ozarksAmt,
-    min: -30000,
-    max: 30000,
-    step: 1000,
-    onChange: set("ozarksAmt"),
-    color: C.accent,
-    note: "Rental income minus carry costs. Can be negative if costs exceed revenue."
-  })), React.createElement(Card, {
-    style: {
-      background: C.accent + "10",
-      border: "1px solid " + C.accent + "30"
-    }
-  }, React.createElement(SectionLabel, {
-    color: C.accent
-  }, "ACA Subsidy Modeler"), React.createElement(Slider, {
-    label: "Household Size",
-    value: s.householdSize,
-    min: 1,
-    max: 6,
-    step: 1,
-    onChange: set("householdSize"),
-    display: function (v) {
-      return String(v);
-    },
-    color: C.accent
-  }), React.createElement(Slider, {
-    label: "Benchmark Silver Premium (annual)",
-    value: s.benchmarkPremium,
-    min: 4000,
-    max: 30000,
-    step: 500,
-    onChange: set("benchmarkPremium"),
-    color: C.accent
-  }), React.createElement("div", {
-    style: {
-      marginTop: 8
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 11,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "MAGI (active income)"), React.createElement("span", {
-    style: {
-      color: C.text,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.totalActiveIncome, true))), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 11,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "Federal Poverty Line (", s.householdSize, ")"), React.createElement("span", {
-    style: {
-      color: C.text,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.aca.fpl, true))), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 11,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "% of FPL"), React.createElement("span", {
-    style: {
-      color: C.text,
-      fontFamily: "monospace"
-    }
-  }, Math.round(e.aca.fplPct), "%")), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 11,
-      marginBottom: 4
-    }
-  }, React.createElement("span", {
-    style: {
-      color: C.muted
-    }
-  }, "Applicable %"), React.createElement("span", {
-    style: {
-      color: C.text,
-      fontFamily: "monospace"
-    }
-  }, (e.aca.applicablePct * 100).toFixed(2), "%")), React.createElement("div", {
-    style: {
-      borderTop: "1px solid " + C.border,
-      paddingTop: 6,
-      marginTop: 4
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between"
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: C.text
-    }
-  }, "Estimated subsidy"), React.createElement("span", {
-    style: {
-      fontSize: 13,
-      fontWeight: 800,
-      color: C.greenBright,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.aca.subsidy, true), "/yr")), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      marginTop: 2
-    }
-  }, React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.muted
-    }
-  }, "Net premium"), React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.gold,
-      fontFamily: "monospace"
-    }
-  }, fmt(e.aca.netPremium, true), "/yr"))))));
-}
-function PathsTab({
-  s,
-  set,
-  engine
-}) {
-  var e = engine;
-  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Retirement Date"), React.createElement(Slider, {
-    label: "Planned Retirement Age",
-    value: s.retireAge,
-    min: s.currentAge + 1,
-    max: s.currentAge + 15,
-    step: 1,
-    onChange: set("retireAge"),
-    display: function (v) {
-      return String(v);
-    },
-    color: C.orange
-  })), React.createElement(Card, {
-    style: {
-      background: C.red + "10",
-      border: "1px solid " + C.red + "30"
-    }
-  }, React.createElement(SectionLabel, {
-    color: C.red
-  }, "Sequence-of-Returns Stress Test"), React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.dim,
-      marginBottom: 8
-    }
-  }, "Deterministic projection at expected return vs. a -25% shock in year one of retirement."), React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 8
-    }
-  }, React.createElement(StatBox, {
-    label: "Baseline Ending Balance",
-    value: fmt(e.stress.baselineEnding, true),
-    color: e.stress.baselineDepleted ? C.red : C.greenBright
-  }), React.createElement(StatBox, {
-    label: "Shocked Ending Balance",
-    value: fmt(e.stress.shockEnding, true),
-    color: e.stress.shockDepleted ? C.red : C.gold
-  })), e.stress.shockDepleted && !e.stress.baselineDepleted && React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.red,
-      marginTop: 8
-    }
-  }, "A year-one -25% shock depletes the portfolio before the baseline scenario would."), !e.stress.shockDepleted && React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.greenBright,
-      marginTop: 8
-    }
-  }, "Portfolio survives the full horizon even with a -25% year-one shock.")), React.createElement(Card, null, React.createElement(SectionLabel, null, "Success Probability by Retirement Date"), e.successByDate.map(function (d) {
-    return React.createElement(BarRow, {
-      key: d.age,
-      label: "Age " + d.age,
-      valuePct: d.success * 100,
-      displayValue: Math.round(d.success * 100) + "%",
-      color: d.success >= 0.9 ? C.greenBright : d.success >= 0.75 ? C.gold : C.red
-    });
-  })));
-}
-function InputsTab({
-  s,
-  set
-}) {
-  return React.createElement("div", null, React.createElement(Card, null, React.createElement(SectionLabel, null, "Portfolio & Contributions"), React.createElement(Slider, {
-    label: "Current Portfolio",
-    value: s.currentPort,
-    min: 200000,
-    max: 3000000,
-    step: 5000,
-    onChange: set("currentPort")
-  }), React.createElement(Slider, {
-    label: "Monthly Contributions",
-    value: s.monthlyContrib,
-    min: 0,
-    max: 15000,
-    step: 250,
-    onChange: set("monthlyContrib")
-  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Age & Spending"), React.createElement(Slider, {
-    label: "Current Age",
-    value: s.currentAge,
-    min: 35,
-    max: 65,
-    step: 1,
-    onChange: set("currentAge"),
-    display: function (v) {
-      return String(v);
-    }
-  }), React.createElement(Slider, {
-    label: "Monthly Spending Goal",
-    value: s.spendTarget,
-    min: 4000,
-    max: 20000,
-    step: 250,
-    onChange: set("spendTarget"),
-    display: function (v) {
-      return fmt(v) + "/mo";
-    }
-  }), React.createElement(Slider, {
-    label: "Retirement Horizon",
-    value: s.horizonYears,
-    min: 15,
-    max: 45,
-    step: 1,
-    onChange: set("horizonYears"),
-    display: function (v) {
-      return v + "yr";
-    }
-  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "TRS Pension"), React.createElement(Slider, {
-    label: "Years of Service So Far",
-    value: s.yearsServiceSoFar,
-    min: 0,
-    max: 35,
-    step: 1,
-    onChange: set("yearsServiceSoFar"),
-    display: function (v) {
-      return String(v);
-    }
-  }), React.createElement(Slider, {
-    label: "High-5 Average Salary",
-    value: s.trsHigh5,
-    min: 80000,
-    max: 300000,
-    step: 2500,
-    onChange: set("trsHigh5")
-  }), React.createElement(Slider, {
-    label: "TRS Start Age",
-    value: s.trsAge,
-    min: 55,
-    max: 70,
-    step: 1,
-    onChange: set("trsAge"),
-    display: function (v) {
-      return String(v);
-    }
-  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Allocation (drives expected return & volatility)"), React.createElement(Slider, {
-    label: "Equity %",
-    value: s.equityPct,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("equityPct"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.accent
-  }), React.createElement(Slider, {
-    label: "Bond Share of Fixed Income",
-    value: s.bondShareOfFixed,
-    min: 0,
-    max: 100,
-    step: 1,
-    onChange: set("bondShareOfFixed"),
-    display: function (v) {
-      return v + "%";
-    },
-    color: C.teal,
-    note: "Remainder (" + (100 - s.equityPct) + "%) splits between bonds and cash by this ratio"
-  })), React.createElement(Card, null, React.createElement(SectionLabel, null, "Social Security & Inflation"), React.createElement(Slider, {
-    label: "Social Security Annual",
-    value: s.ssAmt,
-    min: 12000,
-    max: 48000,
-    step: 500,
-    onChange: set("ssAmt")
-  }), React.createElement(Slider, {
-    label: "SS Start Age",
-    value: s.ssAge,
-    min: 62,
-    max: 70,
-    step: 1,
-    onChange: set("ssAge"),
-    display: function (v) {
-      return String(v);
-    }
-  }), React.createElement(Slider, {
-    label: "Inflation Rate",
-    value: s.inflation,
-    min: 0.01,
-    max: 0.06,
-    step: 0.005,
-    onChange: set("inflation"),
-    display: function (v) {
-      return (v * 100).toFixed(1) + "%";
-    },
-    color: C.orange
-  })));
-}
-var TABS = [{
-  id: "ready",
-  icon: "🎯",
-  label: "Ready"
-}, {
-  id: "portfolio",
-  icon: "📊",
-  label: "Portfolio"
-}, {
-  id: "income",
-  icon: "💰",
-  label: "Income"
-}, {
-  id: "paths",
-  icon: "🗺",
-  label: "Paths"
-}, {
-  id: "inputs",
-  icon: "⚙",
-  label: "Inputs"
-}];
 function loadState() {
   try {
     var raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      var merged = {};
-      for (var k in DEF) merged[k] = DEF[k];
-      for (var k2 in parsed) merged[k2] = parsed[k2];
-      return merged;
-    }
+    if (raw) return normalizeState(JSON.parse(raw));
   } catch (err) {}
-  return DEF;
+  return Object.assign({}, DEF);
 }
-function App() {
-  var stateHook = React.useState(function () {
-    return loadState();
+function iconPath(name) {
+  var paths = {
+    command: ["circle", "M12 4v3M12 17v3M4 12h3M17 12h3", "M12 8a4 4 0 100 8 4 4 0 000-8z"],
+    portfolio: ["path", "M12 3a9 9 0 109 9h-9V3z", "M14 3.25V10h6.75A8.02 8.02 0 0014 3.25z"],
+    income: ["path", "M12 3v18M16 7.5c-.7-1.2-2-1.8-3.9-1.8-2.2 0-3.6 1-3.6 2.6 0 1.7 1.7 2.3 3.8 2.8 2.3.6 4.1 1.3 4.1 3.6 0 1.8-1.5 3.3-4.4 3.3-2.1 0-3.7-.7-4.7-2.1"],
+    adu: ["path", "M3 11.5L12 4l9 7.5", "M5.5 10.5V20h13v-9.5", "M9 20v-6h6v6"],
+    guide: ["path", "M5 4.5A3.5 3.5 0 018.5 1H20v18H8.5A3.5 3.5 0 005 22.5v-18z", "M5 4.5A3.5 3.5 0 018.5 8H20"],
+    calendar: ["path", "M7 3v3M17 3v3M4 8h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"],
+    chevron: ["path", "M9 5l7 7-7 7"],
+    bridge: ["path", "M3 17h18M5 17c2-6 5-9 7-9s5 3 7 9M7 17v-4M12 17V8M17 17v-4"],
+    shield: ["path", "M12 3l8 3v6c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V6l8-3z", "M9 12l2 2 4-5"],
+    list: ["path", "M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"],
+    check: ["path", "M5 12l4 4L19 6"],
+    menu: ["path", "M4 7h16M4 12h16M4 17h16"]
+  };
+  return paths[name] || paths.command;
+}
+function Icon(props) {
+  var items = iconPath(props.name);
+  var nodes = items.slice(1).map(function (d, i) {
+    if (items[0] === "circle" && i === 0) {
+      return h("path", { key: i, d: d, fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" });
+    }
+    return h("path", { key: i, d: d, fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" });
   });
+  return h("svg", { viewBox: "0 0 24 24", width: props.size || 24, height: props.size || 24, "aria-hidden": "true" }, nodes);
+}
+function Panel(props) {
+  return h("section", { className: "panel" },
+    props.title && h("div", { className: "section-head" }, h("h2", null, props.title), props.meta && h("span", null, props.meta)),
+    h("div", { className: props.flush ? "" : "panel-body" }, props.children)
+  );
+}
+function Donut(props) {
+  var size = props.size || 88;
+  var value = clamp(props.value || 0, 0, 1);
+  var stroke = props.stroke || 8;
+  var r = size / 2 - stroke / 2 - 2;
+  var c = 2 * Math.PI * r;
+  var color = props.color || COLORS.green;
+  return h("svg", { width: size, height: size, viewBox: "0 0 " + size + " " + size },
+    h("circle", { cx: size / 2, cy: size / 2, r: r, fill: "none", stroke: "#22343a", strokeWidth: stroke }),
+    h("circle", { cx: size / 2, cy: size / 2, r: r, fill: "none", stroke: color, strokeWidth: stroke, strokeDasharray: c, strokeDashoffset: c * (1 - value), strokeLinecap: "round", transform: "rotate(-90 " + size / 2 + " " + size / 2 + ")" }),
+    h("text", { x: size / 2, y: size / 2 + 6, textAnchor: "middle", fill: color, fontSize: props.fontSize || 22, fontWeight: 850 }, props.label)
+  );
+}
+function Metric(props) {
+  return h("div", { className: "metric" },
+    h("div", { className: "metric-title" }, props.title),
+    h("div", { className: "donut-wrap" }, h(Donut, { value: props.value, label: props.label, color: props.color, fontSize: props.fontSize })),
+    h("div", { className: "metric-sub", style: { color: props.color } }, props.sub),
+    props.note && h("div", { className: "metric-note" }, props.note)
+  );
+}
+function Stat(props) {
+  return h("div", { className: "stat" },
+    h("label", null, props.label),
+    h("strong", { style: { color: props.color || "var(--text)" } }, props.value),
+    props.note && h("small", null, props.note)
+  );
+}
+function BarRow(props) {
+  return h("div", { className: "bar-row" },
+    h("div", { className: "bar-top" }, h("span", null, props.label), h("strong", null, props.value)),
+    h("div", { className: "bar-track" }, h("div", { className: "bar-fill", style: { width: clamp(props.pct, 0, 100) + "%", background: props.color || COLORS.green } }))
+  );
+}
+function RangeControl(props) {
+  return h("div", { className: "control" },
+    h("div", { className: "control-label" }, h("span", null, props.label), h("strong", null, props.display ? props.display(props.value) : fmt(props.value))),
+    h("input", { type: "range", min: props.min, max: props.max, step: props.step || 1, value: props.value, onChange: function (ev) { props.onChange(Number(ev.target.value)); } })
+  );
+}
+function SwitchLine(props) {
+  return h("div", { className: "switch-line" },
+    h("div", { className: "switch-copy" }, h("strong", null, props.title), props.copy && h("span", null, props.copy)),
+    h("button", { className: "switch " + (props.value ? "on" : ""), onClick: function () { props.onChange(!props.value); }, "aria-label": props.title })
+  );
+}
+function SegmentedControl(props) {
+  return h("div", { className: "seg", role: "tablist", "aria-label": props.label },
+    props.options.map(function (option) {
+      return h("button", {
+        key: option.value,
+        className: props.value === option.value ? "active" : "",
+        onClick: function () { props.onChange(option.value); },
+        type: "button"
+      }, option.label);
+    })
+  );
+}
+function FanChart(props) {
+  var data = props.data || [];
+  var w = 420;
+  var hgt = 210;
+  var padL = 34;
+  var padR = 10;
+  var padT = 14;
+  var padB = 26;
+  var maxV = Math.max.apply(null, data.map(function (d) { return d.p90; }).concat([1000000]));
+  function x(i) { return padL + i / Math.max(1, data.length - 1) * (w - padL - padR); }
+  function y(v) { return hgt - padB - Math.max(0, v) / maxV * (hgt - padT - padB); }
+  var top = data.map(function (d, i) { return x(i) + "," + y(d.p90); }).join(" ");
+  var bottom = data.slice().reverse().map(function (d, i) { return x(data.length - 1 - i) + "," + y(d.p10); }).join(" ");
+  var mid = data.map(function (d, i) { return x(i) + "," + y(d.p50); }).join(" ");
+  var ticks = [0, maxV * 0.5, maxV];
+  return h("svg", { width: "100%", viewBox: "0 0 " + w + " " + hgt, role: "img", "aria-label": "Monte Carlo portfolio projection" },
+    ticks.map(function (t, i) {
+      return h("g", { key: i },
+        h("line", { x1: padL, x2: w - padR, y1: y(t), y2: y(t), stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 }),
+        h("text", { x: 0, y: y(t) + 4, fill: "#95a6a3", fontSize: 11 }, fmt(t, true))
+      );
+    }),
+    h("polygon", { points: top + " " + bottom, fill: COLORS.cyan, opacity: 0.2 }),
+    h("polyline", { points: mid, fill: "none", stroke: COLORS.green2, strokeWidth: 3 }),
+    h("line", { x1: padL, x2: w - padR, y1: hgt - padB, y2: hgt - padB, stroke: "#31464c", strokeWidth: 1 }),
+    h("text", { x: padL, y: hgt - 6, fill: "#95a6a3", fontSize: 11 }, "Age " + (data[0] ? data[0].age : "")),
+    h("text", { x: w - padR - 46, y: hgt - 6, fill: "#95a6a3", fontSize: 11 }, "Age " + (data[data.length - 1] ? data[data.length - 1].age : ""))
+  );
+}
+function TimelineRail(props) {
+  var s = props.s;
+  var e = props.e;
+  var items = [
+    { when: "Today", title: "Plan locked", detail: "Use real portfolio data", color: COLORS.green },
+    { when: "6/30/2027", title: "Retirement", detail: "Day 0", color: COLORS.green2 },
+    { when: "2027-2045", title: "Bridge to 65", detail: pct(e.withdrawalRate, 1) + " WR", color: COLORS.gold },
+    { when: "Age 65", title: "TRS starts", detail: fmt(e.trsAnnual, true) + "/yr", color: COLORS.cyan },
+    { when: "67+", title: "Legacy vehicle", detail: "Income floor", color: COLORS.cyan }
+  ];
+  return h("div", { className: "timeline" }, items.map(function (item, idx) {
+    return h("div", { className: "milestone", key: item.title, style: { color: item.color } },
+      h("time", null, item.when),
+      h("div", { className: "milestone-dot" }, idx < 2 ? h(Icon, { name: "check", size: 16 }) : null),
+      h("strong", null, item.title),
+      h("span", null, item.detail)
+    );
+  }));
+}
+function CommandTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var c = props.c;
+  var scoreColor = e.readinessScore >= 100 ? COLORS.green2 : e.readinessScore >= 90 ? COLORS.green : COLORS.gold;
+  var wrColor = e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
+  var actions = [
+    { icon: "list", title: "On time, not early", copy: "Stay the course to " + s.retireDateLabel + ".", status: "Ongoing", color: COLORS.green },
+    { icon: "bridge", title: "Bridge to 65", copy: "Keep first-year draw near " + pct(e.withdrawalRate, 1) + ".", status: "Review Apr 2027", color: COLORS.gold },
+    { icon: "shield", title: "Income floor", copy: "Coverage at SS age: " + pct(e.floorCoverage, 0) + ".", status: "Review yearly", color: COLORS.green2 },
+    { icon: "adu", title: "Legacy vehicle", copy: "Max fund ADU, optimize taxes, plan gifting.", status: "Review 2026", color: COLORS.cyan }
+  ];
+  return h("div", null,
+    h(Panel, { flush: true },
+      h("div", { className: "metric-strip" },
+        h(Metric, { title: "Readiness Score", value: Math.min(1, e.readinessScore / 100), label: Math.round(e.readinessScore), color: scoreColor, sub: "On time, not early", note: "/100 target" }),
+        h(Metric, { title: "Monte Carlo Survival", value: e.mc.successRate, label: Math.round(e.mc.successRate * 100) + "%", color: COLORS.cyan, sub: "800 trials", note: "Success to age " + (s.retireAge + s.horizonYears) }),
+        h(Metric, { title: "Bridge to 65 Withdrawal Rate", value: Math.min(1, e.withdrawalRate / 0.05), label: pct(e.withdrawalRate, 1), color: wrColor, sub: e.withdrawalRate <= 0.04 ? "Sustainable" : "Watch", note: "Target <= 4.0%" }),
+        h(Metric, { title: "Income Floor Coverage", value: Math.min(1, e.floorCoverage), label: pct(e.floorCoverage, 0), color: e.floorCoverage >= 1 ? COLORS.green2 : COLORS.gold, sub: "Legacy vehicle", note: fmt(e.incomeAtSs, true) + " / " + fmt(e.spendAtSs, true) }),
+        h(Metric, { title: "Age-65 Inflection", value: Math.min(1, e.yearsToTrs / 20), label: e.yearsToTrs + "y", color: COLORS.cyan, sub: "TRS starts", note: "From retirement" })
+      )
+    ),
+    h(Panel, { title: "Household Command Brief", meta: "Michael + Colleen" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Michael target", value: s.retireDateLabel, note: "Projected " + fmt(e.startBalance, true), color: COLORS.green2 }),
+        h(Stat, { label: "Michael bridge WR", value: pct(e.withdrawalRate, 1), note: "Before TRS and SS", color: e.withdrawalRate <= 0.04 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: "Colleen target", value: c.targetLabel, note: "Gap " + fmt(c.baseGap, true) + "/yr", color: COLORS.cyan }),
+        h(Stat, { label: "Colleen success", value: Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%", note: "30yr / " + s.colleenHorizon + "yr", color: c.mc.successRate >= 0.9 ? COLORS.green2 : COLORS.gold })
+      )
+    ),
+    h(Panel, { title: "Colleen Conversation Brief", meta: "Big picture" },
+      h("div", { className: "guide-list" },
+        h("div", { className: "guide-item" }, h("strong", null, "This is a bridge plan, not a market bet"), h("span", null, "The portfolio mainly has to bridge the years before pensions and Social Security fully show up.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Michael's pension is counted conservatively"), h("span", null, "Current estimate: " + fmt(e.trsAnnual, true) + "/yr from " + s.trsYears.toFixed(1) + " years x " + fmt(e.highFive.average, true) + " high-5 x 2.0%.")),
+        h("div", { className: "guide-item" }, h("strong", null, "The portfolio's job changes after 65"), h("span", null, "Before 65 it supplies flexibility. After guaranteed income rises, it becomes more about safety, options, and legacy.")),
+        h("div", { className: "guide-item" }, h("strong", null, "There are levers if markets disappoint"), h("span", null, "Spending can flex, cash can be used first, consulting can be temporary, and ADU income remains upside rather than the base case."))
+      )
+    ),
+    h(Panel, { title: "Portfolio Projection", meta: "Real dollars" },
+      h(FanChart, { data: e.mc.percentiles }),
+      h("div", { className: "chart-legend" },
+        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
+        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.cyan, opacity: 0.55 } }), "10th to 90th percentile")
+      )
+    ),
+    h(Panel, { title: "Retirement Timeline" }, h(TimelineRail, { s: s, e: e })),
+    h(Panel, { title: "Next Actions" },
+      actions.map(function (a) {
+        return h("div", { className: "action-row", key: a.title },
+          h("div", { className: "action-icon", style: { color: a.color } }, h(Icon, { name: a.icon, size: 28 })),
+          h("div", null, h("strong", null, a.title), h("span", null, a.copy)),
+          h("div", { className: "action-status", style: { color: a.color } }, a.status),
+          h(Icon, { name: "chevron", size: 22 })
+        );
+      })
+    )
+  );
+}
+function PortfolioTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  var total = s.investmentValue + s.cashValue + s.otherValue;
+  var portfolioGap = total - s.currentPortfolio;
+  return h("div", null,
+    h(Panel, { title: "Net Worth Reconciliation", meta: "Ground truth" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Working portfolio", value: fmt(s.currentPortfolio, true), note: "Used in projections", color: COLORS.green2 }),
+        h(Stat, { label: "Account total", value: fmt(total, true), note: (portfolioGap >= 0 ? "+" : "") + fmt(portfolioGap, true) + " vs model", color: Math.abs(portfolioGap) > 5000 ? COLORS.gold : COLORS.cyan }),
+        h(Stat, { label: "Investments", value: fmt(s.investmentValue, true), note: "Fidelity and linked accounts" }),
+        h(Stat, { label: "Cash equivalents", value: fmt(s.cashValue, true), note: "ADU timing buffer" })
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
+        h(RangeControl, { label: "Monthly additions before retirement", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } })
+      )
+    ),
+    h(Panel, { title: "Allocation", meta: "Return engine" },
+      h(BarRow, { label: "Equities", value: s.equityPct + "%", pct: s.equityPct, color: COLORS.green }),
+      h(BarRow, { label: "Bonds", value: e.bondPct + "%", pct: e.bondPct, color: COLORS.cyan }),
+      h(BarRow, { label: "Cash", value: e.cashPct + "%", pct: e.cashPct, color: COLORS.gold }),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
+        h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 40, step: 1, onChange: set("bondPct"), display: function (v) { return v + "%"; } })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "The equity-heavy stance is defensible only because Colleen's income and the deferred TRS pension act like fixed income outside the brokerage screen.")
+    ),
+    h(Panel, { title: "Concentration Watch" },
+      h(BarRow, { label: "VTI + VOO + ITOT overlap", value: s.overlapPct.toFixed(1) + "%", pct: s.overlapPct, color: s.overlapPct > 60 ? COLORS.orange : COLORS.green }),
+      h(BarRow, { label: "International exposure", value: s.internationalPct.toFixed(1) + "%", pct: s.internationalPct, color: s.internationalPct < 15 ? COLORS.gold : COLORS.green }),
+      h("div", { className: "note" }, "VTI, VOO, ITOT, SCHD, VXUS, BND, VTEB, and SoonerSave WFSPX are treated as planning markers here. The app does not import brokerage lots yet."),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "US broad-market overlap", value: s.overlapPct, min: 0, max: 100, step: 0.1, onChange: set("overlapPct"), display: function (v) { return v.toFixed(1) + "%"; } }),
+        h(RangeControl, { label: "International allocation", value: s.internationalPct, min: 0, max: 40, step: 0.1, onChange: set("internationalPct"), display: function (v) { return v.toFixed(1) + "%"; } })
+      )
+    )
+  );
+}
+function IncomeTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  var salaryRows = michaelSalaryRows(s);
+  var highFive = e.highFive || michaelHighFive(s);
+  return h("div", null,
+    h(Panel, { title: "Income Floor", meta: "Bridge and pension" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Colleen floor", value: fmt(s.wifeIncome, true), note: "Base case anchor", color: COLORS.green2 }),
+        h(Stat, { label: "TRS at 65", value: fmt(e.trsAnnual, true), note: s.trsYears + " years x " + (s.trsMultiplier * 100).toFixed(1) + "%", color: COLORS.cyan }),
+        h(Stat, { label: "Social Security", value: fmt(s.ssAnnual, true), note: "Starts age " + s.ssAge }),
+        h(Stat, { label: "Hidden assets", value: fmt(e.pensionHiddenAsset + e.colleenHiddenAsset, true), note: "3% income capitalization", color: COLORS.gold })
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(BarRow, { label: "Bridge income vs first-year spending", value: fmt(e.bridgeIncome, true) + " / " + fmt(e.spendAtRetire, true), pct: e.bridgeIncome / e.spendAtRetire * 100, color: COLORS.gold }),
+        h(BarRow, { label: "Age 67 income floor coverage", value: pct(e.floorCoverage, 0), pct: e.floorCoverage * 100, color: e.floorCoverage >= 1 ? COLORS.green2 : COLORS.orange })
+      )
+    ),
+    h(Panel, { title: "TRS Pension Formula", meta: "Michael" },
+      h("div", { className: "salary-band" }, "Service Credit and Salary History"),
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Formula", value: "YOS x High-5 x 2.0%", note: "Highest consecutive 5-year average", color: COLORS.cyan }),
+        h(Stat, { label: "Service credit", value: s.trsYears.toFixed(1), note: "Planned at retirement", color: COLORS.green2 }),
+        h(Stat, { label: "High-5 average", value: fmt(highFive.average, true), note: highFive.rows[4].year + " through " + highFive.rows[0].year }),
+        h(Stat, { label: "Annual pension", value: fmt(e.trsAnnual, true), note: "Deferred until age " + s.trsAge, color: COLORS.gold })
+      ),
+      h("table", { className: "mini-table salary-table", style: { marginTop: 12 } },
+        h("thead", null, h("tr", null, h("th", null, "Tier"), h("th", null, "Contract Year"), h("th", null, "Service Credit"), h("th", null, "Salary"))),
+        h("tbody", null,
+          salaryRows.map(function (row) {
+            return h("tr", { key: row.year },
+              h("td", null, row.tier),
+              h("td", null, row.year),
+              h("td", null, row.service.toFixed(2)),
+              h("td", null, fmt(row.salary))
+            );
+          })
+        )
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "Planned service credit at retirement", value: s.trsYears, min: 1, max: 35, step: 0.5, onChange: set("trsYears"), display: function (v) { return v.toFixed(1) + " years"; } }),
+        h(RangeControl, { label: "2026-2027 projected salary", value: s.michaelSalary2027, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2027") }),
+        h(RangeControl, { label: "2025-2026 contract salary", value: s.michaelSalary2026, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2026") })
+      )
+    ),
+    h(Panel, { title: "Income Layers" },
+      h(RangeControl, { label: "Colleen SSDI + OPERS", value: s.wifeIncome, min: 30000, max: 80000, step: 500, onChange: set("wifeIncome") }),
+      h(SwitchLine, { title: "Count portfolio dividends", copy: "Useful for MAGI and bridge planning, but still portfolio-derived.", value: s.includeDividends, onChange: set("includeDividends") }),
+      s.includeDividends && h(RangeControl, { label: "Annual dividends", value: s.dividends, min: 0, max: 35000, step: 500, onChange: set("dividends") }),
+      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") })
+    ),
+    h(Panel, { title: "ACA Estimate", meta: "Planning only" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "MAGI estimate", value: fmt(e.magi, true), note: "Income layers only" }),
+        h(Stat, { label: "FPL percent", value: Math.round(e.aca.fplPct) + "%", note: "Household " + s.householdSize }),
+        h(Stat, { label: "Subsidy estimate", value: fmt(e.aca.subsidy, true), note: "Against benchmark" }),
+        h(Stat, { label: "Net premium", value: fmt(e.aca.netPremium, true), note: "Annual cap", color: COLORS.gold })
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "Household size", value: s.householdSize, min: 1, max: 6, step: 1, onChange: set("householdSize"), display: function (v) { return String(v); } }),
+        h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") })
+      )
+    )
+  );
+}
+function ColleenTab(props) {
+  var s = props.s;
+  var c = props.c;
+  var set = props.set;
+  var cfg = c.config;
+  return h("div", null,
+    h(Panel, { title: "Colleen Early-Retirement Case", meta: c.targetLabel },
+      h(SegmentedControl, {
+        label: "Retirement timing",
+        value: s.colleenRetireOption,
+        onChange: set("colleenRetireOption"),
+        options: [
+          { value: "Feb", label: "Feb 2026" },
+          { value: "Jun", label: "Jun 2026" },
+          { value: "Dec", label: "Dec 2026" }
+        ]
+      }),
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Base gap", value: fmt(c.baseGap, true), note: "Spending minus income before 65", color: COLORS.green2 }),
+        h(Stat, { label: "Cash runway", value: c.cashRunway >= 50 ? "50+ yr" : c.cashRunway.toFixed(1) + " yr", note: fmt(s.colleenCashBuffer, true) + " cash buffer", color: c.cashRunway >= 5 ? COLORS.green2 : COLORS.orange }),
+        h(Stat, { label: "30-year success", value: Math.round(c.mc30.successRate * 100) + "%", note: "Seeded Monte Carlo", color: c.mc30.successRate >= 0.95 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: s.colleenHorizon + "-year success", value: Math.round(c.mc.successRate * 100) + "%", note: "Long-horizon test", color: c.mc.successRate >= 0.9 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: "Age-65 income", value: fmt(c.age65Income, true), note: "Pension + SS + income floor", color: COLORS.cyan }),
+        h(Stat, { label: "Age-65 coverage", value: pct(c.age65Coverage, 0), note: "Guaranteed income vs spending", color: c.age65Coverage >= 1 ? COLORS.green2 : COLORS.orange })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "The central insight is the tiny pre-65 portfolio gap. Cash and bonds can fund several years of drawdowns without selling equities.")
+    ),
+    h(Panel, { title: "Colleen Wealth Fan", meta: "10th / median / 90th" },
+      h(FanChart, { data: c.mc.percentiles }),
+      h("div", { className: "chart-legend" },
+        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
+        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.cyan, opacity: 0.55 } }), "Outcome band")
+      )
+    ),
+    h(Panel, { title: "Scenario Comparisons" },
+      h("table", { className: "mini-table" },
+        h("thead", null, h("tr", null, h("th", null, "Scenario"), h("th", null, "Success"), h("th", null, "Age-65 median"))),
+        h("tbody", null,
+          c.scenarios.map(function (row) {
+            return h("tr", { key: row.label },
+              h("td", null, row.label, h("br"), h("small", { style: { color: "var(--muted)" } }, "gap " + fmt(row.gap, true) + " / start " + fmt(row.start, true))),
+              h("td", null, Math.round(row.success * 100) + "%"),
+              h("td", null, fmt(row.age65Median, true))
+            );
+          })
+        )
+      )
+    ),
+    h(Panel, { title: "Sequence Risk Stress" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Base success", value: Math.round(c.mc.successRate * 100) + "%", note: "Normal stochastic paths", color: COLORS.green2 }),
+        h(Stat, { label: "-25% year-one shock", value: Math.round(c.shock.successRate * 100) + "%", note: "Forced early equity crash", color: c.shock.successRate >= 0.9 ? COLORS.green2 : COLORS.orange }),
+        h(Stat, { label: "Median at 65", value: fmt(c.mc.age65Median, true), note: "Before pension/SS step-up" }),
+        h(Stat, { label: "Cash + bond defense", value: fmt(s.colleenCashBuffer + s.colleenBonds, true), note: "Downturn buffer", color: COLORS.gold })
+      ),
+      h("div", { className: "note", style: { marginTop: 12 } }, "The app models cash as the first spending bucket. Portfolio liquidation begins only after the cash buffer is exhausted.")
+    ),
+    h(Panel, { title: "Colleen Inputs" },
+      h(RangeControl, { label: "Retirement age", value: s.colleenRetireAge, min: 40, max: 65, step: 1, onChange: set("colleenRetireAge"), display: function (v) { return String(v); } }),
+      h(RangeControl, { label: "Invested portfolio", value: s.colleenPortfolio, min: 500000, max: 2200000, step: 5000, onChange: set("colleenPortfolio") }),
+      h(RangeControl, { label: "Cash/CD buffer", value: s.colleenCashBuffer, min: 0, max: 300000, step: 2500, onChange: set("colleenCashBuffer") }),
+      h(RangeControl, { label: "Monthly savings before retirement", value: s.colleenMonthlySavings, min: 0, max: 20000, step: 500, onChange: set("colleenMonthlySavings"), display: function (v) { return fmt(v) + "/mo"; } }),
+      h(RangeControl, { label: "PTO bonus", value: s.colleenPtoBonus, min: 0, max: 50000, step: 500, onChange: set("colleenPtoBonus") }),
+      h(RangeControl, { label: "Annual spending", value: s.colleenSpending, min: 40000, max: 140000, step: 1000, onChange: set("colleenSpending") }),
+      h(RangeControl, { label: "Guaranteed household income", value: s.colleenHouseholdIncome, min: 0, max: 90000, step: 1000, onChange: set("colleenHouseholdIncome") }),
+      h(RangeControl, { label: "Annual dividends", value: s.colleenDividends, min: 0, max: 40000, step: 500, onChange: set("colleenDividends") }),
+      h(RangeControl, { label: "TRS pension at 65", value: s.colleenPension, min: 0, max: 80000, step: 1000, onChange: set("colleenPension") }),
+      h(RangeControl, { label: "Social Security at 65", value: s.colleenSs, min: 0, max: 50000, step: 500, onChange: set("colleenSs") }),
+      h(RangeControl, { label: "Starting equity allocation", value: s.colleenEquityStart, min: 30, max: 95, step: 1, onChange: set("colleenEquityStart"), display: function (v) { return v + "%"; } }),
+      h(SwitchLine, { title: "Use rising-equity glidepath", copy: "Start lower, then raise equity exposure over the first decade.", value: s.colleenUseGlidepath, onChange: set("colleenUseGlidepath") }),
+      s.colleenUseGlidepath && h(RangeControl, { label: "Ending equity allocation", value: s.colleenEquityEnd, min: 40, max: 95, step: 1, onChange: set("colleenEquityEnd"), display: function (v) { return v + "%"; } }),
+      h(SwitchLine, { title: "Use 4% inflation stress", copy: "Raises annual spending faster and lowers margin.", value: s.colleenInflationStress, onChange: set("colleenInflationStress") }),
+      h(RangeControl, { label: "Consulting income", value: s.colleenConsulting, min: 0, max: 50000, step: 1000, onChange: set("colleenConsulting") })
+    ),
+    h(Panel, { title: "Recommendations" },
+      h("div", { className: "guide-list" },
+        h("div", { className: "guide-item" }, h("strong", null, "Retire when the cash buffer is truly built"), h("span", null, "The June 2026 case works because the pre-65 gap is small and cash can absorb the first bad decade.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Use cash and bonds before selling equities"), h("span", null, "Sequence risk is controlled by avoiding equity sales during early downturns.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Keep consulting optional"), h("span", null, "$25k of short-term work adds margin, but the base case should not depend on it.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Review Roth conversions separately"), h("span", null, "Low-income years before pension and SS may be valuable tax-planning windows."))
+      )
+    )
+  );
+}
+function AduitChecklist(props) {
+  var rows = [
+    ["aduDesignLocked", "Attached-suite design", "Back hallway entrance, locked interior door, courtyard, alley gate."],
+    ["aduJeremiahReady", "Jeremiah GC plan", "Confirm scope, budget authority, inspections, and payment cadence."],
+    ["aduTenantReady", "Kaitlyn occupancy plan", "Treat rent as upside until signed and occupied."],
+    ["aduCashPlanReady", "Cash-flow funding plan", "Use VTEB only as a timing backstop, not as base-case income."]
+  ];
+  return h("div", null, rows.map(function (row) {
+    return h(SwitchLine, { key: row[0], title: row[1], copy: row[2], value: props.s[row[0]], onChange: props.set(row[0]) });
+  }));
+}
+function ADUTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  var done = ["aduDesignLocked", "aduJeremiahReady", "aduTenantReady", "aduCashPlanReady"].filter(function (k) { return s[k]; }).length;
+  return h("div", null,
+    h(Panel, { title: "ADU Project", meta: "May-Aug 2026" },
+      h("div", { className: "kpi-grid" },
+        h(Stat, { label: "Readiness", value: done + "/4", note: "Execution gates", color: done >= 3 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: "Remaining budget", value: fmt(e.aduRemaining, true), note: "Planning estimate" }),
+        h(Stat, { label: "Cash after ADU", value: fmt(e.cashAfterAdu, true), note: e.cashAfterAdu < 0 ? "VTEB timing backstop" : "No backstop needed", color: e.cashAfterAdu < 0 ? COLORS.orange : COLORS.green2 }),
+        h(Stat, { label: "Rebuild runway", value: e.rebuildMonths + " mo", note: "At current monthly additions" })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "The ADU is modeled as family infrastructure and lifestyle optionality first. Tenant rent stays upside unless explicitly toggled into the plan.")
+    ),
+    h(Panel, { title: "Funding Model" },
+      h(RangeControl, { label: "ADU budget", value: s.aduBudget, min: 0, max: 180000, step: 1000, onChange: set("aduBudget") }),
+      h(RangeControl, { label: "Already spent", value: s.aduSpent, min: 0, max: 180000, step: 1000, onChange: set("aduSpent") }),
+      h(SwitchLine, { title: "Count ADU rent in base case", copy: "Default off because variable income should be upside.", value: s.includeAduRent, onChange: set("includeAduRent") }),
+      h(RangeControl, { label: "Prospective monthly rent", value: s.aduRentMonthly, min: 0, max: 2500, step: 50, onChange: set("aduRentMonthly"), display: function (v) { return fmt(v) + "/mo"; } })
+    ),
+    h(Panel, { title: "Execution Checklist" }, h(AduitChecklist, { s: s, set: set })),
+    h(Panel, { title: "Design Decisions" },
+      h("div", { className: "guide-list" },
+        h("div", { className: "guide-item" }, h("strong", null, "Attached, not detached"), h("span", null, "Backside hallway is primary entrance; separate gate and paver path support independence.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Privacy and acoustics"), h("span", null, "Locked interior door, acoustic insulation in the party wall, and courtyard space preserve Michael and Colleen's home feel.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Future-use optionality"), h("span", null, "Kaitlyn tenancy, Libby/Jeremiah, aging parents, and travel home base all fit the same infrastructure."))
+      )
+    )
+  );
+}
+function GuideTab(props) {
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  return h("div", null,
+    h(Panel, { title: "Plan Controls", meta: "Core assumptions" },
+      h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
+      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 250, onChange: set("spendMonthly"), display: function (v) { return fmt(v) + "/mo"; } }),
+      h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
+      h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
+      h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") }),
+      h(RangeControl, { label: "PTO days", value: s.ptoDays, min: 0, max: 60, step: 1, onChange: set("ptoDays"), display: function (v) { return v + " days"; } })
+    ),
+    h(Panel, { title: "Colleen Alignment" },
+      h(SwitchLine, { title: "Plan brief reviewed", copy: "She has seen the plain-language bridge and income floor story.", value: s.alignColleenBriefed, onChange: set("alignColleenBriefed") }),
+      h(SwitchLine, { title: "Bridge to 65 understood", copy: "Portfolio is responsible mainly for the pre-TRS bridge.", value: s.alignBridgeReviewed, onChange: set("alignBridgeReviewed") }),
+      h(SwitchLine, { title: "ADU role agreed", copy: "ADU is lifestyle infrastructure first, rent upside second.", value: s.alignAduReviewed, onChange: set("alignAduReviewed") }),
+      h(SwitchLine, { title: "Retirement vision named", copy: "Decompression, slow travel, and optional consulting are concrete.", value: s.alignTravelVision, onChange: set("alignTravelVision") })
+    ),
+    h(Panel, { title: "Data Guide" },
+      h("div", { className: "guide-list" },
+        h("div", { className: "guide-item" }, h("strong", null, "Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Equity mean 9.5%, bond mean 4.5%, cash mean 2.0%; volatility is allocation-weighted.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Colleen Monte Carlo"), h("span", null, "Colleen's tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
+        h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "Michael's TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% withdrawal rate.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Bridge withdrawal"), h("span", null, "First-year spending minus active income layers divided by projected portfolio plus any included PTO buffer.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Base case discipline"), h("span", null, "Guaranteed household income is base. Rent, side income, consulting, and ADU upside stay out unless toggled on.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Withdrawal order"), h("span", null, "The planning guide favors cash/bonds first in downturns, then taxable accounts, then tax-deferred accounts, with Roth assets preserved when possible. This is guidance text, not full tax software.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Not included yet"), h("span", null, "Detailed taxes, Roth conversion optimization, RMDs, real ACA plan quotes, exact TRS rule validation, and brokerage import automation."))
+      )
+    ),
+    h(Panel, { title: "One More Year Check" },
+      h("table", { className: "mini-table" },
+        h("thead", null, h("tr", null, h("th", null, "Scenario"), h("th", null, "Portfolio"), h("th", null, "Bridge draw"))),
+        h("tbody", null,
+          h("tr", null, h("td", null, "On time"), h("td", null, fmt(e.onTime.startBalance, true)), h("td", null, fmt(e.onTime.bridgeDraw, true))),
+          h("tr", null, h("td", null, "+1 year"), h("td", null, fmt(e.delayed.startBalance, true)), h("td", null, fmt(e.delayed.bridgeDraw, true))),
+          h("tr", null, h("td", null, "Delta"), h("td", null, fmt(e.delayed.addedPortfolio, true)), h("td", null, fmt(e.delayed.bridgeDraw - e.onTime.bridgeDraw, true)))
+        )
+      ),
+      h("div", { className: "callout", style: { marginTop: 12 } }, "This is the fear check: extra work may improve the spreadsheet, but the current model is designed to show whether it changes the decision.")
+    )
+  );
+}
+var TABS = [
+  { id: "command", label: "Command", icon: "command" },
+  { id: "portfolio", label: "Portfolio", icon: "portfolio" },
+  { id: "income", label: "Michael", icon: "income" },
+  { id: "colleen", label: "Colleen", icon: "shield" },
+  { id: "adu", label: "ADU", icon: "adu" },
+  { id: "guide", label: "Guide", icon: "guide" }
+];
+function App() {
+  var stateHook = React.useState(function () { return loadState(); });
   var s = stateHook[0];
   var setS = stateHook[1];
-  var tabHook = React.useState("ready");
+  var tabHook = React.useState("command");
   var tab = tabHook[0];
   var setTab = tabHook[1];
+  var copiedHook = React.useState(false);
+  var copied = copiedHook[0];
+  var setCopied = copiedHook[1];
   React.useEffect(function () {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-    } catch (err) {}
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (err) {}
   }, [s]);
   function set(key) {
     return function (value) {
       setS(function (prev) {
-        var next = {};
-        for (var k in prev) next[k] = prev[k];
+        var next = Object.assign({}, prev);
         next[key] = value;
-        return next;
+        return normalizeState(next);
       });
     };
   }
-  var engine = React.useMemo(function () {
-    return buildEngine(s);
-  }, [s]);
-  return React.createElement("div", {
-    style: {
-      background: C.bg,
-      minHeight: "100vh",
-      color: C.text,
-      fontFamily: "Georgia, 'Times New Roman', serif",
-      maxWidth: 480,
-      margin: "0 auto",
-      paddingBottom: 90
+  function reset() {
+    if (!window.confirm("Reset Flory Freedom to the June 2027 plan defaults?")) return;
+    setS(Object.assign({}, DEF));
+  }
+  var e = React.useMemo(function () { return buildEngine(s); }, [s]);
+  var c = React.useMemo(function () { return buildColleenEngine(s); }, [s]);
+  function copySnapshot() {
+    var lines = [
+      "Flory Freedom snapshot",
+      "Target: " + s.retireDateLabel,
+      "Projected portfolio: " + fmt(e.startBalance),
+      "Monte Carlo survival: " + Math.round(e.mc.successRate * 100) + "%",
+      "Bridge withdrawal rate: " + pct(e.withdrawalRate, 1),
+      "TRS annual at 65: " + fmt(e.trsAnnual),
+      "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
+      "Colleen target: " + c.targetLabel,
+      "Colleen 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
+      "Colleen base gap: " + fmt(c.baseGap),
+      "ADU cash after budget: " + fmt(e.cashAfterAdu)
+    ];
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lines.join("\n")).then(function () {
+        setCopied(true);
+        window.setTimeout(function () { setCopied(false); }, 1600);
+      }).catch(function () {});
     }
-  }, React.createElement("div", {
-    style: {
-      background: "linear-gradient(160deg, #060f1c 0%, #0d1830 60%, #070d18 100%)",
-      padding: "16px 16px 12px",
-      position: "sticky",
-      top: 0,
-      zIndex: 100,
-      boxShadow: "0 4px 24px rgba(0,0,0,0.8)",
-      borderBottom: "1px solid " + C.border,
-      paddingTop: "calc(16px + env(safe-area-inset-top))"
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start"
-    }
-  }, React.createElement("div", null, React.createElement("div", {
-    style: {
-      fontSize: 21,
-      fontWeight: 900,
-      color: "white",
-      fontStyle: "italic"
-    }
-  }, "Flory Freedom"), React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(255,255,255,0.4)",
-      letterSpacing: 2,
-      textTransform: "uppercase"
-    }
-  }, "Retirement Dashboard")), React.createElement("div", {
-    style: {
-      textAlign: "right"
-    }
-  }, React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(255,255,255,0.4)",
-      textTransform: "uppercase",
-      letterSpacing: 1
-    }
-  }, "Age ", s.retireAge), React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 800,
-      color: C.accent,
-      fontFamily: "monospace"
-    }
-  }, fmt(engine.projPortAtRetire, true))))), React.createElement("div", {
-    style: {
-      padding: "14px 12px 0"
-    }
-  }, tab === "ready" && React.createElement(ReadyTab, {
-    s: s,
-    set: set,
-    engine: engine
-  }), tab === "portfolio" && React.createElement(PortfolioTab, {
-    s: s,
-    set: set,
-    engine: engine
-  }), tab === "income" && React.createElement(IncomeTab, {
-    s: s,
-    set: set,
-    engine: engine
-  }), tab === "paths" && React.createElement(PathsTab, {
-    s: s,
-    set: set,
-    engine: engine
-  }), tab === "inputs" && React.createElement(InputsTab, {
-    s: s,
-    set: set,
-    engine: engine
-  })), React.createElement("div", {
-    style: {
-      position: "fixed",
-      bottom: 0,
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "100%",
-      maxWidth: 480,
-      background: "rgba(7,13,24,0.97)",
-      backdropFilter: "blur(14px)",
-      borderTop: "1px solid " + C.border,
-      display: "flex",
-      justifyContent: "space-around",
-      padding: "8px 0 calc(14px + env(safe-area-inset-bottom))",
-      zIndex: 200
-    }
-  }, TABS.map(function (t) {
-    return React.createElement("button", {
-      key: t.id,
-      onClick: function () {
-        setTab(t.id);
-      },
-      style: {
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2
-      }
-    }, React.createElement("span", {
-      style: {
-        fontSize: 20,
-        filter: tab === t.id ? "none" : "grayscale(80%) opacity(0.4)"
-      }
-    }, t.icon), React.createElement("span", {
-      style: {
-        fontSize: 8,
-        color: tab === t.id ? C.accent : C.dim,
-        fontWeight: tab === t.id ? 700 : 400,
-        letterSpacing: 0.5,
-        textTransform: "uppercase"
-      }
-    }, t.label));
-  })));
+  }
+  return h("div", { className: "app" },
+    h("header", { className: "topbar" },
+      h("div", { className: "toprow" },
+        h("div", { className: "brand" }, h("h1", null, "Flory Freedom"), h("p", null, "On time, not early")),
+        h("div", { className: "date-chip" }, h(Icon, { name: "calendar", size: 18 }), h("span", null, s.retireDateLabel), h(Icon, { name: "menu", size: 23 }))
+      ),
+      h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
+    ),
+    h("main", { className: "content" },
+      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set }),
+      tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set }),
+      tab === "income" && h(IncomeTab, { s: s, e: e, set: set }),
+      tab === "colleen" && h(ColleenTab, { s: s, c: c, set: set }),
+      tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
+      tab === "guide" && h(GuideTab, { s: s, e: e, set: set }),
+      h(Panel, { title: "Quick Tools" },
+        h("div", { className: "button-row" },
+          h("button", { className: "ghost-btn", onClick: copySnapshot }, h(Icon, { name: "list", size: 17 }), copied ? "Copied" : "Copy snapshot"),
+          h("button", { className: "ghost-btn", onClick: reset }, h(Icon, { name: "check", size: 17 }), "Reset defaults")
+        )
+      )
+    ),
+    h("nav", { className: "tabbar", "aria-label": "Primary" },
+      TABS.map(function (t) {
+        return h("button", { key: t.id, className: "tab " + (tab === t.id ? "active" : ""), onClick: function () { setTab(t.id); }, "aria-label": t.label },
+          h(Icon, { name: t.icon, size: 24 }),
+          h("span", null, t.label)
+        );
+      })
+    )
+  );
 }
 var rootEl = document.getElementById("root");
 if (rootEl) {
-  var root = ReactDOM.createRoot(rootEl);
-  root.render(React.createElement(App));
+  ReactDOM.createRoot(rootEl).render(h(App));
 }
 </script>
 <script>
