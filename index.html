@@ -1139,7 +1139,7 @@ function CommandTab(props) {
       h("div", { className: "hero-grid" },
         h("div", { className: "hero-stat" }, h("label", null, "Family draw"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
         h("div", { className: "hero-stat" }, h("label", null, "Plan MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
-        h("div", { className: "hero-stat" }, h("label", null, "Colleen gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
+        h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
       )
     ),
     h(Panel, { title: "Confidence Check", meta: "Today" },
@@ -1151,7 +1151,7 @@ function CommandTab(props) {
         ),
         h("div", { className: "confidence-item" },
           h("div", { className: "confidence-icon" }, h(Icon, { name: "shield", size: 26 })),
-          h("div", null, h("strong", null, "Colleen's gap is small"), h("span", null, "Cash can carry the pre-65 shortfall for years.")),
+          h("div", null, h("strong", null, "Pre-65 gap is small"), h("span", null, "Cash can carry the shortfall for years.")),
           h("div", { className: "confidence-value" }, c.cashRunway >= 50 ? "50+ yr" : c.cashRunway.toFixed(1) + " yr")
         ),
         h("div", { className: "confidence-item" },
@@ -1161,7 +1161,7 @@ function CommandTab(props) {
         )
       )
     ),
-    h(Panel, { title: "Colleen Conversation Brief", meta: "Big picture" },
+    h(Panel, { title: "Core Planning Inputs", meta: "Big picture" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "This is a bridge plan, not a market bet"), h("span", null, "The portfolio mainly has to bridge the years before pensions and Social Security fully show up.")),
         h("div", { className: "guide-item" }, h("strong", null, "TRS pension is counted conservatively"), h("span", null, "Current estimate: " + fmt(e.trsAnnual, true) + "/yr from " + s.trsYears.toFixed(1) + " years x " + fmt(e.highFive.average, true) + " high-5 x 2.0%.")),
@@ -1216,7 +1216,7 @@ function PortfolioTab(props) {
         h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
         h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 40, step: 1, onChange: set("bondPct"), display: function (v) { return v + "%"; } })
       ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "The equity-heavy stance is defensible only because Colleen's income and the deferred TRS pension act like fixed income outside the brokerage screen.")
+      h("div", { className: "callout", style: { marginTop: 12 } }, "The equity-heavy stance is defensible only because guaranteed income and the deferred TRS pension act like fixed income outside the brokerage screen.")
     ),
     h(Panel, { title: "Concentration Watch" },
       h(BarRow, { label: "VTI + VOO + ITOT overlap", value: s.overlapPct.toFixed(1) + "%", pct: s.overlapPct, color: s.overlapPct > 60 ? COLORS.orange : COLORS.green }),
@@ -1238,7 +1238,7 @@ function IncomeTab(props) {
   return h("div", null,
     h(Panel, { title: "Income Floor", meta: "Bridge and pension" },
       h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Colleen floor", value: fmt(s.wifeIncome, true), note: "Base case anchor", color: COLORS.green2 }),
+        h(Stat, { label: "Income floor", value: fmt(s.wifeIncome, true), note: "Base case anchor", color: COLORS.green2 }),
         h(Stat, { label: "TRS at 65", value: fmt(e.trsAnnual, true), note: s.trsYears + " years x " + (s.trsMultiplier * 100).toFixed(1) + "%", color: COLORS.cyan }),
         h(Stat, { label: "Social Security", value: fmt(s.ssAnnual, true), note: "Starts age " + s.ssAge }),
         h(Stat, { label: "Hidden assets", value: fmt(e.pensionHiddenAsset + e.colleenHiddenAsset, true), note: "3% income capitalization", color: COLORS.gold })
@@ -1276,7 +1276,7 @@ function IncomeTab(props) {
       )
     ),
     h(Panel, { title: "Income Layers" },
-      h(RangeControl, { label: "Colleen SSDI + OPERS", value: s.wifeIncome, min: 30000, max: 80000, step: 500, onChange: set("wifeIncome") }),
+      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 30000, max: 80000, step: 500, onChange: set("wifeIncome") }),
       h(SwitchLine, { title: "Count portfolio dividends", copy: "Useful for MAGI and bridge planning, but still portfolio-derived.", value: s.includeDividends, onChange: set("includeDividends") }),
       s.includeDividends && h(RangeControl, { label: "Annual dividends", value: s.dividends, min: 0, max: 35000, step: 500, onChange: set("dividends") }),
       h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") })
@@ -1372,13 +1372,13 @@ function BudgetTab(props) {
     )
   );
 }
-function ColleenTab(props) {
+function InputsTab(props) {
   var s = props.s;
   var c = props.c;
   var set = props.set;
   var cfg = c.config;
   return h("div", null,
-    h(Panel, { title: "Colleen Early-Retirement Case", meta: c.targetLabel },
+    h(Panel, { title: "Scenario Inputs", meta: c.targetLabel },
       h(SegmentedControl, {
         label: "Retirement timing",
         value: s.colleenRetireOption,
@@ -1397,9 +1397,9 @@ function ColleenTab(props) {
         h(Stat, { label: "Age-65 income", value: fmt(c.age65Income, true), note: "Pension + SS + income floor", color: COLORS.cyan }),
         h(Stat, { label: "Age-65 coverage", value: pct(c.age65Coverage, 0), note: "Guaranteed income vs spending", color: c.age65Coverage >= 1 ? COLORS.green2 : COLORS.orange })
       ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "The central insight is the tiny pre-65 portfolio gap. Cash and bonds can fund several years of drawdowns without selling equities.")
+      h("div", { className: "callout", style: { marginTop: 12 } }, "This view is an input lab: change timing, cash, income, spending, and allocation assumptions to see how much margin the plan keeps.")
     ),
-    h(Panel, { title: "Colleen Wealth Fan", meta: "10th / median / 90th" },
+    h(Panel, { title: "Scenario Wealth Fan", meta: "10th / median / 90th" },
       h(FanChart, { data: c.mc.percentiles }),
       h("div", { className: "chart-legend" },
         h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
@@ -1429,7 +1429,7 @@ function ColleenTab(props) {
       ),
       h("div", { className: "note", style: { marginTop: 12 } }, "The app models cash as the first spending bucket. Portfolio liquidation begins only after the cash buffer is exhausted.")
     ),
-    h(Panel, { title: "Colleen Inputs" },
+    h(Panel, { title: "Scenario Controls" },
       h(RangeControl, { label: "Retirement age", value: s.colleenRetireAge, min: 40, max: 65, step: 1, onChange: set("colleenRetireAge"), display: function (v) { return String(v); } }),
       h(RangeControl, { label: "Invested portfolio", value: s.colleenPortfolio, min: 500000, max: 2200000, step: 5000, onChange: set("colleenPortfolio") }),
       h(RangeControl, { label: "Cash/CD buffer", value: s.colleenCashBuffer, min: 0, max: 300000, step: 2500, onChange: set("colleenCashBuffer") }),
@@ -1446,12 +1446,12 @@ function ColleenTab(props) {
       h(SwitchLine, { title: "Use 4% inflation stress", copy: "Raises annual spending faster and lowers margin.", value: s.colleenInflationStress, onChange: set("colleenInflationStress") }),
       h(RangeControl, { label: "Consulting income", value: s.colleenConsulting, min: 0, max: 50000, step: 1000, onChange: set("colleenConsulting") })
     ),
-    h(Panel, { title: "Recommendations" },
+    h(Panel, { title: "Input Notes" },
       h("div", { className: "guide-list" },
-        h("div", { className: "guide-item" }, h("strong", null, "Retire when the cash buffer is truly built"), h("span", null, "The June 2026 case works because the pre-65 gap is small and cash can absorb the first bad decade.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Use cash and bonds before selling equities"), h("span", null, "Sequence risk is controlled by avoiding equity sales during early downturns.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Keep consulting optional"), h("span", null, "$25k of short-term work adds margin, but the base case should not depend on it.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Review Roth conversions separately"), h("span", null, "Low-income years before pension and SS may be valuable tax-planning windows."))
+        h("div", { className: "guide-item" }, h("strong", null, "Cash buffer"), h("span", null, "Raise or lower the buffer to test how much sequence risk can be absorbed before selling equities.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Timing"), h("span", null, "Use the timing control to see the tradeoff between retiring sooner and adding more savings runway.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Optional income"), h("span", null, "Consulting income adds margin, but the base case should remain understandable without it.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Tax planning"), h("span", null, "Low-income bridge years may be valuable tax-planning windows, but this app stays at planning-input level."))
       )
     )
   );
@@ -1492,7 +1492,7 @@ function ADUTab(props) {
     h(Panel, { title: "Design Decisions" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "Attached, not detached"), h("span", null, "Backside hallway is primary entrance; separate gate and paver path support independence.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Privacy and acoustics"), h("span", null, "Locked interior door, acoustic insulation in the party wall, and courtyard space preserve Michael and Colleen's home feel.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Privacy and acoustics"), h("span", null, "Locked interior door, acoustic insulation in the party wall, and courtyard space preserve the home's feel.")),
         h("div", { className: "guide-item" }, h("strong", null, "Future-use optionality"), h("span", null, "Kaitlyn tenancy, Libby/Jeremiah, aging parents, and travel home base all fit the same infrastructure."))
       )
     )
@@ -1511,16 +1511,16 @@ function GuideTab(props) {
       h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") }),
       h(RangeControl, { label: "PTO days", value: s.ptoDays, min: 0, max: 60, step: 1, onChange: set("ptoDays"), display: function (v) { return v + " days"; } })
     ),
-    h(Panel, { title: "Colleen Alignment" },
-      h(SwitchLine, { title: "Plan brief reviewed", copy: "She has seen the plain-language bridge and income floor story.", value: s.alignColleenBriefed, onChange: set("alignColleenBriefed") }),
-      h(SwitchLine, { title: "Bridge to 65 understood", copy: "Portfolio is responsible mainly for the pre-TRS bridge.", value: s.alignBridgeReviewed, onChange: set("alignBridgeReviewed") }),
-      h(SwitchLine, { title: "ADU role agreed", copy: "ADU is lifestyle infrastructure first, rent upside second.", value: s.alignAduReviewed, onChange: set("alignAduReviewed") }),
-      h(SwitchLine, { title: "Retirement vision named", copy: "Decompression, slow travel, and optional consulting are concrete.", value: s.alignTravelVision, onChange: set("alignTravelVision") })
+    h(Panel, { title: "Input Review" },
+      h(SwitchLine, { title: "Core assumptions reviewed", copy: "Portfolio, spending, income, and timing inputs have been checked.", value: s.alignColleenBriefed, onChange: set("alignColleenBriefed") }),
+      h(SwitchLine, { title: "Bridge to 65 reviewed", copy: "Portfolio is responsible mainly for the pre-TRS bridge.", value: s.alignBridgeReviewed, onChange: set("alignBridgeReviewed") }),
+      h(SwitchLine, { title: "ADU role reviewed", copy: "ADU is lifestyle infrastructure first, rent upside second.", value: s.alignAduReviewed, onChange: set("alignAduReviewed") }),
+      h(SwitchLine, { title: "Lifestyle input reviewed", copy: "Decompression, slow travel, and optional consulting are concrete planning inputs.", value: s.alignTravelVision, onChange: set("alignTravelVision") })
     ),
     h(Panel, { title: "Data Guide" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Equity mean 9.5%, bond mean 4.5%, cash mean 2.0%; volatility is allocation-weighted.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Colleen Monte Carlo"), h("span", null, "Colleen's tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Scenario Monte Carlo"), h("span", null, "The Inputs tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
         h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% draw rate.")),
         h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "Family first-year spending minus active income layers divided by projected portfolio plus any included PTO buffer.")),
         h("div", { className: "guide-item" }, h("strong", null, "Base case discipline"), h("span", null, "Guaranteed household income is base. Rent, side income, consulting, and ADU upside stay out unless toggled on.")),
@@ -1545,7 +1545,7 @@ var TABS = [
   { id: "command", label: "Home", icon: "command" },
   { id: "income", label: "Income", icon: "income" },
   { id: "budget", label: "Budget", icon: "list" },
-  { id: "colleen", label: "Colleen", icon: "shield" },
+  { id: "inputs", label: "Inputs", icon: "shield" },
   { id: "adu", label: "ADU", icon: "adu" },
   { id: "guide", label: "Guide", icon: "guide" }
 ];
@@ -1587,9 +1587,9 @@ function App() {
       "Family monthly budget: " + fmt(budgetCategories(s).reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0)),
       "TRS annual at 65: " + fmt(e.trsAnnual),
       "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
-      "Colleen target: " + c.targetLabel,
-      "Colleen 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
-      "Colleen base gap: " + fmt(c.baseGap),
+      "Scenario target: " + c.targetLabel,
+      "Scenario 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
+      "Scenario base gap: " + fmt(c.baseGap),
       "ADU cash after budget: " + fmt(e.cashAfterAdu)
     ];
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1611,7 +1611,7 @@ function App() {
       tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set }),
       tab === "income" && h(MichaelTab, { s: s, e: e, set: set }),
       tab === "budget" && h(BudgetTab, { s: s, e: e, set: set }),
-      tab === "colleen" && h(ColleenTab, { s: s, c: c, set: set }),
+      tab === "inputs" && h(InputsTab, { s: s, c: c, set: set }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
       tab === "guide" && h(GuideTab, { s: s, e: e, set: set }),
       h(Panel, { title: "Quick Tools" },
