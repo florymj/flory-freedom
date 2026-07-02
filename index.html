@@ -160,14 +160,15 @@ button { color: inherit; }
 .hero-number { margin-top: 18px; }
 .hero-number span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
 .hero-number strong { display: block; color: white; font-size: 42px; line-height: 1; margin-top: 4px; letter-spacing: 0; font-weight: 900; font-variant-numeric: tabular-nums; }
-.hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 8px; margin-top: 16px; }
 .hero-stat {
   background: rgba(255,255,255,0.055);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   padding: 10px 8px;
+  min-width: 0;
 }
-.hero-stat label { display: block; color: var(--dim); font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 850; }
+.hero-stat label { display: block; color: var(--dim); font-size: 9px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0; font-weight: 850; }
 .hero-stat strong { display: block; margin-top: 5px; font-size: 16px; line-height: 1.05; font-weight: 900; color: var(--text); font-variant-numeric: tabular-nums; }
 .confidence-row { display: grid; gap: 8px; margin-bottom: 10px; }
 .confidence-item {
