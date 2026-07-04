@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#08100f">
-<meta name="flory-freedom-build" content="unified-risk-20260703b">
+<meta name="flory-freedom-build" content="guardrails-bridge-ss-20260704">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flory Freedom">
@@ -600,10 +600,10 @@ var COLORS = {
   muted: "#95a6a3"
 };
 var DEF = {
-  currentPortfolio: 1248950,
-  investmentValue: 1172826,
+  currentPortfolio: 1144480,
+  investmentValue: 1081344,
   cashValue: 63136,
-  otherValue: 12988,
+  otherValue: 0,
   portfolioSource: "Planning defaults",
   portfolioUpdatedAt: "",
   portfolioImportStatus: "",
@@ -621,8 +621,8 @@ var DEF = {
   ],
   monthlyContrib: 9000,
   monthsToRetire: 11,
-  currentAge: 46,
-  retireAge: 47,
+  currentAge: 43,
+  retireAge: 44,
   retireDateLabel: "June 30, 2027",
   spendMonthly: 10000,
   budgetHousing: 900,
@@ -633,14 +633,14 @@ var DEF = {
   budgetTaxesInsurance: 1200,
   budgetFamilyGiving: 800,
   budgetFlex: 1900,
-  horizonYears: 40,
+  horizonYears: 46,
   inflation: 0.03,
   incomeGrowth: 0.02,
   equityPct: 83,
   bondPct: 12,
   wifeIncome: 53000,
   includeWifeIncome: true,
-  dividends: 14000,
+  dividends: 20603,
   includeDividends: true,
   trsHigh5: 201000,
   trsYears: 11,
@@ -653,8 +653,20 @@ var DEF = {
   michaelSalary2024: 183332.71,
   michaelSalary2023: 180958.14,
   michaelSalary2022: 177419.28,
-  ssAnnual: 24000,
+  ssAnnual: 50412,
   ssAge: 67,
+  ssAge62: 34116,
+  ssAge65: 43272,
+  ssAge67: 50412,
+  ssAge70: 62976,
+  ssClaimAge: 67,
+  ssBenefitReductionFactor: 0.70,
+  guardrailsEnabled: false,
+  guardrailLower: 0.80,
+  guardrailCutback: 0.15,
+  guardrailUpper: 1.20,
+  guardrailIncrease: 0.10,
+  spendFloor: 60000,
   ptoDays: 30,
   includePto: true,
   householdSize: 2,
@@ -905,7 +917,9 @@ function hashState(s) {
     s.equityPct, s.bondPct, s.wifeIncome, s.dividends,
     s.trsYears, s.trsMultiplier, s.michaelSalary2027, s.michaelSalary2026,
     s.michaelSalary2025, s.michaelSalary2024, s.michaelSalary2023,
-    s.michaelSalary2022, s.ssAnnual, s.inflation, s.aduRentMonthly, s.includeAduRent
+    s.michaelSalary2022, s.ssAnnual, s.ssClaimAge, s.ssBenefitReductionFactor,
+    s.inflation, s.aduRentMonthly, s.includeAduRent,
+    s.guardrailsEnabled, s.guardrailLower, s.guardrailCutback, s.spendFloor
   ].join("|");
   var hsh = 2166136261;
   for (var i = 0; i < src.length; i++) {
@@ -930,6 +944,16 @@ function normal(rand) {
 }
 function trsAnnual(s) {
   return Math.round((s.trsMultiplier || 0.02) * s.trsYears * michaelHighFive(s).average);
+}
+function ssAnnualBenefit(s) {
+  var claimAge = s.ssClaimAge || s.ssAge || 67;
+  var raw;
+  if (claimAge <= 62) raw = s.ssAge62 || 34116;
+  else if (claimAge <= 65) raw = s.ssAge65 || 43272;
+  else if (claimAge <= 67) raw = s.ssAge67 || s.ssAnnual || 50412;
+  else raw = s.ssAge70 || 62976;
+  var factor = (s.ssBenefitReductionFactor !== undefined) ? s.ssBenefitReductionFactor : 0.70;
+  return Math.round(raw * factor);
 }
 function fpl(size) {
   return 15060 + Math.max(0, size - 1) * 5380;
@@ -964,7 +988,8 @@ function incomeForYear(y, s, e) {
     var trsYearsActive = age - s.trsAge;
     income += e.trsAnnual * Math.pow(1 + (s.trsCola || 0), trsYearsActive);
   }
-  if (age >= s.ssAge) income += s.ssAnnual * Math.pow(1 + s.inflation, Math.max(0, age - s.ssAge));
+  var ssClaimAge = s.ssClaimAge || s.ssAge;
+  if (age >= ssClaimAge) income += ssAnnualBenefit(s) * Math.pow(1 + s.inflation, Math.max(0, age - ssClaimAge));
   return income;
 }
 function requiredDraw(y, s, e) {
@@ -1053,6 +1078,58 @@ function runMonteCarlo(s, e, startBalance, sims, options) {
     }
   };
 }
+function runMonteCarloGuardrails(s, e, startBalance, sims) {
+  var rand = rng(hashState(s) + 99991);
+  sims = sims || 800;
+  var lowerTrig = s.guardrailLower || 0.80;
+  var cutback   = s.guardrailCutback || 0.15;
+  var upperTrig = s.guardrailUpper || 1.20;
+  var increase  = s.guardrailIncrease || 0.10;
+  var floorReal = s.spendFloor || 60000;
+  // Deterministic plan balances (mean-return path)
+  var planBals = [startBalance];
+  var pb = startBalance;
+  for (var yi = 0; yi < s.horizonYears; yi++) {
+    pb = pb * (1 + e.meanReturn) - requiredDraw(yi, s, e);
+    planBals.push(Math.max(0, pb));
+  }
+  var successes = 0;
+  for (var sim = 0; sim < sims; sim++) {
+    var b = startBalance;
+    var alive = true;
+    var spendMult = 1.0;
+    for (var year = 0; year < s.horizonYears; year++) {
+      if (!alive) break;
+      var planVal = planBals[year] || 1;
+      var ratio = b / planVal;
+      if (ratio < lowerTrig) spendMult *= (1 - cutback);
+      else if (ratio > upperTrig) spendMult = Math.min(spendMult * (1 + increase), 1.20);
+      var baseSpend = s.spendMonthly * 12 * Math.pow(1 + s.inflation, year + s.monthsToRetire / 12);
+      var floorInflated = floorReal * Math.pow(1 + s.inflation, year + s.monthsToRetire / 12);
+      var adjSpend = clamp(baseSpend * spendMult, floorInflated, baseSpend * 1.20);
+      spendMult = baseSpend > 0 ? adjSpend / baseSpend : spendMult;
+      var income = incomeForYear(year, s, e);
+      var draw = Math.max(0, adjSpend - income);
+      var ret = clamp(e.meanReturn + e.volatility * normal(rand), -0.7, 0.65);
+      b = b * (1 + ret) - draw;
+      if (b <= 0) { b = 0; alive = false; }
+    }
+    if (alive) successes++;
+  }
+  return { successRate: successes / sims, sims: sims, failures: sims - successes };
+}
+function solveSafeSpend(s, e, startBalance, targetRate, useGuardrails) {
+  var lo = 3000, hi = 22000;
+  for (var iter = 0; iter < 18; iter++) {
+    var mid = (lo + hi) / 2;
+    var testS = Object.assign({}, s, { spendMonthly: mid });
+    var mc = useGuardrails
+      ? runMonteCarloGuardrails(testS, e, startBalance, 300)
+      : runMonteCarlo(testS, e, startBalance, 300);
+    if (mc.successRate < targetRate) hi = mid; else lo = mid;
+  }
+  return Math.round((lo + hi) / 2 / 12) * 12;
+}
 function hashAny(obj) {
   var src = JSON.stringify(obj || {});
   var hsh = 2166136261;
@@ -1101,6 +1178,7 @@ function buildEngine(s) {
     + (s.capitalGainsDist || 0);
   var aca = calcAca(magi, s.householdSize, s.benchmarkPremium);
   var mc = runMonteCarlo(s, base, startBalance, 800);
+  var mcGuardrails = s.guardrailsEnabled ? runMonteCarloGuardrails(s, base, startBalance, 800) : null;
   var aduRemaining = Math.max(0, s.aduBudget - s.aduSpent);
   var cashAfterAdu = s.cashValue - aduRemaining;
   var bondReserve = startBalance * bond / 100;
@@ -1148,6 +1226,9 @@ function buildEngine(s) {
     pensionHiddenAsset: base.trsAnnual / 0.03,
     incomeFloorHiddenAsset: s.wifeIncome / 0.03,
     mc: mc,
+    mcGuardrails: mcGuardrails,
+    ssAdjusted: ssAnnualBenefit(s),
+    ssClaimAge: s.ssClaimAge || s.ssAge,
     aca: aca,
     magi: magi,
     aduRemaining: aduRemaining,
@@ -1164,7 +1245,16 @@ function buildEngine(s) {
       bridgeDraw: delayedBridgeDraw,
       addedPortfolio: delayedProjected - startBalance,
       addedPension: trsAnnual(delayedState) - base.trsAnnual
-    }
+    },
+    drawAtYears: [0, 8, 18, 20, 28, 38].filter(function(y) { return y < s.horizonYears; }).map(function(y) {
+      return {
+        year: y,
+        age: s.retireAge + y,
+        spend: s.spendMonthly * 12 * Math.pow(1 + s.inflation, y + s.monthsToRetire / 12),
+        income: incomeForYear(y, s, base),
+        draw: requiredDraw(y, s, base)
+      };
+    })
   });
 }
 function normalizeState(parsed) {
@@ -1192,6 +1282,16 @@ function normalizeState(parsed) {
   }
   if (!s.portfolioSource) s.portfolioSource = "Planning defaults";
   if (!s.portfolioImportStatus) s.portfolioImportStatus = "";
+  // Sync ssAge with ssClaimAge for backward compat
+  if (s.ssClaimAge) s.ssAge = s.ssClaimAge;
+  // Default reduction factor if missing
+  if (s.ssBenefitReductionFactor === undefined) s.ssBenefitReductionFactor = 0.70;
+  // Guardrail defaults
+  if (s.spendFloor === undefined) s.spendFloor = 60000;
+  if (s.guardrailLower === undefined) s.guardrailLower = 0.80;
+  if (s.guardrailCutback === undefined) s.guardrailCutback = 0.15;
+  if (s.guardrailUpper === undefined) s.guardrailUpper = 1.20;
+  if (s.guardrailIncrease === undefined) s.guardrailIncrease = 0.10;
   return s;
 }
 function loadState() {
@@ -1398,38 +1498,236 @@ function MonteCarloRiskPanel(props) {
     ) : h("div", { className: "note", style: { marginTop: 12 } }, "No failed paths in this run.")
   );
 }
+function BridgePhasesPanel(props) {
+  var s = props.s;
+  var e = props.e;
+  var phases = [
+    {
+      id: 1,
+      label: "Phase 1 — Portfolio Only",
+      dates: "Jun 2027 – Aug 2047",
+      ages: "Age 44–65  ·  21 years",
+      color: COLORS.gold,
+      income: e.bridgeIncome,
+      spend: e.spendAtRetire,
+      draw: e.bridgeDraw,
+      note: "Zero guaranteed pension. Dividends (~" + fmt(s.dividends, true) + "/yr) partially offset draws."
+    },
+    {
+      id: 2,
+      label: "Phase 2 — Portfolio + TRS",
+      dates: "Aug 2047 – Aug 2049",
+      ages: "Age 65–67  ·  2 years",
+      color: COLORS.cyan,
+      income: incomeForYear(Math.max(0, s.trsAge - s.retireAge), s, e),
+      spend: s.spendMonthly * 12 * Math.pow(1 + s.inflation, Math.max(0, s.trsAge - s.retireAge) + s.monthsToRetire / 12),
+      draw: requiredDraw(Math.max(0, s.trsAge - s.retireAge), s, e),
+      note: "TRS " + fmt(e.trsAnnual, true) + "/yr kicks in. Bridge draw shrinks significantly."
+    },
+    {
+      id: 3,
+      label: "Phase 3 — Portfolio + TRS + SS",
+      dates: "Aug 2049+",
+      ages: "Age 67–90  ·  23 years",
+      color: COLORS.green2,
+      income: incomeForYear(Math.max(0, (s.ssClaimAge || s.ssAge) - s.retireAge), s, e),
+      spend: s.spendMonthly * 12 * Math.pow(1 + s.inflation, Math.max(0, (s.ssClaimAge || s.ssAge) - s.retireAge) + s.monthsToRetire / 12),
+      draw: requiredDraw(Math.max(0, (s.ssClaimAge || s.ssAge) - s.retireAge), s, e),
+      note: "SS " + fmt(e.ssAdjusted, true) + "/yr added (at age " + (s.ssClaimAge || s.ssAge) + ", adjusted for early retirement)."
+    }
+  ];
+  function status(phase) {
+    var wr = phase.spend > 0 ? phase.draw / phase.spend : 0;
+    if (wr < 0.30) return { label: "On Track", color: COLORS.green2 };
+    if (wr < 0.55) return { label: "Caution", color: COLORS.gold };
+    return { label: "High Draw", color: COLORS.orange };
+  }
+  return h(Panel, { title: "Bridge Phases", meta: "Income timeline" },
+    phases.map(function(ph) {
+      var st = status(ph);
+      return h("div", { key: ph.id, style: { borderTop: ph.id > 1 ? "1px solid var(--line)" : "none", paddingTop: ph.id > 1 ? 14 : 0, marginTop: ph.id > 1 ? 14 : 0 } },
+        h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 } },
+          h("div", null,
+            h("strong", { style: { color: ph.color, fontSize: 13, display: "block" } }, ph.label),
+            h("span", { style: { color: "var(--muted)", fontSize: 11 } }, ph.dates + "  ·  " + ph.ages)
+          ),
+          h("span", { style: { background: st.color + "22", color: st.color, border: "1px solid " + st.color + "55", borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 850, whiteSpace: "nowrap" } }, st.label)
+        ),
+        h("div", { className: "kpi-grid", style: { gridTemplateColumns: "repeat(3, 1fr)" } },
+          h(Stat, { label: "Income/yr", value: fmt(ph.income, true), color: ph.color }),
+          h(Stat, { label: "Spending/yr", value: fmt(ph.spend, true) }),
+          h(Stat, { label: "From portfolio", value: fmt(ph.draw, true), color: ph.draw > 80000 ? COLORS.orange : ph.draw > 40000 ? COLORS.gold : COLORS.green2 })
+        ),
+        h("div", { style: { color: "var(--dim)", fontSize: 11, marginTop: 6 } }, ph.note)
+      );
+    })
+  );
+}
+function SafeSpendCalculator(props) {
+  var s = props.s;
+  var e = props.e;
+  var rates = [0.85, 0.90, 0.95, 0.99];
+  var rateHook = React.useState(0.90);
+  var targetRate = rateHook[0];
+  var setTargetRate = rateHook[1];
+  var guardrailHook = React.useState(false);
+  var useGuardrails = guardrailHook[0];
+  var setUseGuardrails = guardrailHook[1];
+  var result = React.useMemo(function() {
+    return solveSafeSpend(s, e, e.startBalance, targetRate, useGuardrails);
+  }, [s.currentPortfolio, s.monthlyContrib, s.monthsToRetire, s.retireAge,
+      s.equityPct, s.bondPct, s.wifeIncome, s.dividends, s.ssClaimAge,
+      s.ssBenefitReductionFactor, s.trsYears, s.trsMultiplier,
+      s.inflation, s.horizonYears, targetRate, useGuardrails]);
+  var safeAnnual = result;
+  var safeMonthly = Math.round(safeAnnual / 12);
+  var mcColor = targetRate >= 0.95 ? COLORS.cyan : targetRate >= 0.90 ? COLORS.green2 : COLORS.gold;
+  return h(Panel, { title: "What Can I Safely Spend?", meta: "Solved via simulation" },
+    h("div", { style: { marginBottom: 14 } },
+      h("div", { className: "control-label" }, h("span", null, "Target success rate"), h("strong", null, Math.round(targetRate * 100) + "%")),
+      h("div", { className: "seg" },
+        rates.map(function(r) {
+          return h("button", { key: r, type: "button", className: targetRate === r ? "active" : "", onClick: function() { setTargetRate(r); } }, Math.round(r * 100) + "%");
+        })
+      ),
+      h(SwitchLine, { title: "Apply guardrails", copy: "Dynamic spending adjusts automatically in bad markets.", value: useGuardrails, onChange: setUseGuardrails })
+    ),
+    h("div", { style: { background: "rgba(155,227,127,0.06)", border: "1px solid rgba(155,227,127,0.18)", borderRadius: 8, padding: "16px 14px", textAlign: "center", marginTop: 10 } },
+      h("div", { style: { color: "var(--muted)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.07em" } }, "Safe annual spend at " + Math.round(targetRate * 100) + "% · " + (useGuardrails ? "with guardrails" : "fixed spending")),
+      h("div", { style: { color: mcColor, fontSize: 38, fontWeight: 900, lineHeight: 1.1, margin: "8px 0 4px" } }, fmt(safeAnnual)),
+      h("div", { style: { color: "var(--muted)", fontSize: 13 } }, fmt(safeMonthly) + "/month")
+    ),
+    s.spendMonthly * 12 > safeAnnual + 1000 && h("div", { className: "callout", style: { marginTop: 10 } },
+      "Current budget (" + fmt(s.spendMonthly * 12, true) + "/yr) exceeds safe spend by " + fmt(s.spendMonthly * 12 - safeAnnual, true) + ". Consider guardrails or a small spending reduction."
+    )
+  );
+}
+function GuardrailsComparePanel(props) {
+  var s = props.s;
+  var e = props.e;
+  var fixedRate = Math.round(e.mc.successRate * 100);
+  var guardrailsRate = e.mcGuardrails ? Math.round(e.mcGuardrails.successRate * 100) : null;
+  var fixedColor = fixedRate >= 85 ? COLORS.green2 : fixedRate >= 70 ? COLORS.gold : COLORS.orange;
+  var grColor = guardrailsRate !== null ? (guardrailsRate >= 90 ? COLORS.green2 : guardrailsRate >= 75 ? COLORS.gold : COLORS.orange) : COLORS.muted;
+  return h(Panel, { title: "Dynamic Spending (Guardrails)", meta: "vs. fixed spending" },
+    h(SwitchLine, { title: "Enable guardrails", copy: "Adjusts spending each year based on portfolio health. Cuts by " + Math.round((s.guardrailCutback || 0.15) * 100) + "% when portfolio < " + Math.round((s.guardrailLower || 0.80) * 100) + "% of plan; boosts by " + Math.round((s.guardrailIncrease || 0.10) * 100) + "% when > " + Math.round((s.guardrailUpper || 1.20) * 100) + "% of plan.", value: s.guardrailsEnabled, onChange: props.set("guardrailsEnabled") }),
+    s.guardrailsEnabled && h("div", null,
+      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "14px 0 10px" } },
+        h("div", { style: { background: "rgba(255,255,255,0.035)", border: "1px solid var(--line-soft)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
+          h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "Fixed spending"),
+          h("div", { style: { color: fixedColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, fixedRate + "%"),
+          h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mc.failures + " fail paths")
+        ),
+        h("div", { style: { background: "rgba(155,227,127,0.06)", border: "1px solid rgba(155,227,127,0.22)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
+          h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "With guardrails"),
+          h("div", { style: { color: grColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, guardrailsRate !== null ? guardrailsRate + "%" : "—"),
+          guardrailsRate !== null && h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mcGuardrails.failures + " fail paths")
+        )
+      ),
+      h(RangeControl, { label: "Lower guardrail trigger", value: Math.round((s.guardrailLower || 0.80) * 100), min: 60, max: 95, step: 5, onChange: function(v) { props.set("guardrailLower")(v / 100); }, display: function(v) { return v + "% of plan"; } }),
+      h(RangeControl, { label: "Cutback amount", value: Math.round((s.guardrailCutback || 0.15) * 100), min: 5, max: 30, step: 5, onChange: function(v) { props.set("guardrailCutback")(v / 100); }, display: function(v) { return v + "%"; } }),
+      h(RangeControl, { label: "Spending floor (today's $)", value: s.spendFloor || 60000, min: 40000, max: 100000, step: 2500, onChange: props.set("spendFloor") })
+    ),
+    !s.guardrailsEnabled && h("div", { className: "note", style: { marginTop: 10 } }, "Toggle on to compare fixed vs. dynamic spending success rates side by side.")
+  );
+}
 var RETIRE_PRESETS = [
-  { label: "Jun 2027", sub: "11 TRS yrs", monthsToRetire: 11, trsYears: 11, retireDateLabel: "June 30, 2027" },
-  { label: "Jun 2028", sub: "12 TRS yrs", monthsToRetire: 23, trsYears: 12, retireDateLabel: "June 30, 2028" },
-  { label: "Jun 2029", sub: "13 TRS yrs", monthsToRetire: 35, trsYears: 13, retireDateLabel: "June 30, 2029" }
+  { label: "Jun 2027", sub: "11 TRS yrs", monthsToRetire: 11, retireAge: 44, trsYears: 11, retireDateLabel: "June 30, 2027" },
+  { label: "Jun 2028", sub: "12 TRS yrs", monthsToRetire: 23, retireAge: 45, trsYears: 12, retireDateLabel: "June 30, 2028" },
+  { label: "Jun 2029", sub: "13 TRS yrs", monthsToRetire: 35, retireAge: 46, trsYears: 13, retireDateLabel: "June 30, 2029" }
 ];
 function RetirementPresetPicker(props) {
   var s = props.s;
   var update = props.update;
-  var active = RETIRE_PRESETS.filter(function(p) {
-    return p.monthsToRetire === s.monthsToRetire && p.trsYears === s.trsYears;
-  })[0];
-  return h("div", { className: "control", style: { marginBottom: 0 } },
-    h("div", { className: "control-label" },
-      h("span", null, "Retirement date"),
-      h("strong", null, s.retireDateLabel)
-    ),
-    h("div", { className: "seg" },
-      RETIRE_PRESETS.map(function(preset) {
-        var isActive = !!(active && active.monthsToRetire === preset.monthsToRetire);
-        return h("button", {
-          key: preset.label,
-          type: "button",
-          className: isActive ? "active" : "",
-          onClick: function() {
-            update({ monthsToRetire: preset.monthsToRetire, trsYears: preset.trsYears, retireDateLabel: preset.retireDateLabel });
-          }
+  var engines = React.useMemo(function() {
+    return RETIRE_PRESETS.map(function(p) {
+      return buildEngine(Object.assign({}, s, {
+        monthsToRetire: p.monthsToRetire,
+        retireAge: p.retireAge,
+        trsYears: p.trsYears,
+        retireDateLabel: p.retireDateLabel
+      }));
+    });
+  }, [s.currentPortfolio, s.monthlyContrib, s.spendMonthly, s.wifeIncome,
+      s.dividends, s.includeDividends, s.equityPct, s.bondPct,
+      s.ssAnnual, s.inflation, s.horizonYears, s.trsMultiplier,
+      s.includeAduRent, s.aduRentMonthly, s.includePto, s.ptoDays]);
+  return h("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 } },
+    RETIRE_PRESETS.map(function(preset, i) {
+      var isActive = s.monthsToRetire === preset.monthsToRetire && s.trsYears === preset.trsYears;
+      var eng = engines[i];
+      var mc = Math.round(eng.mc.successRate * 100);
+      var mcColor = mc >= 85 ? COLORS.green2 : mc >= 70 ? COLORS.gold : COLORS.orange;
+      var wrColor = eng.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
+      return h("button", {
+        key: preset.label,
+        type: "button",
+        onClick: function() {
+          update({ monthsToRetire: preset.monthsToRetire, retireAge: preset.retireAge, trsYears: preset.trsYears, retireDateLabel: preset.retireDateLabel });
         },
-          preset.label,
-          h("br"),
-          h("span", { style: { fontSize: 9, opacity: 0.75 } }, preset.sub)
-        );
-      })
+        style: {
+          border: "1px solid " + (isActive ? "rgba(155,227,127,0.44)" : "rgba(255,255,255,0.07)"),
+          background: isActive ? "rgba(155,227,127,0.09)" : "rgba(255,255,255,0.025)",
+          borderRadius: 8,
+          padding: "12px 10px",
+          textAlign: "left",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          gap: 5,
+          minHeight: 168
+        }
+      },
+        h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+          h("strong", { style: { color: isActive ? COLORS.green2 : "var(--text)", fontSize: 15, fontWeight: 900, lineHeight: 1.15 } }, preset.label),
+          isActive && h("span", { style: { background: COLORS.green2, color: "#071011", fontSize: 9, fontWeight: 900, padding: "2px 5px", borderRadius: 999, whiteSpace: "nowrap" } }, "ACTIVE")
+        ),
+        h("div", { style: { color: "var(--muted)", fontSize: 10, lineHeight: 1.35 } }, preset.trsYears + " TRS yrs"),
+        h("div", { style: { color: "var(--muted)", fontSize: 10 } }, preset.monthsToRetire + " months away"),
+        h("div", { style: { color: COLORS.cyan, fontSize: 13, fontWeight: 850, marginTop: 4 } }, fmt(eng.startBalance, true)),
+        h("div", { style: { color: COLORS.gold, fontSize: 11 } }, fmt(eng.trsAnnual, true) + "/yr TRS"),
+        h("div", { style: { color: wrColor, fontSize: 11 } }, pct(eng.withdrawalRate, 1) + " draw"),
+        h("div", { style: { color: mcColor, fontSize: 18, fontWeight: 900, marginTop: 4 } }, mc + "%",
+          h("span", { style: { fontSize: 10, fontWeight: 700, marginLeft: 3, opacity: 0.8 } }, "MC")
+        )
+      );
+    })
+  );
+}
+function DrawTrajectoryPanel(props) {
+  var s = props.s;
+  var e = props.e;
+  var rows = e.drawAtYears || [];
+  var labels = {};
+  labels[s.retireAge] = "Retirement";
+  labels[s.trsAge] = "TRS starts";
+  labels[s.ssAge] = "SS starts";
+  return h(Panel, { title: "Draw Trajectory", meta: "How the gap evolves" },
+    h("div", { className: "callout", style: { marginBottom: 12 } },
+      "Opening draw rate is only year one. Spending grows 3%/yr while the TRS pension has no COLA — the portfolio gap widens again after age 67 and keeps climbing."
+    ),
+    h("table", { className: "mini-table" },
+      h("thead", null,
+        h("tr", null,
+          h("th", null, "Age"),
+          h("th", null, "Event"),
+          h("th", null, "Spending"),
+          h("th", null, "Income"),
+          h("th", null, "From portfolio")
+        )
+      ),
+      h("tbody", null,
+        rows.map(function(row) {
+          var drawColor = row.draw > 100000 ? COLORS.orange : row.draw > 60000 ? COLORS.gold : COLORS.green2;
+          return h("tr", { key: row.age },
+            h("td", null, row.age),
+            h("td", null, h("small", null, labels[row.age] || "")),
+            h("td", null, fmt(row.spend, true)),
+            h("td", null, fmt(row.income, true)),
+            h("td", null, h("strong", { style: { color: drawColor } }, fmt(row.draw, true)))
+          );
+        })
+      )
     )
   );
 }
@@ -1466,10 +1764,10 @@ function CommandTab(props) {
       patch: { spendMonthly: 8500 }
     },
     {
-      title: "Earlier exit",
-      detail: "Cut the runway to 6 months",
-      active: s.monthsToRetire <= 6,
-      patch: { monthsToRetire: 6 }
+      title: "Jun ’28 plan",
+      detail: "One more year — 12 TRS years, bigger portfolio",
+      active: s.monthsToRetire === 23 && s.trsYears === 12,
+      patch: { monthsToRetire: 23, retireAge: 48, trsYears: 12, retireDateLabel: "June 30, 2028" }
     },
     {
       title: "Income upside",
@@ -1485,6 +1783,12 @@ function CommandTab(props) {
     { icon: "adu", title: "Legacy vehicle", copy: "Max fund ADU, optimize taxes, plan gifting.", status: "Review 2026", color: COLORS.cyan }
   ];
   return h("div", null,
+    h(Panel, { title: "Retirement Year", meta: "School year boundaries" },
+      h(RetirementPresetPicker, { s: s, update: update }),
+      h("div", { className: "callout", style: { marginTop: 10 } },
+        "Each June 30 is a valid TRS boundary. One more school year adds a full service credit and roughly $3.9k more pension per year for life."
+      )
+    ),
     h("section", { className: "hero-card" },
       h("div", { className: "hero-top" },
         h("div", { className: "hero-title" },
@@ -1503,6 +1807,8 @@ function CommandTab(props) {
         h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(e.bridgeDraw, true)))
       )
     ),
+    h(BridgePhasesPanel, { s: s, e: e }),
+    h(SafeSpendCalculator, { s: s, e: e }),
     h(Panel, { title: "Scenario Cockpit", meta: "Budget linked" },
       h("div", { className: "scenario-grid" },
         presets.map(function (preset) {
@@ -1514,7 +1820,6 @@ function CommandTab(props) {
       ),
       h("div", { className: "control-deck" },
         h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
-        h(RetirementPresetPicker, { s: s, update: update }),
         h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
         h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
         h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
@@ -1528,6 +1833,7 @@ function CommandTab(props) {
       )
     ),
     h(MonteCarloRiskPanel, { s: s, e: e }),
+    h(DrawTrajectoryPanel, { s: s, e: e }),
     h(Panel, { title: "Confidence Check", meta: "Today" },
       h("div", { className: "confidence-row" },
         h("div", { className: "confidence-item" },
@@ -1727,8 +2033,55 @@ function IncomeTab(props) {
       h(SwitchLine, { title: "Include guaranteed income floor", copy: "Turn off to model a scenario where this income is temporarily not in the plan.", value: s.includeWifeIncome !== false, onChange: set("includeWifeIncome") }),
       h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 80000, step: 500, onChange: set("wifeIncome") }),
       h(SwitchLine, { title: "Count portfolio dividends", copy: "Useful for MAGI and bridge planning, but still portfolio-derived.", value: s.includeDividends, onChange: set("includeDividends") }),
-      s.includeDividends && h(RangeControl, { label: "Annual dividends", value: s.dividends, min: 0, max: 35000, step: 500, onChange: set("dividends") }),
-      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") })
+      s.includeDividends && h(RangeControl, { label: "Annual dividends (Fidelity: ~$20,603/yr at 1.8% yield)", value: s.dividends, min: 0, max: 40000, step: 500, onChange: set("dividends") }),
+      h("div", { className: "callout", style: { borderLeftColor: "var(--gold)" } }, "Dividends partially offset portfolio draws during the bridge (~" + fmt(s.dividends, true) + "/yr). They fluctuate with markets and are not guaranteed."),
+      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 65000, step: 500, onChange: set("ssAnnual") }),
+      h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--cyan)" } },
+        "SSA estimates assume continued earnings to claim age. Adjust the reduction factor for early retirement (default 70%)."
+      ),
+      h(RangeControl, { label: "SS benefit reduction factor (early retirement)", value: Math.round((s.ssBenefitReductionFactor || 0.70) * 100), min: 50, max: 100, step: 5, onChange: function(v) { set("ssBenefitReductionFactor")(v / 100); }, display: function(v) { return v + "% of SSA estimate"; } })
+    ),
+    h(Panel, { title: "Social Security Strategy", meta: "Claim age comparison" },
+      h("div", { className: "callout", style: { marginBottom: 12, borderLeftColor: "var(--cyan)" } },
+        "SSA statement (DOB Aug 3, 1982) assumes continued earnings to claim age. With early retirement at 44, apply a " + Math.round((s.ssBenefitReductionFactor || 0.70) * 100) + "% factor. TRS covers basics at 65 — strongly consider delaying to 70."
+      ),
+      h("div", { className: "kpi-grid", style: { gridTemplateColumns: "repeat(4, 1fr)" } },
+        [
+          { age: 62, raw: s.ssAge62 || 34116 },
+          { age: 65, raw: s.ssAge65 || 43272 },
+          { age: 67, raw: s.ssAge67 || 50412 },
+          { age: 70, raw: s.ssAge70 || 62976 }
+        ].map(function(row) {
+          var adj = Math.round(row.raw * (s.ssBenefitReductionFactor || 0.70));
+          var isSelected = (s.ssClaimAge || 67) === row.age;
+          return h("div", {
+            key: row.age,
+            style: {
+              background: isSelected ? "rgba(99,212,238,0.12)" : "rgba(255,255,255,0.035)",
+              border: "1px solid " + (isSelected ? "rgba(99,212,238,0.4)" : "var(--line-soft)"),
+              borderRadius: 8, padding: "10px 8px", textAlign: "center", cursor: "pointer"
+            },
+            onClick: function() { set("ssClaimAge")(row.age); set("ssAnnual")(adj); }
+          },
+            h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Age " + row.age + (row.age === 67 ? " (FRA)" : row.age === 70 ? " ★" : "")),
+            h("div", { style: { color: COLORS.cyan, fontSize: 17, fontWeight: 900, margin: "5px 0 2px" } }, fmt(adj, true)),
+            h("div", { style: { color: "var(--dim)", fontSize: 10 } }, "adj/yr"),
+            h("div", { style: { color: "var(--dim)", fontSize: 9, marginTop: 2 } }, fmt(row.raw, true) + " raw")
+          );
+        })
+      ),
+      h("div", { className: "callout", style: { marginTop: 12, borderLeftColor: "var(--green)" } },
+        "Delay from 62 → 70 adds " + fmt(Math.round((s.ssAge70 || 62976) * (s.ssBenefitReductionFactor || 0.70)) - Math.round((s.ssAge62 || 34116) * (s.ssBenefitReductionFactor || 0.70)), true) + "/yr (adjusted). TRS covers essential bridge income, making delay low-risk."
+      ),
+      h("div", { style: { marginTop: 14 } },
+        h(RangeControl, { label: "SS claim age", value: s.ssClaimAge || 67, min: 62, max: 70, step: 1, onChange: function(v) {
+          var ages = { 62: s.ssAge62 || 34116, 65: s.ssAge65 || 43272, 67: s.ssAge67 || 50412, 70: s.ssAge70 || 62976 };
+          var closest = [62, 65, 67, 70].reduce(function(a, b) { return Math.abs(b - v) < Math.abs(a - v) ? b : a; });
+          var raw = ages[closest] || 50412;
+          set("ssClaimAge")(closest);
+          set("ssAnnual")(Math.round(raw * (s.ssBenefitReductionFactor || 0.70)));
+        }, display: function(v) { return "Age " + v; } })
+      )
     ),
     h(Panel, { title: "ACA Estimate", meta: "Planning only" },
       h("div", { className: "kpi-grid" },
@@ -1905,6 +2258,7 @@ function RiskTab(props) {
       ),
       h("div", { className: "note", style: { marginTop: 12 } }, "These are stress checks, not separate assumptions. The base plan remains the source of truth.")
     ),
+    h(GuardrailsComparePanel, { s: s, e: e, set: set }),
     h(Panel, { title: "Risk Levers", meta: "Live controls" },
       h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
       h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
