@@ -36,7 +36,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { min-height: 100%; background: var(--bg); color: var(--text); }
 body {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
@@ -76,15 +76,15 @@ button { color: inherit; }
 }
 .header-metric {
   margin-top: 12px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
   border-top: 1px solid var(--line-soft);
   padding-top: 12px;
 }
-.header-metric span { color: var(--muted); font-size: 12px; }
-.header-metric strong { color: var(--green-2); font-size: 22px; font-weight: 850; font-variant-numeric: tabular-nums; }
+.header-metric .hm-item { display: flex; flex-direction: column; gap: 2px; }
+.header-metric .hm-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+.header-metric .hm-value { font-size: 16px; font-weight: 850; font-variant-numeric: tabular-nums; }
 .content { padding: 14px 12px 0; }
 .panel {
   background: linear-gradient(180deg, rgba(18,32,30,0.96), rgba(12,23,21,0.98));
@@ -475,7 +475,7 @@ input[type=range]::-moz-range-thumb {
   max-width: 520px;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   background: rgba(8,16,15,0.97);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(18px);
@@ -493,7 +493,7 @@ input[type=range]::-moz-range-thumb {
   position: relative;
 }
 .tab svg { width: 24px; height: 24px; }
-.tab span { font-size: 9px; letter-spacing: 0; }
+.tab span { font-size: 10px; letter-spacing: 0; }
 .tab.active { color: var(--green-2); }
 .tab.active:after {
   content: "";
@@ -579,6 +579,9 @@ input[type=range]::-moz-range-thumb {
   .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="root"></div>
@@ -597,13 +600,14 @@ var COLORS = {
   muted: "#95a6a3"
 };
 var DEF = {
-  currentPortfolio: 1248757,
+  currentPortfolio: 1248950,
   investmentValue: 1172826,
   cashValue: 63136,
   otherValue: 12988,
   portfolioSource: "Planning defaults",
   portfolioUpdatedAt: "",
   portfolioImportStatus: "",
+  portfolioSourceLocked: false,
   portfolioHoldings: [
     { symbol: "VTI", name: "Vanguard Total Stock Market ETF", account: "Fidelity", assetClass: "US Equity", value: 290000 },
     { symbol: "VOO", name: "Vanguard S&P 500 ETF", account: "Fidelity", assetClass: "US Equity", value: 255000 },
@@ -635,12 +639,14 @@ var DEF = {
   equityPct: 83,
   bondPct: 12,
   wifeIncome: 53000,
+  includeWifeIncome: true,
   dividends: 14000,
   includeDividends: true,
   trsHigh5: 201000,
   trsYears: 11,
   trsMultiplier: 0.02,
   trsAge: 65,
+  trsCola: 0.00,
   michaelSalary2027: 215000,
   michaelSalary2026: 205000,
   michaelSalary2025: 191636.14,
@@ -653,6 +659,7 @@ var DEF = {
   includePto: true,
   householdSize: 2,
   benchmarkPremium: 14000,
+  capitalGainsDist: 8000,
   overlapPct: 70,
   internationalPct: 3.4,
   aduBudget: 85000,
@@ -950,10 +957,13 @@ function calcAca(magi, householdSize, benchmarkPremium) {
 }
 function incomeForYear(y, s, e) {
   var age = s.retireAge + y;
-  var income = s.wifeIncome * Math.pow(1 + s.incomeGrowth, y);
+  var income = (s.includeWifeIncome !== false ? s.wifeIncome : 0) * Math.pow(1 + s.incomeGrowth, y);
   if (s.includeDividends) income += s.dividends * Math.pow(1 + s.inflation, y);
   if (s.includeAduRent) income += s.aduRentMonthly * 12 * Math.pow(1 + s.inflation, y);
-  if (age >= s.trsAge) income += e.trsAnnual;
+  if (age >= s.trsAge) {
+    var trsYearsActive = age - s.trsAge;
+    income += e.trsAnnual * Math.pow(1 + (s.trsCola || 0), trsYearsActive);
+  }
   if (age >= s.ssAge) income += s.ssAnnual * Math.pow(1 + s.inflation, Math.max(0, age - s.ssAge));
   return income;
 }
@@ -1085,7 +1095,10 @@ function buildEngine(s) {
   var spendAtSs = s.spendMonthly * 12 * Math.pow(1 + s.inflation, yearsToSs);
   var incomeAtSs = incomeForYear(yearsToSs, s, base);
   var floorCoverage = spendAtSs > 0 ? incomeAtSs / spendAtSs : 0;
-  var magi = s.wifeIncome + (s.includeDividends ? s.dividends : 0) + (s.includeAduRent ? s.aduRentMonthly * 12 : 0);
+  var magi = (s.includeWifeIncome !== false ? s.wifeIncome : 0)
+    + (s.includeDividends ? s.dividends : 0)
+    + (s.includeAduRent ? s.aduRentMonthly * 12 : 0)
+    + (s.capitalGainsDist || 0);
   var aca = calcAca(magi, s.householdSize, s.benchmarkPremium);
   var mc = runMonteCarlo(s, base, startBalance, 800);
   var aduRemaining = Math.max(0, s.aduBudget - s.aduSpent);
@@ -1294,6 +1307,8 @@ function SegmentedControl(props) {
 }
 function FanChart(props) {
   var data = props.data || [];
+  var yearsToTrs = props.yearsToTrs || 0;
+  var yearsToSs  = props.yearsToSs  || 0;
   var w = 420;
   var hgt = 210;
   var padL = 34;
@@ -1307,6 +1322,7 @@ function FanChart(props) {
   var bottom = data.slice().reverse().map(function (d, i) { return x(data.length - 1 - i) + "," + y(d.p10); }).join(" ");
   var mid = data.map(function (d, i) { return x(i) + "," + y(d.p50); }).join(" ");
   var ticks = [0, maxV * 0.5, maxV];
+  var midIdx = Math.floor(data.length / 2);
   return h("svg", { width: "100%", viewBox: "0 0 " + w + " " + hgt, role: "img", "aria-label": "Monte Carlo portfolio projection" },
     ticks.map(function (t, i) {
       return h("g", { key: i },
@@ -1316,8 +1332,17 @@ function FanChart(props) {
     }),
     h("polygon", { points: top + " " + bottom, fill: COLORS.cyan, opacity: 0.2 }),
     h("polyline", { points: mid, fill: "none", stroke: COLORS.green2, strokeWidth: 3 }),
+    yearsToTrs > 0 && yearsToTrs < data.length && h("g", { key: "trs" },
+      h("line", { x1: x(yearsToTrs), x2: x(yearsToTrs), y1: padT, y2: hgt - padB, stroke: COLORS.cyan, strokeWidth: 1, strokeDasharray: "4 3", opacity: 0.7 }),
+      h("text", { x: x(yearsToTrs) + 4, y: padT + 14, fill: COLORS.cyan, fontSize: 10, fontWeight: 700 }, "TRS")
+    ),
+    yearsToSs > 0 && yearsToSs < data.length && h("g", { key: "ss" },
+      h("line", { x1: x(yearsToSs), x2: x(yearsToSs), y1: padT, y2: hgt - padB, stroke: COLORS.gold, strokeWidth: 1, strokeDasharray: "4 3", opacity: 0.7 }),
+      h("text", { x: x(yearsToSs) + 4, y: padT + 14, fill: COLORS.gold, fontSize: 10, fontWeight: 700 }, "SS")
+    ),
     h("line", { x1: padL, x2: w - padR, y1: hgt - padB, y2: hgt - padB, stroke: "#31464c", strokeWidth: 1 }),
     h("text", { x: padL, y: hgt - 6, fill: "#95a6a3", fontSize: 11 }, "Age " + (data[0] ? data[0].age : "")),
+    h("text", { x: x(midIdx), y: hgt - 6, fill: "#95a6a3", fontSize: 11, textAnchor: "middle" }, "Age " + (data[midIdx] ? data[midIdx].age : "")),
     h("text", { x: w - padR - 46, y: hgt - 6, fill: "#95a6a3", fontSize: 11 }, "Age " + (data[data.length - 1] ? data[data.length - 1].age : ""))
   );
 }
@@ -1531,7 +1556,7 @@ function CommandTab(props) {
       )
     ),
     h(Panel, { title: "Portfolio Projection", meta: "Real dollars" },
-      h(FanChart, { data: e.mc.percentiles }),
+      h(FanChart, { data: e.mc.percentiles, yearsToTrs: e.yearsToTrs, yearsToSs: e.yearsToSs }),
       h("div", { className: "chart-legend" },
         h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
         h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.cyan, opacity: 0.55 } }), "10th to 90th percentile")
@@ -1578,6 +1603,7 @@ function PortfolioTab(props) {
         portfolioSource: file.name,
         portfolioUpdatedAt: new Date().toLocaleString(),
         portfolioImportStatus: parsed.message,
+        portfolioSourceLocked: true,
         currentPortfolio: nextTotal,
         investmentValue: Math.round(nextSummary.equity + nextSummary.bond),
         cashValue: Math.round(nextSummary.cash),
@@ -1604,6 +1630,10 @@ function PortfolioTab(props) {
         h(Stat, { label: "Projection portfolio", value: fmt(s.currentPortfolio, true), note: (portfolioGap >= 0 ? "+" : "") + fmt(portfolioGap, true) + " vs holdings", color: Math.abs(portfolioGap) > 5000 ? COLORS.gold : COLORS.cyan }),
         h(Stat, { label: "Top holding", value: topHolding ? topHolding.symbol : "None", note: topHolding ? pct(pctOf(topHolding.value, total), 1) + " of portfolio" : "Upload CSV", color: COLORS.gold }),
         h(Stat, { label: "Top 5 concentration", value: pct(pctOf(summary.topFive, total), 0), note: "Largest holdings", color: pctOf(summary.topFive, total) > 0.65 ? COLORS.orange : COLORS.cyan })
+      ),
+      s.portfolioSourceLocked && Math.abs(total - s.currentPortfolio) > 5000 && h("div", { className: "callout", style: { marginTop: 10 } },
+        "Holdings import differs from projection portfolio by " + fmt(Math.abs(total - s.currentPortfolio), true) + ". ",
+        h("button", { className: "ghost-btn", style: { display: "inline-flex", marginTop: 6 }, onClick: function() { update({ currentPortfolio: Math.round(total) }); } }, "Sync to holdings total")
       ),
       h("div", { style: { marginTop: 14 } },
         h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
@@ -1671,7 +1701,7 @@ function IncomeTab(props) {
         h(Stat, { label: "Annual pension", value: fmt(e.trsAnnual, true), note: "Deferred until age " + s.trsAge, color: COLORS.gold })
       ),
       h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--cyan)" } },
-        "TRS pension has no COLA — the benefit is fixed in nominal dollars. Inflation erodes its real purchasing power over time, which is why the portfolio bridge matters in the pre-65 years."
+        "TRS COLA defaults to 0% (fixed nominal dollars). Use the slider below to model a future COLA if TRS policy changes — the compounding applies from age " + s.trsAge + " onward."
       ),
       h("table", { className: "mini-table salary-table", style: { marginTop: 12 } },
         h("thead", null, h("tr", null, h("th", null, "Tier"), h("th", null, "Contract Year"), h("th", null, "Service Credit"), h("th", null, "Salary"))),
@@ -1688,12 +1718,14 @@ function IncomeTab(props) {
       ),
       h("div", { style: { marginTop: 14 } },
         h(RangeControl, { label: "Planned service credit at retirement", value: s.trsYears, min: 1, max: 35, step: 0.5, onChange: set("trsYears"), display: function (v) { return v.toFixed(1) + " years"; } }),
+        h(RangeControl, { label: "TRS COLA (0% = conservative, fixed nominal)", value: s.trsCola || 0, min: 0, max: 0.03, step: 0.005, onChange: set("trsCola"), display: function (v) { return pct(v, 1); } }),
         h(RangeControl, { label: "2026-2027 projected salary", value: s.michaelSalary2027, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2027") }),
         h(RangeControl, { label: "2025-2026 contract salary", value: s.michaelSalary2026, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2026") })
       )
     ),
     h(Panel, { title: "Income Layers" },
-      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 30000, max: 80000, step: 500, onChange: set("wifeIncome") }),
+      h(SwitchLine, { title: "Include guaranteed income floor", copy: "Turn off to model a scenario where this income is temporarily not in the plan.", value: s.includeWifeIncome !== false, onChange: set("includeWifeIncome") }),
+      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 80000, step: 500, onChange: set("wifeIncome") }),
       h(SwitchLine, { title: "Count portfolio dividends", copy: "Useful for MAGI and bridge planning, but still portfolio-derived.", value: s.includeDividends, onChange: set("includeDividends") }),
       s.includeDividends && h(RangeControl, { label: "Annual dividends", value: s.dividends, min: 0, max: 35000, step: 500, onChange: set("dividends") }),
       h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") })
@@ -1707,7 +1739,8 @@ function IncomeTab(props) {
       ),
       h("div", { style: { marginTop: 14 } },
         h(RangeControl, { label: "Household size", value: s.householdSize, min: 1, max: 6, step: 1, onChange: set("householdSize"), display: function (v) { return String(v); } }),
-        h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") })
+        h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") }),
+        h(RangeControl, { label: "Capital gains distributions (est.)", value: s.capitalGainsDist || 0, min: 0, max: 25000, step: 500, onChange: set("capitalGainsDist") })
       )
     )
   );
@@ -1886,7 +1919,7 @@ function RiskTab(props) {
     )
   );
 }
-function AduitChecklist(props) {
+function AduChecklist(props) {
   var rows = [
     ["aduDesignLocked", "Attached-suite design", "Back hallway entrance, locked interior door, courtyard, alley gate."],
     ["aduJeremiahReady", "Jeremiah GC plan", "Confirm scope, budget authority, inspections, and payment cadence."],
@@ -1918,7 +1951,7 @@ function ADUTab(props) {
       h(SwitchLine, { title: "Count ADU rent in base case", copy: "Default off because variable income should be upside.", value: s.includeAduRent, onChange: set("includeAduRent") }),
       h(RangeControl, { label: "Prospective monthly rent", value: s.aduRentMonthly, min: 0, max: 2500, step: 50, onChange: set("aduRentMonthly"), display: function (v) { return fmt(v) + "/mo"; } })
     ),
-    h(Panel, { title: "Execution Checklist" }, h(AduitChecklist, { s: s, set: set })),
+    h(Panel, { title: "Execution Checklist" }, h(AduChecklist, { s: s, set: set })),
     h(Panel, { title: "Design Decisions" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "Attached, not detached"), h("span", null, "Backside hallway is primary entrance; separate gate and paver path support independence.")),
@@ -1975,14 +2008,18 @@ function GuideTab(props) {
     )
   );
 }
+function PlanTab(props) {
+  return h("div", null, h(IncomeTab, props), h(BudgetTab, props));
+}
+function SettingsTab(props) {
+  return h("div", null, h(ADUTab, props), h(GuideTab, props));
+}
 var TABS = [
-  { id: "command", label: "Home", icon: "command" },
-  { id: "income", label: "Income", icon: "income" },
-  { id: "budget", label: "Budget", icon: "list" },
+  { id: "command",   label: "Home",      icon: "command"   },
+  { id: "plan",      label: "Plan",      icon: "income"    },
   { id: "portfolio", label: "Portfolio", icon: "portfolio" },
-  { id: "risk", label: "Risk", icon: "shield" },
-  { id: "adu", label: "ADU", icon: "adu" },
-  { id: "guide", label: "Guide", icon: "guide" }
+  { id: "risk",      label: "Risk",      icon: "shield"    },
+  { id: "settings",  label: "Settings",  icon: "guide"     }
 ];
 function App() {
   var stateHook = React.useState(function () { return loadState(); });
@@ -2066,16 +2103,29 @@ function App() {
         h("div", { className: "brand" }, h("h1", null, "Flory Freedom"), h("p", null, "On time, not early")),
         h("div", { className: "date-chip" }, h(Icon, { name: "calendar", size: 18 }), h("span", null, s.retireDateLabel))
       ),
-      h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
+      h("div", { className: "header-metric" },
+        h("div", { className: "hm-item" },
+          h("span", { className: "hm-label" }, "Portfolio at retirement"),
+          h("strong", { className: "hm-value", style: { color: "var(--green-2)" } }, fmt(e.startBalance, true))
+        ),
+        h("div", { className: "hm-item" },
+          h("span", { className: "hm-label" }, "Plan success"),
+          h("strong", { className: "hm-value", style: { color: e.mc.successRate >= 0.85 ? COLORS.green2 : e.mc.successRate >= 0.70 ? COLORS.gold : COLORS.red } },
+            Math.round(e.mc.successRate * 100) + "%")
+        ),
+        h("div", { className: "hm-item" },
+          h("span", { className: "hm-label" }, "Family draw"),
+          h("strong", { className: "hm-value", style: { color: e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange } },
+            pct(e.withdrawalRate, 1))
+        )
+      )
     ),
     h("main", { className: "content" },
-      tab === "command" && h(CommandTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
-      tab === "income" && h(IncomeTab, { s: s, e: e, set: set }),
-      tab === "budget" && h(BudgetTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
+      tab === "command"   && h(CommandTab,   { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
+      tab === "plan"      && h(PlanTab,      { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set, update: update }),
-      tab === "risk" && h(RiskTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
-      tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
-      tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
+      tab === "risk"      && h(RiskTab,      { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
+      tab === "settings"  && h(SettingsTab,  { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
       h(Panel, { title: "Quick Tools" },
         h("div", { className: "button-row" },
           h("button", { className: "ghost-btn", onClick: copySnapshot }, h(Icon, { name: "list", size: 17 }), copied ? "Copied" : "Copy snapshot"),
