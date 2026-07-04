@@ -564,6 +564,15 @@ input[type=range]::-moz-range-thumb {
 .salary-table th:nth-child(3),
 .salary-table td:nth-child(4),
 .salary-table th:nth-child(4) { text-align: right; }
+@media (max-width: 430px) {
+  .scenario-grid,
+  .impact-strip { grid-template-columns: 1fr; }
+  .scenario-btn { min-height: 68px; }
+  .confidence-item { grid-template-columns: 34px 1fr; align-items: start; }
+  .confidence-value { grid-column: 2; justify-self: start; }
+  .hero-title h2 { font-size: 27px; }
+  .hero-number strong { font-size: 38px; }
+}
 @media (min-width: 760px) {
   body { background: #050908; }
   .app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
@@ -656,28 +665,7 @@ var DEF = {
   alignCoreReviewed: false,
   alignBridgeReviewed: false,
   alignAduReviewed: false,
-  alignTravelVision: false,
-  colleenCurrentAge: 46,
-  colleenRetireAge: 46,
-  colleenRetireOption: "Jun",
-  colleenPortfolio: 1150000,
-  colleenCashBuffer: 100000,
-  colleenBonds: 160000,
-  colleenMonthlySavings: 10000,
-  colleenPtoBonus: 18000,
-  colleenHouseholdIncome: 53000,
-  colleenDividends: 14000,
-  colleenSpending: 78000,
-  colleenPension: 40000,
-  colleenPensionAge: 65,
-  colleenSs: 24000,
-  colleenSsAge: 65,
-  colleenEquityStart: 76,
-  colleenEquityEnd: 76,
-  colleenHorizon: 50,
-  colleenConsulting: 0,
-  colleenUseGlidepath: false,
-  colleenInflationStress: false
+  alignTravelVision: false
 };
 var BUDGET_KEYS = [
   "budgetHousing",
@@ -868,6 +856,11 @@ function pct(n, digits) {
   digits = digits === undefined ? 1 : digits;
   return ((n || 0) * 100).toFixed(digits) + "%";
 }
+function yearsLabel(years) {
+  if (!isFinite(years) || years >= 50) return "50+ yr";
+  if (years < 0.1) return "<0.1 yr";
+  return years.toFixed(1) + " yr";
+}
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
 }
@@ -967,8 +960,9 @@ function requiredDraw(y, s, e) {
   var spend = s.spendMonthly * 12 * Math.pow(1 + s.inflation, y + s.monthsToRetire / 12);
   return Math.max(0, spend - incomeForYear(y, s, e));
 }
-function runMonteCarlo(s, e, startBalance, sims) {
-  var rand = rng(hashState(s));
+function runMonteCarlo(s, e, startBalance, sims, options) {
+  options = options || {};
+  var rand = rng(hashState(s) + (options.shockFirstYear ? 7919 : 0));
   var buckets = [];
   var failureCounts = [];
   var failureYears = [];
@@ -984,6 +978,7 @@ function runMonteCarlo(s, e, startBalance, sims) {
     for (var year = 0; year < s.horizonYears; year++) {
       if (alive) {
         var ret = e.meanReturn + e.volatility * normal(rand);
+        if (options.shockFirstYear && year === 0) ret -= 0.25 * Math.max(0, Number(e.equityPct || 0)) / 100;
         ret = clamp(ret, -0.7, 0.65);
         b = b * (1 + ret) - requiredDraw(year, s, e);
         if (b <= 0) {
@@ -1056,147 +1051,6 @@ function hashAny(obj) {
   }
   return hsh >>> 0;
 }
-function retireOptionMonths(option) {
-  if (option === "Feb") return 2;
-  if (option === "Dec") return 12;
-  return 6;
-}
-function retireOptionLabel(option) {
-  if (option === "Feb") return "February 2026";
-  if (option === "Dec") return "December 2026";
-  return "June 2026";
-}
-function colleenIncomeForYear(y, c) {
-  var age = c.retireAge + y;
-  var income = c.householdIncome * Math.pow(1 + c.incomeGrowth, y);
-  income += c.dividends * Math.pow(1 + c.inflation, y);
-  income += c.consulting * Math.pow(1 + c.inflation, y);
-  if (age >= c.pensionAge) income += c.pension * Math.pow(1 + c.inflation, Math.max(0, age - c.pensionAge));
-  if (age >= c.ssAge) income += c.ss * Math.pow(1 + c.inflation, Math.max(0, age - c.ssAge));
-  return income;
-}
-function colleenRun(c, sims, shockFirstYear) {
-  sims = sims || 800;
-  var rand = rng(hashAny(c) + (shockFirstYear ? 911 : 0));
-  var buckets = [];
-  var failures = 0;
-  var age65Index = Math.max(0, c.pensionAge - c.retireAge);
-  for (var y = 0; y < c.horizon; y++) buckets.push([]);
-  for (var sim = 0; sim < sims; sim++) {
-    var portfolio = c.portfolio + c.preRetireSavings + c.ptoBonus;
-    var cash = c.cashBuffer;
-    var alive = true;
-    for (var year = 0; year < c.horizon; year++) {
-      var glideT = c.horizon > 1 ? Math.min(1, year / Math.max(1, c.glideYears)) : 0;
-      var equityPct = c.useGlidepath ? c.equityStart + (c.equityEnd - c.equityStart) * glideT : c.equityStart;
-      var bondPct = Math.max(0, 100 - equityPct);
-      var stockRet = 0.098 + 0.18 * normal(rand);
-      var bondRet = 0.05 + 0.06 * normal(rand);
-      if (shockFirstYear && year === 0) stockRet -= 0.25;
-      var ret = equityPct / 100 * stockRet + bondPct / 100 * bondRet;
-      ret = clamp(ret, -0.75, 0.7);
-      var spend = c.spending * Math.pow(1 + c.inflation, year);
-      var gap = Math.max(0, spend - colleenIncomeForYear(year, c));
-      var cashDraw = Math.min(cash, gap);
-      cash -= cashDraw;
-      var portfolioDraw = gap - cashDraw;
-      if (alive) {
-        portfolio = portfolio * (1 + ret) - portfolioDraw;
-        if (portfolio + cash <= 0) {
-          portfolio = 0;
-          cash = 0;
-          alive = false;
-          failures++;
-        }
-      }
-      buckets[year].push(Math.max(0, portfolio + cash));
-    }
-  }
-  var percentiles = buckets.map(function (bucket, i) {
-    var sorted = bucket.slice().sort(function (a, b) { return a - b; });
-    return {
-      year: i,
-      age: c.retireAge + i,
-      p10: sorted[Math.floor(sorted.length * 0.1)] || 0,
-      p50: sorted[Math.floor(sorted.length * 0.5)] || 0,
-      p90: sorted[Math.floor(sorted.length * 0.9)] || 0
-    };
-  });
-  return {
-    successRate: 1 - failures / sims,
-    percentiles: percentiles,
-    age65Median: percentiles[age65Index] ? percentiles[age65Index].p50 : 0
-  };
-}
-function makeRiskLabConfig(s, overrides) {
-  var months = retireOptionMonths((overrides && overrides.option) || s.colleenRetireOption);
-  var base = {
-    option: s.colleenRetireOption,
-    retireAge: s.colleenRetireAge,
-    portfolio: s.colleenPortfolio,
-    cashBuffer: s.colleenCashBuffer,
-    preRetireSavings: s.colleenMonthlySavings * months,
-    ptoBonus: s.colleenPtoBonus,
-    householdIncome: s.colleenHouseholdIncome,
-    dividends: s.colleenDividends,
-    spending: s.colleenSpending,
-    pension: s.colleenPension,
-    pensionAge: s.colleenPensionAge,
-    ss: s.colleenSs,
-    ssAge: s.colleenSsAge,
-    equityStart: s.colleenEquityStart,
-    equityEnd: s.colleenUseGlidepath ? s.colleenEquityEnd : s.colleenEquityStart,
-    useGlidepath: s.colleenUseGlidepath,
-    glideYears: 10,
-    horizon: s.colleenHorizon,
-    consulting: s.colleenConsulting,
-    inflation: s.colleenInflationStress ? 0.04 : s.inflation,
-    incomeGrowth: s.incomeGrowth
-  };
-  return Object.assign(base, overrides || {});
-}
-function buildRiskLabEngine(s) {
-  var c = makeRiskLabConfig(s);
-  var baseGap = Math.max(0, c.spending - colleenIncomeForYear(0, c));
-  var cashRunway = baseGap > 0 ? c.cashBuffer / baseGap : 99;
-  var age65Income = colleenIncomeForYear(Math.max(0, c.pensionAge - c.retireAge), c);
-  var age65Spend = c.spending * Math.pow(1 + c.inflation, Math.max(0, c.pensionAge - c.retireAge));
-  var mc30 = colleenRun(Object.assign({}, c, { horizon: 30 }), 700, false);
-  var mc = colleenRun(c, 900, false);
-  var shock = colleenRun(c, 500, true);
-  var scenarioConfigs = [
-    { label: "Base: " + retireOptionLabel(c.option), cfg: c },
-    { label: "February 2026", cfg: makeRiskLabConfig(s, { option: "Feb" }) },
-    { label: "December 2026", cfg: makeRiskLabConfig(s, { option: "Dec" }) },
-    { label: "Rising glidepath", cfg: makeRiskLabConfig(s, { useGlidepath: true, equityStart: 50, equityEnd: 72 }) },
-    { label: "4% inflation stress", cfg: makeRiskLabConfig(s, { inflation: 0.04 }) },
-    { label: "$25k consulting", cfg: makeRiskLabConfig(s, { consulting: 25000 }) }
-  ];
-  var scenarios = scenarioConfigs.map(function (row) {
-    var result = colleenRun(row.cfg, 360, false);
-    var gap = Math.max(0, row.cfg.spending - colleenIncomeForYear(0, row.cfg));
-    return {
-      label: row.label,
-      success: result.successRate,
-      gap: gap,
-      age65Median: result.age65Median,
-      start: row.cfg.portfolio + row.cfg.cashBuffer + row.cfg.preRetireSavings + row.cfg.ptoBonus
-    };
-  });
-  return {
-    config: c,
-    baseGap: baseGap,
-    cashRunway: cashRunway,
-    age65Income: age65Income,
-    age65Spend: age65Spend,
-    age65Coverage: age65Spend > 0 ? age65Income / age65Spend : 0,
-    mc30: mc30,
-    mc: mc,
-    shock: shock,
-    scenarios: scenarios,
-    targetLabel: retireOptionLabel(c.option)
-  };
-}
 function buildEngine(s) {
   var equity = clamp(s.equityPct, 0, 100);
   var bond = clamp(s.bondPct, 0, Math.max(0, 100 - equity));
@@ -1235,6 +1089,11 @@ function buildEngine(s) {
   var mc = runMonteCarlo(s, base, startBalance, 800);
   var aduRemaining = Math.max(0, s.aduBudget - s.aduSpent);
   var cashAfterAdu = s.cashValue - aduRemaining;
+  var bondReserve = startBalance * bond / 100;
+  var cashReserve = Math.max(0, Number(s.cashValue || 0));
+  var defenseBalance = cashReserve + bondReserve;
+  var cashRunway = bridgeDraw > 0 ? cashReserve / bridgeDraw : 99;
+  var defenseRunway = bridgeDraw > 0 ? defenseBalance / bridgeDraw : 99;
   var monthlyRebuild = Math.max(0, s.monthlyContrib);
   var rebuildMonths = cashAfterAdu < 0 && monthlyRebuild > 0 ? Math.ceil(Math.abs(cashAfterAdu) / monthlyRebuild) : 0;
   var onTime = {
@@ -1273,12 +1132,17 @@ function buildEngine(s) {
     spendAtSs: spendAtSs,
     floorCoverage: floorCoverage,
     pensionHiddenAsset: base.trsAnnual / 0.03,
-    colleenHiddenAsset: s.wifeIncome / 0.03,
+    incomeFloorHiddenAsset: s.wifeIncome / 0.03,
     mc: mc,
     aca: aca,
     magi: magi,
     aduRemaining: aduRemaining,
     cashAfterAdu: cashAfterAdu,
+    bondReserve: bondReserve,
+    cashReserve: cashReserve,
+    defenseBalance: defenseBalance,
+    cashRunway: cashRunway,
+    defenseRunway: defenseRunway,
     rebuildMonths: rebuildMonths,
     onTime: onTime,
     delayed: {
@@ -1511,7 +1375,6 @@ function MonteCarloRiskPanel(props) {
 function CommandTab(props) {
   var s = props.s;
   var e = props.e;
-  var c = props.c;
   var set = props.set;
   var setSpendMonthly = props.setSpendMonthly;
   var update = props.update;
@@ -1576,7 +1439,7 @@ function CommandTab(props) {
       h("div", { className: "hero-grid" },
         h("div", { className: "hero-stat" }, h("label", null, "Family draw"), h("strong", { style: { color: wrColor } }, pct(e.withdrawalRate, 1))),
         h("div", { className: "hero-stat" }, h("label", null, "Plan MC"), h("strong", { style: { color: COLORS.cyan } }, Math.round(e.mc.successRate * 100) + "%")),
-        h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(c.baseGap, true)))
+        h("div", { className: "hero-stat" }, h("label", null, "Pre-65 gap"), h("strong", { style: { color: COLORS.green2 } }, fmt(e.bridgeDraw, true)))
       )
     ),
     h(Panel, { title: "Scenario Cockpit", meta: "Budget linked" },
@@ -1613,8 +1476,8 @@ function CommandTab(props) {
         ),
         h("div", { className: "confidence-item" },
           h("div", { className: "confidence-icon" }, h(Icon, { name: "shield", size: 26 })),
-          h("div", null, h("strong", null, "Pre-65 gap is small"), h("span", null, "Cash can carry the shortfall for years.")),
-          h("div", { className: "confidence-value" }, c.cashRunway >= 50 ? "50+ yr" : c.cashRunway.toFixed(1) + " yr")
+          h("div", null, h("strong", null, "Defense bucket is visible"), h("span", null, "Cash plus bonds show how long the first-year gap can be cushioned.")),
+          h("div", { className: "confidence-value" }, yearsLabel(e.defenseRunway))
         ),
         h("div", { className: "confidence-item" },
           h("div", { className: "confidence-icon", style: { color: COLORS.gold } }, h(Icon, { name: "income", size: 26 })),
@@ -1756,7 +1619,7 @@ function IncomeTab(props) {
         h(Stat, { label: "Income floor", value: fmt(s.wifeIncome, true), note: "Base case anchor", color: COLORS.green2 }),
         h(Stat, { label: "TRS at 65", value: fmt(e.trsAnnual, true), note: s.trsYears + " years x " + (s.trsMultiplier * 100).toFixed(1) + "%", color: COLORS.cyan }),
         h(Stat, { label: "Social Security", value: fmt(s.ssAnnual, true), note: "Starts age " + s.ssAge }),
-        h(Stat, { label: "Hidden assets", value: fmt(e.pensionHiddenAsset + e.colleenHiddenAsset, true), note: "3% income capitalization", color: COLORS.gold })
+        h(Stat, { label: "Hidden assets", value: fmt(e.pensionHiddenAsset + e.incomeFloorHiddenAsset, true), note: "3% income capitalization", color: COLORS.gold })
       ),
       h("div", { style: { marginTop: 14 } },
         h(BarRow, { label: "Bridge income vs first-year spending", value: fmt(e.bridgeIncome, true) + " / " + fmt(e.spendAtRetire, true), pct: e.bridgeIncome / e.spendAtRetire * 100, color: COLORS.gold }),
@@ -1810,11 +1673,7 @@ function IncomeTab(props) {
     )
   );
 }
-function IncomeTab(props) {
-  return h("div", null,
-    h(IncomeTab, { s: props.s, e: props.e, set: props.set })
-  );
-}
+
 function budgetCategories(s) {
   return [
     { key: "budgetHousing", label: "Home costs, no mortgage", value: s.budgetHousing, color: COLORS.green2, note: "Debt-free carrying costs only: utilities, upkeep, HOA, and home repairs." },
@@ -1890,97 +1749,96 @@ function BudgetTab(props) {
     )
   );
 }
-function InputsTab(props) {
+function RiskTab(props) {
   var s = props.s;
   var e = props.e;
-  var c = props.c;
   var set = props.set;
-  var cfg = c.config;
+  var setSpendMonthly = props.setSpendMonthly;
+  function stateWith(patch) {
+    return Object.assign({}, s, patch || {});
+  }
+  function failureLabel(mc) {
+    if (!mc || !mc.failures) return "No failed paths";
+    return "Median age " + mc.failureStats.medianAge;
+  }
+  function scenario(label, patch, note) {
+    var engine = buildEngine(stateWith(patch));
+    return {
+      label: label,
+      note: note,
+      success: engine.mc.successRate,
+      failures: engine.mc.failures,
+      draw: engine.bridgeDraw,
+      failure: failureLabel(engine.mc)
+    };
+  }
+  var spendDown = Math.max(0, s.spendMonthly - 1000);
+  var spendUp = s.spendMonthly + 1000;
+  var scenarioRows = [
+    { label: "Current family plan", note: "Same number as Home", success: e.mc.successRate, failures: e.mc.failures, draw: e.bridgeDraw, failure: failureLabel(e.mc) },
+    scenario("Spending -$1k/mo", { spendMonthly: spendDown }, "Budget pressure falls"),
+    scenario("Spending +$1k/mo", { spendMonthly: spendUp }, "Budget pressure rises"),
+    scenario("Work 1 more year", { monthsToRetire: s.monthsToRetire + 12, retireAge: s.retireAge + 1, trsYears: s.trsYears + 1 }, "More savings and service credit"),
+    scenario("4% inflation", { inflation: 0.04 }, "Persistent cost pressure"),
+    scenario("ADU rent included", { includeAduRent: true, aduRentMonthly: s.aduRentMonthly || 1500 }, "Upside, not base case")
+  ];
+  var shockMc = runMonteCarlo(s, e, e.startBalance, 800, { shockFirstYear: true });
+  var lowerReturnBase = Object.assign({}, e, { meanReturn: Math.max(-0.02, e.meanReturn - 0.02) });
+  var lowerReturnMc = runMonteCarlo(s, lowerReturnBase, e.startBalance, 800);
+  var longEngine = buildEngine(stateWith({ horizonYears: Math.max(50, s.horizonYears) }));
+  var stressRows = [
+    { label: "Normal market paths", value: e.mc.successRate, note: e.mc.failures + " of " + e.mc.sims + " fail" },
+    { label: "-25% year-one equity shock", value: shockMc.successRate, note: shockMc.failures + " of " + shockMc.sims + " fail" },
+    { label: "Return haircut", value: lowerReturnMc.successRate, note: "2-point lower average return" },
+    { label: "50-year horizon", value: longEngine.mc.successRate, note: longEngine.mc.failures + " of " + longEngine.mc.sims + " fail" }
+  ];
   return h("div", null,
-    h(Panel, { title: "Why The Percentages Differ", meta: "Home vs Risk" },
+    h(Panel, { title: "Risk Dashboard", meta: "Same inputs as Home" },
       h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Home Plan MC", value: Math.round(e.mc.successRate * 100) + "%", note: e.mc.sims + " simulations", color: COLORS.green2 }),
-        h(Stat, { label: "Risk Lab long-run", value: Math.round(c.mc.successRate * 100) + "%", note: c.config.horizon + "-year cash-first test", color: COLORS.cyan }),
-        h(Stat, { label: "Home start", value: fmt(e.startBalance, true), note: "Current plan after runway" }),
-        h(Stat, { label: "Risk lab start", value: fmt(cfg.portfolio + cfg.cashBuffer + cfg.preRetireSavings + cfg.ptoBonus, true), note: "Separate sandbox inputs" })
+        h(Stat, { label: "Plan success", value: Math.round(e.mc.successRate * 100) + "%", note: e.mc.sims + " simulations", color: e.mc.successRate >= 0.85 ? COLORS.green2 : COLORS.gold }),
+        h(Stat, { label: "Failed paths", value: String(e.mc.failures), note: Math.round(e.mc.failureRate * 100) + "% of simulations", color: e.mc.failures ? COLORS.gold : COLORS.green2 }),
+        h(Stat, { label: "Earliest failure", value: e.mc.failureStats.earliestAge ? "Age " + e.mc.failureStats.earliestAge : "None", note: e.mc.failureStats.earliestYear === null ? "No failed paths" : "Retirement year " + e.mc.failureStats.earliestYear }),
+        h(Stat, { label: "Defense runway", value: yearsLabel(e.defenseRunway), note: "Cash + bonds / first-year gap", color: COLORS.cyan }),
+        h(Stat, { label: "First-year draw", value: fmt(e.bridgeDraw, true), note: pct(e.withdrawalRate, 1) + " of projected assets", color: COLORS.gold }),
+        h(Stat, { label: "Age-" + s.ssAge + " coverage", value: pct(e.floorCoverage, 0), note: "Income floor vs budget", color: e.floorCoverage >= 1 ? COLORS.green2 : COLORS.orange })
       ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "Home is the family-plan model: Budget tab spending, current portfolio, TRS at " + s.trsAge + ", Social Security at " + s.ssAge + ", and a " + s.horizonYears + "-year horizon. Risk Lab is a separate cash-first sandbox with its own starting portfolio, cash buffer, timing, pension, and spending assumptions.")
+      h("div", { className: "callout", style: { marginTop: 12 } }, "Risk uses the exact same family-plan inputs as Home, Budget, Portfolio, and Income. Change spending, holdings, pension, Social Security, or retirement timing anywhere and this tab moves with it.")
     ),
-    h(Panel, { title: "Risk Lab Inputs", meta: c.targetLabel },
-      h(SegmentedControl, {
-        label: "Retirement timing",
-        value: s.colleenRetireOption,
-        onChange: set("colleenRetireOption"),
-        options: [
-          { value: "Feb", label: "Feb 2026" },
-          { value: "Jun", label: "Jun 2026" },
-          { value: "Dec", label: "Dec 2026" }
-        ]
-      }),
-      h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Base gap", value: fmt(c.baseGap, true), note: "Spending minus income before 65", color: COLORS.green2 }),
-        h(Stat, { label: "Cash runway", value: c.cashRunway >= 50 ? "50+ yr" : c.cashRunway.toFixed(1) + " yr", note: fmt(s.colleenCashBuffer, true) + " cash buffer", color: c.cashRunway >= 5 ? COLORS.green2 : COLORS.orange }),
-        h(Stat, { label: "30-year success", value: Math.round(c.mc30.successRate * 100) + "%", note: "Seeded Monte Carlo", color: c.mc30.successRate >= 0.95 ? COLORS.green2 : COLORS.gold }),
-        h(Stat, { label: s.colleenHorizon + "-year success", value: Math.round(c.mc.successRate * 100) + "%", note: "Long-horizon test", color: c.mc.successRate >= 0.9 ? COLORS.green2 : COLORS.gold }),
-        h(Stat, { label: "Age-65 income", value: fmt(c.age65Income, true), note: "Pension + SS + income floor", color: COLORS.cyan }),
-        h(Stat, { label: "Age-65 coverage", value: pct(c.age65Coverage, 0), note: "Guaranteed income vs spending", color: c.age65Coverage >= 1 ? COLORS.green2 : COLORS.orange })
-      ),
-      h("div", { className: "callout", style: { marginTop: 12 } }, "This lab is for stress testing. It does not replace the Home Plan MC number; it shows how a cash-first sequence-risk model behaves under separate assumptions.")
-    ),
-    h(Panel, { title: "Risk Lab Wealth Fan", meta: "10th / median / 90th" },
-      h(FanChart, { data: c.mc.percentiles }),
-      h("div", { className: "chart-legend" },
-        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.green2 } }), "Median"),
-        h("span", null, h("i", { className: "legend-dot", style: { background: COLORS.cyan, opacity: 0.55 } }), "Outcome band")
-      )
-    ),
-    h(Panel, { title: "Risk Comparisons" },
+    h(MonteCarloRiskPanel, { s: s, e: e }),
+    h(Panel, { title: "Plan Comparisons", meta: "One shared model" },
       h("table", { className: "mini-table" },
-        h("thead", null, h("tr", null, h("th", null, "Scenario"), h("th", null, "Success"), h("th", null, "Age-65 median"))),
+        h("thead", null, h("tr", null, h("th", null, "Scenario"), h("th", null, "Success"), h("th", null, "First-year draw"), h("th", null, "Failure window"))),
         h("tbody", null,
-          c.scenarios.map(function (row) {
+          scenarioRows.map(function (row) {
             return h("tr", { key: row.label },
-              h("td", null, row.label, h("br"), h("small", { style: { color: "var(--muted)" } }, "gap " + fmt(row.gap, true) + " / start " + fmt(row.start, true))),
+              h("td", null, row.label, h("br"), h("small", null, row.note)),
               h("td", null, Math.round(row.success * 100) + "%"),
-              h("td", null, fmt(row.age65Median, true))
+              h("td", null, fmt(row.draw, true)),
+              h("td", null, row.failure)
             );
           })
         )
       )
     ),
-    h(Panel, { title: "Sequence Risk Stress" },
+    h(Panel, { title: "Stress Tests", meta: "Same start, harsher path" },
       h("div", { className: "kpi-grid" },
-        h(Stat, { label: "Base success", value: Math.round(c.mc.successRate * 100) + "%", note: "Normal stochastic paths", color: COLORS.green2 }),
-        h(Stat, { label: "-25% year-one shock", value: Math.round(c.shock.successRate * 100) + "%", note: "Forced early equity crash", color: c.shock.successRate >= 0.9 ? COLORS.green2 : COLORS.orange }),
-        h(Stat, { label: "Median at 65", value: fmt(c.mc.age65Median, true), note: "Before pension/SS step-up" }),
-        h(Stat, { label: "Cash + bond defense", value: fmt(s.colleenCashBuffer + s.colleenBonds, true), note: "Downturn buffer", color: COLORS.gold })
+        stressRows.map(function (row) {
+          return h(Stat, { key: row.label, label: row.label, value: Math.round(row.value * 100) + "%", note: row.note, color: row.value >= 0.85 ? COLORS.green2 : row.value >= 0.7 ? COLORS.gold : COLORS.orange });
+        })
       ),
-      h("div", { className: "note", style: { marginTop: 12 } }, "The app models cash as the first spending bucket. Portfolio liquidation begins only after the cash buffer is exhausted.")
+      h("div", { className: "note", style: { marginTop: 12 } }, "These are stress checks, not separate assumptions. The base plan remains the source of truth.")
     ),
-    h(Panel, { title: "Risk Controls" },
-      h(RangeControl, { label: "Retirement age", value: s.colleenRetireAge, min: 40, max: 65, step: 1, onChange: set("colleenRetireAge"), display: function (v) { return String(v); } }),
-      h(RangeControl, { label: "Invested portfolio", value: s.colleenPortfolio, min: 500000, max: 2200000, step: 5000, onChange: set("colleenPortfolio") }),
-      h(RangeControl, { label: "Cash/CD buffer", value: s.colleenCashBuffer, min: 0, max: 300000, step: 2500, onChange: set("colleenCashBuffer") }),
-      h(RangeControl, { label: "Monthly savings before retirement", value: s.colleenMonthlySavings, min: 0, max: 20000, step: 500, onChange: set("colleenMonthlySavings"), display: function (v) { return fmt(v) + "/mo"; } }),
-      h(RangeControl, { label: "PTO bonus", value: s.colleenPtoBonus, min: 0, max: 50000, step: 500, onChange: set("colleenPtoBonus") }),
-      h(RangeControl, { label: "Annual spending", value: s.colleenSpending, min: 40000, max: 140000, step: 1000, onChange: set("colleenSpending") }),
-      h(RangeControl, { label: "Guaranteed household income", value: s.colleenHouseholdIncome, min: 0, max: 90000, step: 1000, onChange: set("colleenHouseholdIncome") }),
-      h(RangeControl, { label: "Annual dividends", value: s.colleenDividends, min: 0, max: 40000, step: 500, onChange: set("colleenDividends") }),
-      h(RangeControl, { label: "TRS pension at 65", value: s.colleenPension, min: 0, max: 80000, step: 1000, onChange: set("colleenPension") }),
-      h(RangeControl, { label: "Risk lab Social Security", value: s.colleenSs, min: 0, max: 50000, step: 500, onChange: set("colleenSs") }),
-      h(RangeControl, { label: "Starting equity allocation", value: s.colleenEquityStart, min: 30, max: 95, step: 1, onChange: set("colleenEquityStart"), display: function (v) { return v + "%"; } }),
-      h(SwitchLine, { title: "Use rising-equity glidepath", copy: "Start lower, then raise equity exposure over the first decade.", value: s.colleenUseGlidepath, onChange: set("colleenUseGlidepath") }),
-      s.colleenUseGlidepath && h(RangeControl, { label: "Ending equity allocation", value: s.colleenEquityEnd, min: 40, max: 95, step: 1, onChange: set("colleenEquityEnd"), display: function (v) { return v + "%"; } }),
-      h(SwitchLine, { title: "Use 4% inflation stress", copy: "Raises annual spending faster and lowers margin.", value: s.colleenInflationStress, onChange: set("colleenInflationStress") }),
-      h(RangeControl, { label: "Consulting income", value: s.colleenConsulting, min: 0, max: 50000, step: 1000, onChange: set("colleenConsulting") })
-    ),
-    h(Panel, { title: "Input Notes" },
-      h("div", { className: "guide-list" },
-        h("div", { className: "guide-item" }, h("strong", null, "Cash buffer"), h("span", null, "Raise or lower the buffer to test how much sequence risk can be absorbed before selling equities.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Timing"), h("span", null, "Use the timing control to see the tradeoff between retiring sooner and adding more savings runway.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Optional income"), h("span", null, "Consulting income adds margin, but the base case should remain understandable without it.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Tax planning"), h("span", null, "Low-income bridge years may be valuable tax-planning windows, but this app stays at planning-input level."))
-      )
+    h(Panel, { title: "Risk Levers", meta: "Live controls" },
+      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
+      h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
+      h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
+      h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
+      h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 60, step: 1, onChange: set("bondPct"), display: function (v) { return v + "%"; } }),
+      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 90000, step: 500, onChange: set("wifeIncome") }),
+      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") }),
+      h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
+      h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
+      h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") })
     )
   );
 }
@@ -2049,7 +1907,7 @@ function GuideTab(props) {
     h(Panel, { title: "Data Guide" },
       h("div", { className: "guide-list" },
         h("div", { className: "guide-item" }, h("strong", null, "Home Monte Carlo"), h("span", null, "800 seeded simulations using Box-Muller normal returns. Failure means the portfolio hits $0 before the planning horizon after income layers are counted.")),
-        h("div", { className: "guide-item" }, h("strong", null, "Risk Lab Monte Carlo"), h("span", null, "The Risk tab runs a separate bucket model: cash funds the gap first, then invested assets. It reports 30-year and long-horizon survival plus a forced -25% year-one equity shock.")),
+        h("div", { className: "guide-item" }, h("strong", null, "Risk dashboard"), h("span", null, "The Risk tab uses the same family-plan inputs as Home. It shows failure years, shared-model scenario comparisons, and stress tests such as a forced -25% first-year equity shock.")),
         h("div", { className: "guide-item" }, h("strong", null, "Portfolio CSV import"), h("span", null, "The Portfolio tab can import a holdings CSV and update current portfolio, equity percentage, bond percentage, cash, and the holdings table locally in this browser.")),
         h("div", { className: "guide-item" }, h("strong", null, "TRS hidden asset"), h("span", null, "TRS annual benefit = years of service x highest 5-year consecutive salary average x 2.0%. Hidden asset value capitalizes annual pension at a 3% draw rate.")),
         h("div", { className: "guide-item" }, h("strong", null, "Household bridge draw"), h("span", null, "The Budget tab category total is the monthly spending target used by Home, Monte Carlo, and bridge-draw math.")),
@@ -2099,6 +1957,14 @@ function App() {
       setS(function (prev) {
         var next = Object.assign({}, prev);
         next[key] = value;
+        if (key === "equityPct") {
+          next.equityPct = Number(value || 0);
+          if (next.equityPct + Number(next.bondPct || 0) > 100) next.bondPct = Math.max(0, 100 - next.equityPct);
+        }
+        if (key === "bondPct") {
+          next.bondPct = Number(value || 0);
+          if (Number(next.equityPct || 0) + next.bondPct > 100) next.equityPct = Math.max(0, 100 - next.bondPct);
+        }
         if (BUDGET_KEYS.indexOf(key) >= 0) next.spendMonthly = budgetTotal(next);
         return normalizeState(next);
       });
@@ -2127,7 +1993,6 @@ function App() {
     setS(Object.assign({}, DEF));
   }
   var e = React.useMemo(function () { return buildEngine(s); }, [s]);
-  var c = React.useMemo(function () { return buildRiskLabEngine(s); }, [s]);
   function copySnapshot() {
     var lines = [
       "Flory Freedom snapshot",
@@ -2138,9 +2003,8 @@ function App() {
       "Family monthly budget: " + fmt(budgetCategories(s).reduce(function (sum, row) { return sum + Number(row.value || 0); }, 0)),
       "TRS annual at 65: " + fmt(e.trsAnnual),
       "Income floor coverage at SS age: " + pct(e.floorCoverage, 0),
-      "Risk lab target: " + c.targetLabel,
-      "Risk lab 30-year / " + s.colleenHorizon + "-year success: " + Math.round(c.mc30.successRate * 100) + "% / " + Math.round(c.mc.successRate * 100) + "%",
-      "Risk lab base gap: " + fmt(c.baseGap),
+      "Failed paths: " + e.mc.failures + " of " + e.mc.sims,
+      "Defense runway: " + yearsLabel(e.defenseRunway),
       "ADU cash after budget: " + fmt(e.cashAfterAdu)
     ];
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2159,11 +2023,11 @@ function App() {
       h("div", { className: "header-metric" }, h("span", null, "Projected portfolio at retirement"), h("strong", null, fmt(e.startBalance, true)))
     ),
     h("main", { className: "content" },
-      tab === "command" && h(CommandTab, { s: s, e: e, c: c, set: set, setSpendMonthly: setSpendMonthly, update: update }),
+      tab === "command" && h(CommandTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
       tab === "income" && h(IncomeTab, { s: s, e: e, set: set }),
       tab === "budget" && h(BudgetTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set, update: update }),
-      tab === "risk" && h(InputsTab, { s: s, e: e, c: c, set: set }),
+      tab === "risk" && h(RiskTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
       tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       h(Panel, { title: "Quick Tools" },

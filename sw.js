@@ -1,4 +1,4 @@
-var CACHE_NAME = "flory-freedom-v2-risk-portfolio-20260702";
+var CACHE_NAME = "flory-freedom-v3-unified-risk-20260703";
 var APP_SHELL = [
   "./",
   "./index.html",
