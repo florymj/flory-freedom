@@ -616,7 +616,7 @@ var DEF = {
     { symbol: "Cash", name: "Cash and core positions", account: "Fidelity", assetClass: "Cash", value: 62906 }
   ],
   monthlyContrib: 9000,
-  monthsToRetire: 12,
+  monthsToRetire: 11,
   currentAge: 46,
   retireAge: 47,
   retireDateLabel: "June 30, 2027",
@@ -1373,6 +1373,41 @@ function MonteCarloRiskPanel(props) {
     ) : h("div", { className: "note", style: { marginTop: 12 } }, "No failed paths in this run.")
   );
 }
+var RETIRE_PRESETS = [
+  { label: "Jun 2027", sub: "11 TRS yrs", monthsToRetire: 11, trsYears: 11, retireDateLabel: "June 30, 2027" },
+  { label: "Jun 2028", sub: "12 TRS yrs", monthsToRetire: 23, trsYears: 12, retireDateLabel: "June 30, 2028" },
+  { label: "Jun 2029", sub: "13 TRS yrs", monthsToRetire: 35, trsYears: 13, retireDateLabel: "June 30, 2029" }
+];
+function RetirementPresetPicker(props) {
+  var s = props.s;
+  var update = props.update;
+  var active = RETIRE_PRESETS.filter(function(p) {
+    return p.monthsToRetire === s.monthsToRetire && p.trsYears === s.trsYears;
+  })[0];
+  return h("div", { className: "control", style: { marginBottom: 0 } },
+    h("div", { className: "control-label" },
+      h("span", null, "Retirement date"),
+      h("strong", null, s.retireDateLabel)
+    ),
+    h("div", { className: "seg" },
+      RETIRE_PRESETS.map(function(preset) {
+        var isActive = !!(active && active.monthsToRetire === preset.monthsToRetire);
+        return h("button", {
+          key: preset.label,
+          type: "button",
+          className: isActive ? "active" : "",
+          onClick: function() {
+            update({ monthsToRetire: preset.monthsToRetire, trsYears: preset.trsYears, retireDateLabel: preset.retireDateLabel });
+          }
+        },
+          preset.label,
+          h("br"),
+          h("span", { style: { fontSize: 9, opacity: 0.75 } }, preset.sub)
+        );
+      })
+    )
+  );
+}
 function CommandTab(props) {
   var s = props.s;
   var e = props.e;
@@ -1387,9 +1422,9 @@ function CommandTab(props) {
     {
       title: "Base case",
       detail: "June 2027, current spend, current allocation",
-      active: s.monthsToRetire === 12 && s.spendMonthly === 10000 && s.monthlyContrib === 9000 && s.equityPct === 83 && s.bondPct === 12 && s.includePto && !s.includeAduRent,
+      active: s.monthsToRetire === 11 && s.spendMonthly === 10000 && s.monthlyContrib === 9000 && s.equityPct === 83 && s.bondPct === 12 && s.includePto && !s.includeAduRent,
       patch: {
-        monthsToRetire: 12,
+        monthsToRetire: 11,
         spendMonthly: 10000,
         monthlyContrib: 9000,
         equityPct: 83,
@@ -1454,7 +1489,7 @@ function CommandTab(props) {
       ),
       h("div", { className: "control-deck" },
         h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
-        h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
+        h(RetirementPresetPicker, { s: s, update: update }),
         h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
         h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
         h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
@@ -1635,6 +1670,9 @@ function IncomeTab(props) {
         h(Stat, { label: "High-5 average", value: fmt(highFive.average, true), note: highFive.rows[4].year + " through " + highFive.rows[0].year }),
         h(Stat, { label: "Annual pension", value: fmt(e.trsAnnual, true), note: "Deferred until age " + s.trsAge, color: COLORS.gold })
       ),
+      h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--cyan)" } },
+        "TRS pension has no COLA — the benefit is fixed in nominal dollars. Inflation erodes its real purchasing power over time, which is why the portfolio bridge matters in the pre-65 years."
+      ),
       h("table", { className: "mini-table salary-table", style: { marginTop: 12 } },
         h("thead", null, h("tr", null, h("th", null, "Tier"), h("th", null, "Contract Year"), h("th", null, "Service Credit"), h("th", null, "Salary"))),
         h("tbody", null,
@@ -1773,26 +1811,31 @@ function RiskTab(props) {
       failure: failureLabel(engine.mc)
     };
   }
-  var spendDown = Math.max(0, s.spendMonthly - 1000);
-  var spendUp = s.spendMonthly + 1000;
-  var scenarioRows = [
-    { label: "Current family plan", note: "Same number as Home", success: e.mc.successRate, failures: e.mc.failures, draw: e.bridgeDraw, failure: failureLabel(e.mc) },
-    scenario("Spending -$1k/mo", { spendMonthly: spendDown }, "Budget pressure falls"),
-    scenario("Spending +$1k/mo", { spendMonthly: spendUp }, "Budget pressure rises"),
-    scenario("Work 1 more year", { monthsToRetire: s.monthsToRetire + 12, retireAge: s.retireAge + 1, trsYears: s.trsYears + 1 }, "More savings and service credit"),
-    scenario("4% inflation", { inflation: 0.04 }, "Persistent cost pressure"),
-    scenario("ADU rent included", { includeAduRent: true, aduRentMonthly: s.aduRentMonthly || 1500 }, "Upside, not base case")
-  ];
-  var shockMc = runMonteCarlo(s, e, e.startBalance, 800, { shockFirstYear: true });
-  var lowerReturnBase = Object.assign({}, e, { meanReturn: Math.max(-0.02, e.meanReturn - 0.02) });
-  var lowerReturnMc = runMonteCarlo(s, lowerReturnBase, e.startBalance, 800);
-  var longEngine = buildEngine(stateWith({ horizonYears: Math.max(50, s.horizonYears) }));
-  var stressRows = [
-    { label: "Normal market paths", value: e.mc.successRate, note: e.mc.failures + " of " + e.mc.sims + " fail" },
-    { label: "-25% year-one equity shock", value: shockMc.successRate, note: shockMc.failures + " of " + shockMc.sims + " fail" },
-    { label: "Return haircut", value: lowerReturnMc.successRate, note: "2-point lower average return" },
-    { label: "50-year horizon", value: longEngine.mc.successRate, note: longEngine.mc.failures + " of " + longEngine.mc.sims + " fail" }
-  ];
+  var riskComputations = React.useMemo(function() {
+    var spendDown = Math.max(0, s.spendMonthly - 1000);
+    var spendUp = s.spendMonthly + 1000;
+    var scenarioRows = [
+      { label: "Current family plan", note: "Same number as Home", success: e.mc.successRate, failures: e.mc.failures, draw: e.bridgeDraw, failure: failureLabel(e.mc) },
+      scenario("Spending -$1k/mo", { spendMonthly: spendDown }, "Budget pressure falls"),
+      scenario("Spending +$1k/mo", { spendMonthly: spendUp }, "Budget pressure rises"),
+      scenario("Work 1 more year", { monthsToRetire: s.monthsToRetire + 12, retireAge: s.retireAge + 1, trsYears: s.trsYears + 1 }, "More savings and service credit"),
+      scenario("4% inflation", { inflation: 0.04 }, "Persistent cost pressure"),
+      scenario("ADU rent included", { includeAduRent: true, aduRentMonthly: s.aduRentMonthly || 1500 }, "Upside, not base case")
+    ];
+    var shockMc = runMonteCarlo(s, e, e.startBalance, 800, { shockFirstYear: true });
+    var lowerReturnBase = Object.assign({}, e, { meanReturn: Math.max(-0.02, e.meanReturn - 0.02) });
+    var lowerReturnMc = runMonteCarlo(s, lowerReturnBase, e.startBalance, 800);
+    var longEngine = buildEngine(stateWith({ horizonYears: Math.max(50, s.horizonYears) }));
+    var stressRows = [
+      { label: "Normal market paths", value: e.mc.successRate, note: e.mc.failures + " of " + e.mc.sims + " fail" },
+      { label: "-25% year-one equity shock", value: shockMc.successRate, note: shockMc.failures + " of " + shockMc.sims + " fail" },
+      { label: "Return haircut", value: lowerReturnMc.successRate, note: "2-point lower average return" },
+      { label: "50-year horizon", value: longEngine.mc.successRate, note: longEngine.mc.failures + " of " + longEngine.mc.sims + " fail" }
+    ];
+    return { scenarioRows: scenarioRows, stressRows: stressRows };
+  }, [e]); // e is memoized from s in App — re-runs only when inputs change
+  var scenarioRows = riskComputations.scenarioRows;
+  var stressRows = riskComputations.stressRows;
   return h("div", null,
     h(Panel, { title: "Risk Dashboard", meta: "Same inputs as Home" },
       h("div", { className: "kpi-grid" },
@@ -1890,9 +1933,10 @@ function GuideTab(props) {
   var e = props.e;
   var set = props.set;
   var setSpendMonthly = props.setSpendMonthly;
+  var update = props.update;
   return h("div", null,
     h(Panel, { title: "Plan Controls", meta: "Core assumptions" },
-      h(RangeControl, { label: "Months to retirement", value: s.monthsToRetire, min: 0, max: 36, step: 1, onChange: set("monthsToRetire"), display: function (v) { return v + " mo"; } }),
+      h(RetirementPresetPicker, { s: s, update: update }),
       h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
       h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
       h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
@@ -1991,7 +2035,8 @@ function App() {
   }
   function reset() {
     if (!window.confirm("Reset Flory Freedom to the June 2027 plan defaults?")) return;
-    setS(Object.assign({}, DEF));
+    try { window.localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+    window.location.reload();
   }
   var e = React.useMemo(function () { return buildEngine(s); }, [s]);
   function copySnapshot() {
@@ -2030,7 +2075,7 @@ function App() {
       tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set, update: update }),
       tab === "risk" && h(RiskTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "adu" && h(ADUTab, { s: s, e: e, set: set }),
-      tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
+      tab === "guide" && h(GuideTab, { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
       h(Panel, { title: "Quick Tools" },
         h("div", { className: "button-row" },
           h("button", { className: "ghost-btn", onClick: copySnapshot }, h(Icon, { name: "list", size: 17 }), copied ? "Copied" : "Copy snapshot"),
