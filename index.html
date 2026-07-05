@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#08100f">
-<meta name="flory-freedom-build" content="guardrails-bridge-ss-20260704">
+<meta name="flory-freedom-build" content="dividend-split-magi-20260704">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flory Freedom">
@@ -640,7 +640,8 @@ var DEF = {
   bondPct: 12,
   wifeIncome: 53000,
   includeWifeIncome: true,
-  dividends: 20603,
+  taxableDividends: 14000,
+  taxAdvantagedDividends: 6603,
   includeDividends: true,
   trsHigh5: 201000,
   trsYears: 11,
@@ -914,7 +915,7 @@ function michaelHighFive(s) {
 function hashState(s) {
   var src = [
     s.currentPortfolio, s.monthlyContrib, s.monthsToRetire, s.spendMonthly,
-    s.equityPct, s.bondPct, s.wifeIncome, s.dividends,
+    s.equityPct, s.bondPct, s.wifeIncome, s.taxableDividends, s.taxAdvantagedDividends,
     s.trsYears, s.trsMultiplier, s.michaelSalary2027, s.michaelSalary2026,
     s.michaelSalary2025, s.michaelSalary2024, s.michaelSalary2023,
     s.michaelSalary2022, s.ssAnnual, s.ssClaimAge, s.ssBenefitReductionFactor,
@@ -982,7 +983,7 @@ function calcAca(magi, householdSize, benchmarkPremium) {
 function incomeForYear(y, s, e) {
   var age = s.retireAge + y;
   var income = (s.includeWifeIncome !== false ? s.wifeIncome : 0) * Math.pow(1 + s.incomeGrowth, y);
-  if (s.includeDividends) income += s.dividends * Math.pow(1 + s.inflation, y);
+  if (s.includeDividends) income += ((s.taxableDividends || 0) + (s.taxAdvantagedDividends || 0)) * Math.pow(1 + s.inflation, y);
   if (s.includeAduRent) income += s.aduRentMonthly * 12 * Math.pow(1 + s.inflation, y);
   if (age >= s.trsAge) {
     var trsYearsActive = age - s.trsAge;
@@ -1173,7 +1174,7 @@ function buildEngine(s) {
   var incomeAtSs = incomeForYear(yearsToSs, s, base);
   var floorCoverage = spendAtSs > 0 ? incomeAtSs / spendAtSs : 0;
   var magi = (s.includeWifeIncome !== false ? s.wifeIncome : 0)
-    + (s.includeDividends ? s.dividends : 0)
+    + (s.includeDividends ? (s.taxableDividends || 0) : 0)
     + (s.includeAduRent ? s.aduRentMonthly * 12 : 0)
     + (s.capitalGainsDist || 0);
   var aca = calcAca(magi, s.householdSize, s.benchmarkPremium);
@@ -1286,6 +1287,13 @@ function normalizeState(parsed) {
   if (s.ssClaimAge) s.ssAge = s.ssClaimAge;
   // Default reduction factor if missing
   if (s.ssBenefitReductionFactor === undefined) s.ssBenefitReductionFactor = 0.70;
+  // Migrate old single dividends field to split taxable/tax-advantaged
+  if (parsed && Object.prototype.hasOwnProperty.call(parsed, 'dividends') && !Object.prototype.hasOwnProperty.call(parsed, 'taxableDividends')) {
+    var oldDiv = Number(parsed.dividends || 0);
+    var taxPct = 14000 / 20603;
+    s.taxableDividends = Math.round(oldDiv * taxPct / 500) * 500;
+    s.taxAdvantagedDividends = Math.max(0, oldDiv - s.taxableDividends);
+  }
   // Guardrail defaults
   if (s.spendFloor === undefined) s.spendFloor = 60000;
   if (s.guardrailLower === undefined) s.guardrailLower = 0.80;
@@ -1511,7 +1519,7 @@ function BridgePhasesPanel(props) {
       income: e.bridgeIncome,
       spend: e.spendAtRetire,
       draw: e.bridgeDraw,
-      note: "Zero guaranteed pension. Dividends (~" + fmt(s.dividends, true) + "/yr) partially offset draws."
+      note: "Zero guaranteed pension. Dividends (~" + fmt((s.taxableDividends || 0) + (s.taxAdvantagedDividends || 0), true) + "/yr) partially offset draws; taxable portion (" + fmt(s.taxableDividends || 0, true) + ") counts toward MAGI."
     },
     {
       id: 2,
@@ -1576,7 +1584,7 @@ function SafeSpendCalculator(props) {
   var result = React.useMemo(function() {
     return solveSafeSpend(s, e, e.startBalance, targetRate, useGuardrails);
   }, [s.currentPortfolio, s.monthlyContrib, s.monthsToRetire, s.retireAge,
-      s.equityPct, s.bondPct, s.wifeIncome, s.dividends, s.ssClaimAge,
+      s.equityPct, s.bondPct, s.wifeIncome, s.taxableDividends, s.taxAdvantagedDividends, s.ssClaimAge,
       s.ssBenefitReductionFactor, s.trsYears, s.trsMultiplier,
       s.inflation, s.horizonYears, targetRate, useGuardrails]);
   var safeAnnual = result;
@@ -1649,7 +1657,7 @@ function RetirementPresetPicker(props) {
       }));
     });
   }, [s.currentPortfolio, s.monthlyContrib, s.spendMonthly, s.wifeIncome,
-      s.dividends, s.includeDividends, s.equityPct, s.bondPct,
+      s.taxableDividends, s.taxAdvantagedDividends, s.includeDividends, s.equityPct, s.bondPct,
       s.ssAnnual, s.inflation, s.horizonYears, s.trsMultiplier,
       s.includeAduRent, s.aduRentMonthly, s.includePto, s.ptoDays]);
   return h("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 } },
@@ -2032,9 +2040,12 @@ function IncomeTab(props) {
     h(Panel, { title: "Income Layers" },
       h(SwitchLine, { title: "Include guaranteed income floor", copy: "Turn off to model a scenario where this income is temporarily not in the plan.", value: s.includeWifeIncome !== false, onChange: set("includeWifeIncome") }),
       h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 80000, step: 500, onChange: set("wifeIncome") }),
-      h(SwitchLine, { title: "Count portfolio dividends", copy: "Useful for MAGI and bridge planning, but still portfolio-derived.", value: s.includeDividends, onChange: set("includeDividends") }),
-      s.includeDividends && h(RangeControl, { label: "Annual dividends (Fidelity: ~$20,603/yr at 1.8% yield)", value: s.dividends, min: 0, max: 40000, step: 500, onChange: set("dividends") }),
-      h("div", { className: "callout", style: { borderLeftColor: "var(--gold)" } }, "Dividends partially offset portfolio draws during the bridge (~" + fmt(s.dividends, true) + "/yr). They fluctuate with markets and are not guaranteed."),
+      h(SwitchLine, { title: "Count portfolio dividends", copy: "Taxable brokerage dividends count toward MAGI; IRA/Roth dividends do not.", value: s.includeDividends, onChange: set("includeDividends") }),
+      s.includeDividends && h("div", null,
+        h(RangeControl, { label: "Taxable brokerage dividends  ·  Counts toward MAGI", value: s.taxableDividends, min: 0, max: 40000, step: 500, onChange: set("taxableDividends") }),
+        h(RangeControl, { label: "Tax-advantaged dividends (IRA/Roth)  ·  Doesn't affect ACA subsidies", value: s.taxAdvantagedDividends, min: 0, max: 20000, step: 500, onChange: set("taxAdvantagedDividends") })
+      ),
+      h("div", { className: "callout", style: { borderLeftColor: "var(--gold)" } }, "Taxable dividends (" + fmt(s.taxableDividends || 0, true) + "/yr) offset portfolio draws and count toward MAGI. IRA/Roth dividends (" + fmt(s.taxAdvantagedDividends || 0, true) + "/yr) also help with draw but don't affect ACA subsidies."),
       h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 65000, step: 500, onChange: set("ssAnnual") }),
       h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--cyan)" } },
         "SSA estimates assume continued earnings to claim age. Adjust the reduction factor for early retirement (default 70%)."
