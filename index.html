@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#08100f">
-<meta name="flory-freedom-build" content="dividend-split-magi-20260704">
+<meta name="flory-freedom-build" content="settings-consolidated-20260706">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flory Freedom">
@@ -1613,30 +1613,35 @@ function SafeSpendCalculator(props) {
 function GuardrailsComparePanel(props) {
   var s = props.s;
   var e = props.e;
+  var readOnly = props.readOnly;
   var fixedRate = Math.round(e.mc.successRate * 100);
   var guardrailsRate = e.mcGuardrails ? Math.round(e.mcGuardrails.successRate * 100) : null;
   var fixedColor = fixedRate >= 85 ? COLORS.green2 : fixedRate >= 70 ? COLORS.gold : COLORS.orange;
   var grColor = guardrailsRate !== null ? (guardrailsRate >= 90 ? COLORS.green2 : guardrailsRate >= 75 ? COLORS.gold : COLORS.orange) : COLORS.muted;
-  return h(Panel, { title: "Dynamic Spending (Guardrails)", meta: "vs. fixed spending" },
-    h(SwitchLine, { title: "Enable guardrails", copy: "Adjusts spending each year based on portfolio health. Cuts by " + Math.round((s.guardrailCutback || 0.15) * 100) + "% when portfolio < " + Math.round((s.guardrailLower || 0.80) * 100) + "% of plan; boosts by " + Math.round((s.guardrailIncrease || 0.10) * 100) + "% when > " + Math.round((s.guardrailUpper || 1.20) * 100) + "% of plan.", value: s.guardrailsEnabled, onChange: props.set("guardrailsEnabled") }),
-    s.guardrailsEnabled && h("div", null,
-      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "14px 0 10px" } },
-        h("div", { style: { background: "rgba(255,255,255,0.035)", border: "1px solid var(--line-soft)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
-          h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "Fixed spending"),
-          h("div", { style: { color: fixedColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, fixedRate + "%"),
-          h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mc.failures + " fail paths")
-        ),
-        h("div", { style: { background: "rgba(155,227,127,0.06)", border: "1px solid rgba(155,227,127,0.22)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
-          h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "With guardrails"),
-          h("div", { style: { color: grColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, guardrailsRate !== null ? guardrailsRate + "%" : "—"),
-          guardrailsRate !== null && h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mcGuardrails.failures + " fail paths")
-        )
-      ),
-      h(RangeControl, { label: "Lower guardrail trigger", value: Math.round((s.guardrailLower || 0.80) * 100), min: 60, max: 95, step: 5, onChange: function(v) { props.set("guardrailLower")(v / 100); }, display: function(v) { return v + "% of plan"; } }),
-      h(RangeControl, { label: "Cutback amount", value: Math.round((s.guardrailCutback || 0.15) * 100), min: 5, max: 30, step: 5, onChange: function(v) { props.set("guardrailCutback")(v / 100); }, display: function(v) { return v + "%"; } }),
-      h(RangeControl, { label: "Spending floor (today's $)", value: s.spendFloor || 60000, min: 40000, max: 100000, step: 2500, onChange: props.set("spendFloor") })
+  var compareGrid = h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "14px 0 10px" } },
+    h("div", { style: { background: "rgba(255,255,255,0.035)", border: "1px solid var(--line-soft)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
+      h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "Fixed spending"),
+      h("div", { style: { color: fixedColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, fixedRate + "%"),
+      h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mc.failures + " fail paths")
     ),
-    !s.guardrailsEnabled && h("div", { className: "note", style: { marginTop: 10 } }, "Toggle on to compare fixed vs. dynamic spending success rates side by side.")
+    h("div", { style: { background: "rgba(155,227,127,0.06)", border: "1px solid rgba(155,227,127,0.22)", borderRadius: 8, padding: "14px 10px", textAlign: "center" } },
+      h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" } }, "With guardrails"),
+      h("div", { style: { color: grColor, fontSize: 30, fontWeight: 900, margin: "6px 0 2px" } }, guardrailsRate !== null ? guardrailsRate + "%" : "—"),
+      guardrailsRate !== null && h("div", { style: { color: "var(--dim)", fontSize: 11 } }, e.mcGuardrails.failures + " fail paths")
+    )
+  );
+  return h(Panel, { title: "Dynamic Spending (Guardrails)", meta: "vs. fixed spending" },
+    !readOnly && h(SwitchLine, { title: "Enable guardrails", copy: "Adjusts spending each year based on portfolio health. Cuts by " + Math.round((s.guardrailCutback || 0.15) * 100) + "% when portfolio < " + Math.round((s.guardrailLower || 0.80) * 100) + "% of plan; boosts by " + Math.round((s.guardrailIncrease || 0.10) * 100) + "% when > " + Math.round((s.guardrailUpper || 1.20) * 100) + "% of plan.", value: s.guardrailsEnabled, onChange: props.set("guardrailsEnabled") }),
+    readOnly && !s.guardrailsEnabled && h("div", { className: "note", style: { marginTop: 10 } }, "Guardrails are off. Enable them in Settings → Guardrails to compare dynamic vs. fixed spending."),
+    s.guardrailsEnabled && h("div", null,
+      compareGrid,
+      !readOnly && h("div", null,
+        h(RangeControl, { label: "Lower guardrail trigger", value: Math.round((s.guardrailLower || 0.80) * 100), min: 60, max: 95, step: 5, onChange: function(v) { props.set("guardrailLower")(v / 100); }, display: function(v) { return v + "% of plan"; } }),
+        h(RangeControl, { label: "Cutback amount", value: Math.round((s.guardrailCutback || 0.15) * 100), min: 5, max: 30, step: 5, onChange: function(v) { props.set("guardrailCutback")(v / 100); }, display: function(v) { return v + "%"; } }),
+        h(RangeControl, { label: "Spending floor (today's $)", value: s.spendFloor || 60000, min: 40000, max: 100000, step: 2500, onChange: props.set("spendFloor") })
+      )
+    ),
+    !readOnly && !s.guardrailsEnabled && h("div", { className: "note", style: { marginTop: 10 } }, "Toggle on to compare fixed vs. dynamic spending success rates side by side.")
   );
 }
 var RETIRE_PRESETS = [
@@ -1742,48 +1747,7 @@ function DrawTrajectoryPanel(props) {
 function CommandTab(props) {
   var s = props.s;
   var e = props.e;
-  var set = props.set;
-  var setSpendMonthly = props.setSpendMonthly;
-  var update = props.update;
-  var scoreColor = e.readinessScore >= 100 ? COLORS.green2 : e.readinessScore >= 90 ? COLORS.green : COLORS.gold;
   var wrColor = e.withdrawalRate <= 0.04 ? COLORS.gold : COLORS.orange;
-  var projectedMonthly = e.spendAtRetire / 12;
-  var drawMonthly = e.bridgeDraw / 12;
-  var presets = [
-    {
-      title: "Base case",
-      detail: "June 2027, current spend, current allocation",
-      active: s.monthsToRetire === 11 && s.spendMonthly === 10000 && s.monthlyContrib === 9000 && s.equityPct === 83 && s.bondPct === 12 && s.includePto && !s.includeAduRent,
-      patch: {
-        monthsToRetire: 11,
-        spendMonthly: 10000,
-        monthlyContrib: 9000,
-        equityPct: 83,
-        bondPct: 12,
-        includePto: true,
-        includeAduRent: false,
-        aduRentMonthly: 0
-      }
-    },
-    {
-      title: "Lean spend",
-      detail: "Drop monthly target and watch draw pressure fall",
-      active: s.spendMonthly <= 8500,
-      patch: { spendMonthly: 8500 }
-    },
-    {
-      title: "Jun ’28 plan",
-      detail: "One more year — 12 TRS years, bigger portfolio",
-      active: s.monthsToRetire === 23 && s.trsYears === 12,
-      patch: { monthsToRetire: 23, retireAge: 48, trsYears: 12, retireDateLabel: "June 30, 2028" }
-    },
-    {
-      title: "Income upside",
-      detail: "Toggle ADU rent into the plan",
-      active: s.includeAduRent && s.aduRentMonthly > 0,
-      patch: { includeAduRent: true, aduRentMonthly: 1500 }
-    }
-  ];
   var actions = [
     { icon: "list", title: "On time, not early", copy: "Stay the course to " + s.retireDateLabel + ".", status: "Ongoing", color: COLORS.green },
     { icon: "bridge", title: "Bridge to 65", copy: "Keep the family's first-year draw near " + pct(e.withdrawalRate, 1) + ".", status: "Review Apr 2027", color: COLORS.gold },
@@ -1791,12 +1755,6 @@ function CommandTab(props) {
     { icon: "adu", title: "Legacy vehicle", copy: "Max fund ADU, optimize taxes, plan gifting.", status: "Review 2026", color: COLORS.cyan }
   ];
   return h("div", null,
-    h(Panel, { title: "Retirement Year", meta: "School year boundaries" },
-      h(RetirementPresetPicker, { s: s, update: update }),
-      h("div", { className: "callout", style: { marginTop: 10 } },
-        "Each June 30 is a valid TRS boundary. One more school year adds a full service credit and roughly $3.9k more pension per year for life."
-      )
-    ),
     h("section", { className: "hero-card" },
       h("div", { className: "hero-top" },
         h("div", { className: "hero-title" },
@@ -1817,29 +1775,6 @@ function CommandTab(props) {
     ),
     h(BridgePhasesPanel, { s: s, e: e }),
     h(SafeSpendCalculator, { s: s, e: e }),
-    h(Panel, { title: "Scenario Cockpit", meta: "Budget linked" },
-      h("div", { className: "scenario-grid" },
-        presets.map(function (preset) {
-          return h("button", { key: preset.title, type: "button", className: "scenario-btn" + (preset.active ? " active" : ""), onClick: function () { update(preset.patch); } },
-            h("strong", null, preset.title),
-            h("span", null, preset.detail)
-          );
-        })
-      ),
-      h("div", { className: "control-deck" },
-        h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
-        h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2200000, step: 1000, onChange: set("currentPortfolio") }),
-        h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
-        h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
-        h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 30000, max: 90000, step: 500, onChange: set("wifeIncome") })
-      ),
-      h("div", { className: "impact-strip" },
-        h(Stat, { label: "Budget at exit", value: fmt(projectedMonthly, true) + "/mo", note: "Inflation adjusted", color: COLORS.cyan }),
-        h(Stat, { label: "Portfolio draw", value: fmt(drawMonthly, true) + "/mo", note: pct(e.withdrawalRate, 1) + " of assets", color: wrColor }),
-        h(Stat, { label: "Plan success", value: Math.round(e.mc.successRate * 100) + "%", note: e.mc.failures + " fail paths", color: COLORS.green2 }),
-        h(Stat, { label: "Income coverage", value: pct(e.floorCoverage, 0), note: "At Social Security age", color: COLORS.gold })
-      )
-    ),
     h(MonteCarloRiskPanel, { s: s, e: e }),
     h(DrawTrajectoryPanel, { s: s, e: e }),
     h(Panel, { title: "Confidence Check", meta: "Today" },
@@ -1949,10 +1884,6 @@ function PortfolioTab(props) {
         "Holdings import differs from projection portfolio by " + fmt(Math.abs(total - s.currentPortfolio), true) + ". ",
         h("button", { className: "ghost-btn", style: { display: "inline-flex", marginTop: 6 }, onClick: function() { update({ currentPortfolio: Math.round(total) }); } }, "Sync to holdings total")
       ),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
-        h(RangeControl, { label: "Monthly additions before retirement", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } })
-      )
     ),
     h(Panel, { title: "Asset Allocation", meta: "Imported or manual" },
       h(BarRow, { label: "US equity", value: fmt(summary.usEquity, true) + " / " + pct(pctOf(summary.usEquity, total), 1), pct: pctOf(summary.usEquity, total) * 100, color: COLORS.green }),
@@ -1981,9 +1912,6 @@ function PortfolioTab(props) {
       h(BarRow, { label: "VTI + VOO + ITOT overlap", value: s.overlapPct.toFixed(1) + "%", pct: s.overlapPct, color: s.overlapPct > 60 ? COLORS.orange : COLORS.green }),
       h(BarRow, { label: "International exposure", value: pct(pctOf(summary.international, total), 1), pct: pctOf(summary.international, total) * 100, color: pctOf(summary.international, total) < 0.15 ? COLORS.gold : COLORS.green }),
       h(BarRow, { label: "Cash + bond defense", value: fmt(summary.cash + summary.bond, true), pct: pctOf(summary.cash + summary.bond, total) * 100, color: COLORS.cyan }),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "US broad-market overlap", value: s.overlapPct, min: 0, max: 100, step: 0.1, onChange: set("overlapPct"), display: function (v) { return v.toFixed(1) + "%"; } })
-      )
     )
   );
 }
@@ -2030,27 +1958,6 @@ function IncomeTab(props) {
           })
         )
       ),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Planned service credit at retirement", value: s.trsYears, min: 1, max: 35, step: 0.5, onChange: set("trsYears"), display: function (v) { return v.toFixed(1) + " years"; } }),
-        h(RangeControl, { label: "TRS COLA (0% = conservative, fixed nominal)", value: s.trsCola || 0, min: 0, max: 0.03, step: 0.005, onChange: set("trsCola"), display: function (v) { return pct(v, 1); } }),
-        h(RangeControl, { label: "2026-2027 projected salary", value: s.michaelSalary2027, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2027") }),
-        h(RangeControl, { label: "2025-2026 contract salary", value: s.michaelSalary2026, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2026") })
-      )
-    ),
-    h(Panel, { title: "Income Layers" },
-      h(SwitchLine, { title: "Include guaranteed income floor", copy: "Turn off to model a scenario where this income is temporarily not in the plan.", value: s.includeWifeIncome !== false, onChange: set("includeWifeIncome") }),
-      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 80000, step: 500, onChange: set("wifeIncome") }),
-      h(SwitchLine, { title: "Count portfolio dividends", copy: "Taxable brokerage dividends count toward MAGI; IRA/Roth dividends do not.", value: s.includeDividends, onChange: set("includeDividends") }),
-      s.includeDividends && h("div", null,
-        h(RangeControl, { label: "Taxable brokerage dividends  ·  Counts toward MAGI", value: s.taxableDividends, min: 0, max: 40000, step: 500, onChange: set("taxableDividends") }),
-        h(RangeControl, { label: "Tax-advantaged dividends (IRA/Roth)  ·  Doesn't affect ACA subsidies", value: s.taxAdvantagedDividends, min: 0, max: 20000, step: 500, onChange: set("taxAdvantagedDividends") })
-      ),
-      h("div", { className: "callout", style: { borderLeftColor: "var(--gold)" } }, "Taxable dividends (" + fmt(s.taxableDividends || 0, true) + "/yr) offset portfolio draws and count toward MAGI. IRA/Roth dividends (" + fmt(s.taxAdvantagedDividends || 0, true) + "/yr) also help with draw but don't affect ACA subsidies."),
-      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 65000, step: 500, onChange: set("ssAnnual") }),
-      h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--cyan)" } },
-        "SSA estimates assume continued earnings to claim age. Adjust the reduction factor for early retirement (default 70%)."
-      ),
-      h(RangeControl, { label: "SS benefit reduction factor (early retirement)", value: Math.round((s.ssBenefitReductionFactor || 0.70) * 100), min: 50, max: 100, step: 5, onChange: function(v) { set("ssBenefitReductionFactor")(v / 100); }, display: function(v) { return v + "% of SSA estimate"; } })
     ),
     h(Panel, { title: "Social Security Strategy", meta: "Claim age comparison" },
       h("div", { className: "callout", style: { marginBottom: 12, borderLeftColor: "var(--cyan)" } },
@@ -2070,9 +1977,8 @@ function IncomeTab(props) {
             style: {
               background: isSelected ? "rgba(99,212,238,0.12)" : "rgba(255,255,255,0.035)",
               border: "1px solid " + (isSelected ? "rgba(99,212,238,0.4)" : "var(--line-soft)"),
-              borderRadius: 8, padding: "10px 8px", textAlign: "center", cursor: "pointer"
-            },
-            onClick: function() { set("ssClaimAge")(row.age); set("ssAnnual")(adj); }
+              borderRadius: 8, padding: "10px 8px", textAlign: "center", cursor: "default"
+            }
           },
             h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Age " + row.age + (row.age === 67 ? " (FRA)" : row.age === 70 ? " ★" : "")),
             h("div", { style: { color: COLORS.cyan, fontSize: 17, fontWeight: 900, margin: "5px 0 2px" } }, fmt(adj, true)),
@@ -2084,15 +1990,6 @@ function IncomeTab(props) {
       h("div", { className: "callout", style: { marginTop: 12, borderLeftColor: "var(--green)" } },
         "Delay from 62 → 70 adds " + fmt(Math.round((s.ssAge70 || 62976) * (s.ssBenefitReductionFactor || 0.70)) - Math.round((s.ssAge62 || 34116) * (s.ssBenefitReductionFactor || 0.70)), true) + "/yr (adjusted). TRS covers essential bridge income, making delay low-risk."
       ),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "SS claim age", value: s.ssClaimAge || 67, min: 62, max: 70, step: 1, onChange: function(v) {
-          var ages = { 62: s.ssAge62 || 34116, 65: s.ssAge65 || 43272, 67: s.ssAge67 || 50412, 70: s.ssAge70 || 62976 };
-          var closest = [62, 65, 67, 70].reduce(function(a, b) { return Math.abs(b - v) < Math.abs(a - v) ? b : a; });
-          var raw = ages[closest] || 50412;
-          set("ssClaimAge")(closest);
-          set("ssAnnual")(Math.round(raw * (s.ssBenefitReductionFactor || 0.70)));
-        }, display: function(v) { return "Age " + v; } })
-      )
     ),
     h(Panel, { title: "ACA Estimate", meta: "Planning only" },
       h("div", { className: "kpi-grid" },
@@ -2101,11 +1998,6 @@ function IncomeTab(props) {
         h(Stat, { label: "Subsidy estimate", value: fmt(e.aca.subsidy, true), note: "Against benchmark" }),
         h(Stat, { label: "Net premium", value: fmt(e.aca.netPremium, true), note: "Annual cap", color: COLORS.gold })
       ),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Household size", value: s.householdSize, min: 1, max: 6, step: 1, onChange: set("householdSize"), display: function (v) { return String(v); } }),
-        h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") }),
-        h(RangeControl, { label: "Capital gains distributions (est.)", value: s.capitalGainsDist || 0, min: 0, max: 25000, step: 500, onChange: set("capitalGainsDist") })
-      )
     )
   );
 }
@@ -2150,9 +2042,6 @@ function BudgetTab(props) {
       ),
       h("div", { className: "callout", style: { marginTop: 12 } }, varianceText),
       h("div", { className: "callout", style: { marginTop: 10 } }, "No mortgage, car payment, credit card debt, or other debt payment is modeled. Home costs are only debt-free carrying costs, and extra room is kept as flex/sinking funds."),
-      h("div", { style: { marginTop: 14 } },
-        h(RangeControl, { label: "Projection monthly spending", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly })
-      )
     ),
     h(Panel, { title: "Pre-65 Bridge Budget", meta: "Family draw" },
       h("div", { className: "kpi-grid" },
@@ -2168,10 +2057,9 @@ function BudgetTab(props) {
     ),
     h(Panel, { title: "Budget Categories" },
       categories.map(function (row) {
-        return h("div", { key: row.key, style: { marginBottom: 12 } },
+        return h("div", { key: row.key, style: { marginBottom: 8 } },
           h(BarRow, { label: row.label, value: fmt(row.value) + "/mo", pct: row.value / largest * 100, color: row.color }),
-          row.note && h("div", { className: "budget-note" }, row.note),
-          h(RangeControl, { label: row.label, value: row.value, min: 0, max: 5000, step: 50, field: row.key, onChange: set(row.key) })
+          row.note && h("div", { className: "budget-note" }, row.note)
         );
       })
     ),
@@ -2269,19 +2157,7 @@ function RiskTab(props) {
       ),
       h("div", { className: "note", style: { marginTop: 12 } }, "These are stress checks, not separate assumptions. The base plan remains the source of truth.")
     ),
-    h(GuardrailsComparePanel, { s: s, e: e, set: set }),
-    h(Panel, { title: "Risk Levers", meta: "Live controls" },
-      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
-      h(RangeControl, { label: "Portfolio today", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
-      h(RangeControl, { label: "Monthly additions", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function (v) { return fmt(v) + "/mo"; } }),
-      h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function (v) { return v + "%"; } }),
-      h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 60, step: 1, onChange: set("bondPct"), display: function (v) { return v + "%"; } }),
-      h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 90000, step: 500, onChange: set("wifeIncome") }),
-      h(RangeControl, { label: "Social Security annual", value: s.ssAnnual, min: 0, max: 50000, step: 500, onChange: set("ssAnnual") }),
-      h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
-      h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
-      h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") })
-    )
+    h(GuardrailsComparePanel, { s: s, e: e, set: set, readOnly: true }),
   );
 }
 function AduChecklist(props) {
@@ -2333,14 +2209,6 @@ function GuideTab(props) {
   var setSpendMonthly = props.setSpendMonthly;
   var update = props.update;
   return h("div", null,
-    h(Panel, { title: "Plan Controls", meta: "Core assumptions" },
-      h(RetirementPresetPicker, { s: s, update: update }),
-      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function (v) { return fmt(v) + "/mo"; } }),
-      h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function (v) { return pct(v, 1); } }),
-      h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function (v) { return v + " years"; } }),
-      h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days estimated from high-5 salary as a sequence buffer.", value: s.includePto, onChange: set("includePto") }),
-      h(RangeControl, { label: "PTO days", value: s.ptoDays, min: 0, max: 60, step: 1, onChange: set("ptoDays"), display: function (v) { return v + " days"; } })
-    ),
     h(Panel, { title: "Input Review" },
       h(SwitchLine, { title: "Core assumptions reviewed", copy: "Portfolio, spending, income, and timing inputs have been checked.", value: s.alignCoreReviewed, onChange: set("alignCoreReviewed") }),
       h(SwitchLine, { title: "Bridge to 65 reviewed", copy: "Portfolio is responsible mainly for the pre-TRS bridge.", value: s.alignBridgeReviewed, onChange: set("alignBridgeReviewed") }),
@@ -2377,7 +2245,141 @@ function PlanTab(props) {
   return h("div", null, h(IncomeTab, props), h(BudgetTab, props));
 }
 function SettingsTab(props) {
-  return h("div", null, h(ADUTab, props), h(GuideTab, props));
+  var s = props.s;
+  var e = props.e;
+  var set = props.set;
+  var setSpendMonthly = props.setSpendMonthly;
+  var update = props.update;
+  var reset = props.reset;
+  var highFive = e.highFive || michaelHighFive(s);
+  var categories = budgetCategories(s);
+  return h("div", null,
+    h(Panel, { title: "Retirement", meta: "School year" },
+      h(RetirementPresetPicker, { s: s, update: update }),
+      h("div", { className: "kpi-grid", style: { marginTop: 12 } },
+        h(Stat, { label: "Current age", value: String(s.currentAge), note: "Today" }),
+        h(Stat, { label: "Retire age", value: String(s.retireAge), note: s.retireDateLabel })
+      ),
+      h("div", { className: "callout", style: { marginTop: 10 } },
+        "Each June 30 is a valid TRS boundary. One more school year adds a full service credit and roughly $3.9k more pension per year for life."
+      )
+    ),
+    h(Panel, { title: "Portfolio", meta: "Current values" },
+      h(RangeControl, { label: "Working portfolio", value: s.currentPortfolio, min: 800000, max: 2600000, step: 1000, onChange: set("currentPortfolio") }),
+      h(RangeControl, { label: "Monthly additions before retirement", value: s.monthlyContrib, min: 0, max: 18000, step: 250, onChange: set("monthlyContrib"), display: function(v) { return fmt(v) + "/mo"; } }),
+      h(SwitchLine, { title: "Count portfolio dividends", copy: "Taxable brokerage dividends count toward MAGI; IRA/Roth dividends do not.", value: s.includeDividends, onChange: set("includeDividends") }),
+      s.includeDividends && h("div", null,
+        h(RangeControl, { label: "Taxable brokerage dividends  ·  Counts toward MAGI", value: s.taxableDividends, min: 0, max: 40000, step: 500, onChange: set("taxableDividends") }),
+        h(RangeControl, { label: "Tax-advantaged dividends (IRA/Roth)  ·  No ACA effect", value: s.taxAdvantagedDividends, min: 0, max: 20000, step: 500, onChange: set("taxAdvantagedDividends") })
+      ),
+      s.portfolioSourceLocked && h("div", { className: "callout", style: { marginTop: 10 } },
+        "Holdings imported from " + s.portfolioSource + ". Re-upload in Portfolio tab to refresh."
+      )
+    ),
+    h(Panel, { title: "Spending", meta: "Budget" },
+      h(RangeControl, { label: "Monthly spending target", value: s.spendMonthly, min: 5000, max: 18000, step: 50, field: "spendMonthly", onChange: setSpendMonthly, display: function(v) { return fmt(v) + "/mo"; } }),
+      h("div", { className: "callout", style: { marginTop: 10, marginBottom: 14 } },
+        "Adjust budget categories below or drag this slider — they stay in sync."
+      ),
+      categories.map(function(row) {
+        return h("div", { key: row.key, style: { marginBottom: 10 } },
+          h(RangeControl, { label: row.label, value: row.value, min: 0, max: 5000, step: 50, field: row.key, onChange: set(row.key) })
+        );
+      })
+    ),
+    h(Panel, { title: "Income: TRS", meta: "Pension formula" },
+      h("div", { className: "kpi-grid", style: { marginBottom: 14 } },
+        h(Stat, { label: "Annual pension", value: fmt(e.trsAnnual, true), note: "YOS × High-5 × 2.0%", color: COLORS.gold }),
+        h(Stat, { label: "High-5 average", value: fmt(highFive.average, true), note: "Best 5-yr consecutive" })
+      ),
+      h(RangeControl, { label: "Service credit at retirement", value: s.trsYears, min: 1, max: 35, step: 0.5, onChange: set("trsYears"), display: function(v) { return v.toFixed(1) + " years"; } }),
+      h(RangeControl, { label: "2026–2027 projected salary", value: s.michaelSalary2027, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2027") }),
+      h(RangeControl, { label: "2025–2026 contract salary", value: s.michaelSalary2026, min: 100000, max: 300000, step: 1000, onChange: set("michaelSalary2026") }),
+      h(RangeControl, { label: "TRS COLA (0% = conservative, fixed nominal)", value: s.trsCola || 0, min: 0, max: 0.03, step: 0.005, onChange: set("trsCola"), display: function(v) { return pct(v, 1); } })
+    ),
+    h(Panel, { title: "Income: Social Security", meta: "Claim age" },
+      h("div", { className: "callout", style: { marginBottom: 12, borderLeftColor: "var(--cyan)" } },
+        "SSA statement (DOB Aug 3, 1982) assumes continued earnings to claim age. With early retirement at 44, apply a reduction factor. TRS covers basics at 65 — strongly consider delaying to 70."
+      ),
+      h("div", { className: "kpi-grid", style: { gridTemplateColumns: "repeat(4, 1fr)", marginBottom: 14 } },
+        [
+          { age: 62, raw: s.ssAge62 || 34116 },
+          { age: 65, raw: s.ssAge65 || 43272 },
+          { age: 67, raw: s.ssAge67 || 50412 },
+          { age: 70, raw: s.ssAge70 || 62976 }
+        ].map(function(row) {
+          var adj = Math.round(row.raw * (s.ssBenefitReductionFactor || 0.70));
+          var isSelected = (s.ssClaimAge || 67) === row.age;
+          return h("div", {
+            key: row.age,
+            style: {
+              background: isSelected ? "rgba(99,212,238,0.12)" : "rgba(255,255,255,0.035)",
+              border: "1px solid " + (isSelected ? "rgba(99,212,238,0.4)" : "var(--line-soft)"),
+              borderRadius: 8, padding: "10px 8px", textAlign: "center", cursor: "pointer"
+            },
+            onClick: function() { set("ssClaimAge")(row.age); set("ssAnnual")(adj); }
+          },
+            h("div", { style: { color: "var(--muted)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Age " + row.age + (row.age === 67 ? " (FRA)" : row.age === 70 ? " ★" : "")),
+            h("div", { style: { color: COLORS.cyan, fontSize: 17, fontWeight: 900, margin: "5px 0 2px" } }, fmt(adj, true)),
+            h("div", { style: { color: "var(--dim)", fontSize: 10 } }, "adj/yr"),
+            h("div", { style: { color: "var(--dim)", fontSize: 9, marginTop: 2 } }, fmt(row.raw, true) + " raw")
+          );
+        })
+      ),
+      h(RangeControl, { label: "Benefit reduction factor (early retirement)", value: Math.round((s.ssBenefitReductionFactor || 0.70) * 100), min: 50, max: 100, step: 5, onChange: function(v) { set("ssBenefitReductionFactor")(v / 100); }, display: function(v) { return v + "% of SSA estimate"; } }),
+      h("div", { className: "callout", style: { marginTop: 10, borderLeftColor: "var(--green)" } },
+        "Delay from 62 → 70 adds " + fmt(Math.round((s.ssAge70 || 62976) * (s.ssBenefitReductionFactor || 0.70)) - Math.round((s.ssAge62 || 34116) * (s.ssBenefitReductionFactor || 0.70)), true) + "/yr (adjusted). TRS covers essential bridge income, making delay low-risk."
+      )
+    ),
+    h(Panel, { title: "Income: Other", meta: "Optional sources" },
+      h(SwitchLine, { title: "Include guaranteed income floor", copy: "Turn off to model without this income.", value: s.includeWifeIncome !== false, onChange: set("includeWifeIncome") }),
+      (s.includeWifeIncome !== false) && h(RangeControl, { label: "Guaranteed income floor", value: s.wifeIncome, min: 0, max: 80000, step: 500, onChange: set("wifeIncome") }),
+      h(SwitchLine, { title: "Count ADU rent in base case", copy: "Keep off for conservative base case.", value: s.includeAduRent, onChange: set("includeAduRent") }),
+      s.includeAduRent && h(RangeControl, { label: "Monthly rent", value: s.aduRentMonthly, min: 0, max: 2500, step: 50, onChange: set("aduRentMonthly"), display: function(v) { return fmt(v) + "/mo"; } }),
+      h(SwitchLine, { title: "Include PTO lump payout", copy: s.ptoDays + " days as a sequence buffer.", value: s.includePto, onChange: set("includePto") }),
+      s.includePto && h(RangeControl, { label: "PTO days", value: s.ptoDays, min: 0, max: 60, step: 1, onChange: set("ptoDays"), display: function(v) { return v + " days"; } })
+    ),
+    h(Panel, { title: "Market Assumptions", meta: "Portfolio engine" },
+      h("div", { className: "kpi-grid", style: { marginBottom: 14 } },
+        h(Stat, { label: "Expected return", value: pct(e.meanReturn, 1), note: "From asset mix", color: COLORS.cyan }),
+        h(Stat, { label: "Volatility (σ)", value: pct(e.volatility, 1), note: "Std deviation", color: COLORS.gold })
+      ),
+      h(RangeControl, { label: "Equity allocation", value: s.equityPct, min: 30, max: 95, step: 1, onChange: set("equityPct"), display: function(v) { return v + "%"; } }),
+      h(RangeControl, { label: "Bond allocation", value: s.bondPct, min: 0, max: 60, step: 1, onChange: set("bondPct"), display: function(v) { return v + "%"; } }),
+      h(RangeControl, { label: "Inflation", value: s.inflation, min: 0.01, max: 0.06, step: 0.005, onChange: set("inflation"), display: function(v) { return pct(v, 1); } }),
+      h(RangeControl, { label: "Retirement horizon", value: s.horizonYears, min: 25, max: 50, step: 1, onChange: set("horizonYears"), display: function(v) { return v + " years"; } })
+    ),
+    h(Panel, { title: "ACA / Healthcare", meta: "Planning only" },
+      h("div", { className: "kpi-grid", style: { marginBottom: 14 } },
+        h(Stat, { label: "MAGI estimate", value: fmt(e.magi, true), note: "Income layers only" }),
+        h(Stat, { label: "FPL percent", value: Math.round(e.aca.fplPct) + "%", note: "Household " + s.householdSize }),
+        h(Stat, { label: "Subsidy estimate", value: fmt(e.aca.subsidy, true), note: "Against benchmark", color: COLORS.green2 }),
+        h(Stat, { label: "Net premium", value: fmt(e.aca.netPremium, true), note: "Annual cap", color: COLORS.gold })
+      ),
+      h("div", { className: "note", style: { marginBottom: 12 } },
+        "MAGI includes spouse income, taxable dividends, and ADU rent (if on). Capital gains distributions are added for ACA only."
+      ),
+      h(RangeControl, { label: "Household size", value: s.householdSize, min: 1, max: 6, step: 1, onChange: set("householdSize"), display: function(v) { return String(v); } }),
+      h(RangeControl, { label: "Benchmark Silver premium", value: s.benchmarkPremium, min: 4000, max: 30000, step: 500, onChange: set("benchmarkPremium") }),
+      h(RangeControl, { label: "Capital gains distributions (est.)", value: s.capitalGainsDist || 0, min: 0, max: 25000, step: 500, onChange: set("capitalGainsDist") })
+    ),
+    h(Panel, { title: "Guardrails", meta: "Dynamic spending" },
+      h(SwitchLine, { title: "Enable guardrails", copy: "Adjusts spending each year based on portfolio health. Compare in Risk tab.", value: s.guardrailsEnabled, onChange: set("guardrailsEnabled") }),
+      h(RangeControl, { label: "Lower trigger (cut spending below this ratio)", value: Math.round((s.guardrailLower || 0.80) * 100), min: 60, max: 95, step: 5, onChange: function(v) { set("guardrailLower")(v / 100); }, display: function(v) { return v + "% of plan"; } }),
+      h(RangeControl, { label: "Cutback amount", value: Math.round((s.guardrailCutback || 0.15) * 100), min: 5, max: 30, step: 5, onChange: function(v) { set("guardrailCutback")(v / 100); }, display: function(v) { return v + "%"; } }),
+      h(RangeControl, { label: "Spending floor (today's $)", value: s.spendFloor || 60000, min: 40000, max: 100000, step: 2500, onChange: set("spendFloor") }),
+      h(RangeControl, { label: "Upper trigger (boost spending above this ratio)", value: Math.round((s.guardrailUpper || 1.20) * 100), min: 105, max: 140, step: 5, onChange: function(v) { set("guardrailUpper")(v / 100); }, display: function(v) { return v + "% of plan"; } }),
+      h(RangeControl, { label: "Boost amount", value: Math.round((s.guardrailIncrease || 0.10) * 100), min: 5, max: 20, step: 5, onChange: function(v) { set("guardrailIncrease")(v / 100); }, display: function(v) { return v + "%"; } })
+    ),
+    h(ADUTab, props),
+    h(GuideTab, props),
+    h(Panel, { title: "Reset to Defaults" },
+      h("div", { className: "note", style: { marginBottom: 12 } }, "Clears all saved data and reloads with the June 2027 plan defaults."),
+      h("button", { className: "ghost-btn", style: { borderColor: "var(--red)", color: "var(--red)" }, onClick: reset },
+        h(Icon, { name: "check", size: 17 }), " Reset to defaults"
+      )
+    )
+  );
 }
 var TABS = [
   { id: "command",   label: "Home",      icon: "command"   },
@@ -2490,7 +2492,7 @@ function App() {
       tab === "plan"      && h(PlanTab,      { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
       tab === "portfolio" && h(PortfolioTab, { s: s, e: e, set: set, update: update }),
       tab === "risk"      && h(RiskTab,      { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly }),
-      tab === "settings"  && h(SettingsTab,  { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update }),
+      tab === "settings"  && h(SettingsTab,  { s: s, e: e, set: set, setSpendMonthly: setSpendMonthly, update: update, reset: reset }),
       h(Panel, { title: "Quick Tools" },
         h("div", { className: "button-row" },
           h("button", { className: "ghost-btn", onClick: copySnapshot }, h(Icon, { name: "list", size: 17 }), copied ? "Copied" : "Copy snapshot"),
